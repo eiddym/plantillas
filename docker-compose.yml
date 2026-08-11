@@ -32,7 +32,7 @@ services:
              done;
              npm install &&
              echo 'Base de datos lista. Aplicando parches e inicializando BD...';
-             npm run parchar && npm run setup && node index.js"
+             npm run parchar && npm run migrar && node index.js"
     tty: true
     stdin_open: true
     volumes:
