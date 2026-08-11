@@ -7,11 +7,12 @@
     "start": "node index.js",
     "lint": "eslint *.js lib/*.js src/models/*/*.js src/routes/*/*.js test/*.js src/bl/*/*.js",
     "apidoc": "apidoc -i src/routes/ -o public/apidoc",
-    "setup": "FORCE=true node index.js && sequelize db:seed:all --config src/config/sequelize-cli-config.js --seeders-path src/seeders",
+    "setup": "sequelize db:seed:all --config src/config/sequelize-cli-config.js --seeders-path src/seeders",
     "startdev": "nodemon --exec 'node index.js'",
     "parchar": "node parches/parchar.js",
     "generar": "node generarToken.js",
-    "migrar": "sequelize db:migrate --config src/config/sequelize-cli-config.js --migrations-path src/migrations"
+    "migrar": "sequelize db:migrate --config src/config/sequelize-cli-config.js --migrations-path src/migrations",
+    "setup:clean": "FORCE=true node index.js && sequelize db:seed:all --config src/config/sequelize-cli-config.js --seeders-path src/seeders"
   },
   "keywords": [
     "node",
