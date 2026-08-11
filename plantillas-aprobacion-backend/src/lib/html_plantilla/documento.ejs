@@ -595,39 +595,46 @@
             <% }
             break;
           case 'datosGenerales':
+            var datosGenerales = pDatos[pItem.key] || {};
+            var para = Array.isArray(datosGenerales.para)
+              ? datosGenerales.para
+              : (datosGenerales.para ? [datosGenerales.para] : []);
+            var via = Array.isArray(datosGenerales.via)
+              ? datosGenerales.via
+              : (datosGenerales.via ? [datosGenerales.via] : []);
+            var de = Array.isArray(datosGenerales.de)
+              ? datosGenerales.de
+              : (datosGenerales.de ? [datosGenerales.de] : []);
+
             if(pItem.templateOptions.showItem){ %>
               <table width="100%">
                 <tbody>
-                  <% if(pItem.templateOptions.show.para) { %>
+                  <% if(pItem.templateOptions.show.para && para.length > 0) { %>
                     <tr>
                       <td class="datosGenerales">PARA:</td>
-                      <td><%=pDatos[pItem.key].para.nombres%> <%=pDatos[pItem.key].para.apellidos%><br/><%=pDatos[pItem.key].para.cargo%><br/></td>
+                      <td><%=para[0].nombres%> <%=para[0].apellidos%><br/><%=para[0].cargo%><br/></td>
                     </tr>
                   <% }
-                  if(pItem.templateOptions.show.via) {
-                    if(Array.isArray(pDatos[pItem.key].via)){
-                      if(pDatos[pItem.key].via.length >0){ %>
+                  if(pItem.templateOptions.show.via && via.length > 0) { %>
                         <tr>
                           <td class="datosGenerales">VÍA:</td>
                           <td>
-                            <% for(var j = 0; j < pDatos[pItem.key].via.length; j++){
-                              var via = pDatos[pItem.key].via[j]; %>
-                              <%= via.nombres %> <%= via.apellidos %>
-                              <br /><%=via.cargo%><br />
+                            <% for(var j = 0; j < via.length; j++){
+                              var itemVia = via[j]; %>
+                              <%= itemVia.nombres %> <%= itemVia.apellidos %>
+                              <br /><%=itemVia.cargo%><br />
                             <%} %>
                           </td>
                         </tr>
                       <%}
-                    }
-                  }
                   if(pItem.templateOptions.show.de) { %>
                     <tr>
                       <td class="datosGenerales">DE:</td>
                       <td>
-                        <% for(var j = 0; j < pDatos[pItem.key].de.length; j++){
-                          var de = pDatos[pItem.key].de[j]; %>
-                          <%= de.nombres %> <%= de.apellidos %>
-                          <br /><%=de.cargo%><br />
+                        <% for(var j = 0; j < de.length; j++){
+                          var itemDe = de[j]; %>
+                          <%= itemDe.nombres %> <%= itemDe.apellidos %>
+                          <br /><%=itemDe.cargo%><br />
                           <%}%>
                       </td>
                     </tr>
@@ -641,66 +648,81 @@
               </table><br />
             <%}
             break;
-          case 'encabezado': %>
+          case 'encabezado':
+            var datosEncabezado = pDatos[pItem.key] || {};
+            var paraEncabezado = Array.isArray(datosEncabezado.para)
+              ? datosEncabezado.para
+              : (datosEncabezado.para ? [datosEncabezado.para] : []);
+            var viaEncabezado = Array.isArray(datosEncabezado.via)
+              ? datosEncabezado.via
+              : (datosEncabezado.via ? [datosEncabezado.via] : []);
+            var deEncabezado = Array.isArray(datosEncabezado.de)
+              ? datosEncabezado.de
+              : (datosEncabezado.de ? [datosEncabezado.de] : []);
+            %>
             <table width="100%">
               <tbody>
-                <% if(pItem.templateOptions.show.para) {
-                  if(Array.isArray(pDatos[pItem.key].para)){ %>
-                    <tr>
-                      <td class="datosGenerales">PARA:</td>
-                      <td>
-                        <% for(var z = 0; z < pDatos[pItem.key].para.length; z++){
-                          var para =pDatos[pItem.key].para[z]; %>
-                          <%=para.nombres%> <%=para.apellidos%><br/>
-                          <% if(para.mostrar_cargo){ %>
-                            <%=para.cargo%><br />
-                            <%}
-                          }%>
-                      </td>
-                    </tr>
-                  <%}
-                }
-                if(pItem.templateOptions.show.via) {
-                  if(Array.isArray(pDatos[pItem.key].via)){
-                    if(pDatos[pItem.key].via.length >0){ %>
-                      <tr>
-                        <td class="datosGenerales">VÍA:</td>
-                        <td>
-                          <% for(var j = 0; j < pDatos[pItem.key].via.length; j++){
-                            var via = pDatos[pItem.key].via[j]; %>
-                            <%= via.nombres %> <%= via.apellidos %><br />
-                            <% if(via.mostrar_cargo){ %>
-                              <%=via.cargo%><br />
-                              <%}
-                            } %>
-                        </td>
-                      </tr>
-                    <%}
-                  }
-                }
-                if(pItem.templateOptions.show.de) { %>
+                <% if(pItem.templateOptions.show.para && paraEncabezado.length > 0) { %>
+                  <tr>
+                    <td class="datosGenerales">PARA:</td>
+                    <td>
+                      <% for(var z = 0; z < paraEncabezado.length; z++){
+                        var itemPara = paraEncabezado[z]; %>
+                        <%= itemPara.nombres %>
+                        <%= itemPara.apellidos %><br />
+                        <% if(itemPara.mostrar_cargo) { %>
+                          <%= itemPara.cargo %><br />
+                        <% } %>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% } %>
+
+                <% if(pItem.templateOptions.show.via && viaEncabezado.length > 0) { %>
+                  <tr>
+                    <td class="datosGenerales">VÍA:</td>
+                    <td>
+                      <% for(var j = 0; j < viaEncabezado.length; j++){
+                        var itemViaEncabezado = viaEncabezado[j]; %>
+                        <%= itemViaEncabezado.nombres %>
+                        <%= itemViaEncabezado.apellidos %><br />
+                        <% if(itemViaEncabezado.mostrar_cargo) { %>
+                          <%= itemViaEncabezado.cargo %><br />
+                        <% } %>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% } %>
+
+                <% if(pItem.templateOptions.show.de && deEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">DE:</td>
                     <td>
-                      <% for(var j = 0; j < pDatos[pItem.key].de.length; j++){
-                        var de = pDatos[pItem.key].de[j]; %>
-                        <%= de.nombres %> <%= de.apellidos %><br />
-                        <% if(de.mostrar_cargo){ %>
-                          <%=de.cargo%><br />
-                          <%}
-                        }%>
+                      <% for(var j = 0; j < deEncabezado.length; j++){
+                        var itemDeEncabezado = deEncabezado[j]; %>
+                        <%= itemDeEncabezado.nombres %>
+                        <%= itemDeEncabezado.apellidos %><br />
+                        <% if(itemDeEncabezado.mostrar_cargo) { %>
+                          <%= itemDeEncabezado.cargo %><br />
+                        <% } %>
+                      <% } %>
                     </td>
                   </tr>
-                <% }
-                if(pItem.templateOptions.show.ref) { %>
+                <% } %>
+
+                <% if(pItem.templateOptions.show.ref) { %>
                   <tr>
-                    <td class="datosGenerales"><%= pItem.templateOptions.labelRef %></td>
-                    <td><%=pDatos[pItem.key].ref%><br /></td>
+                    <td class="datosGenerales">
+                      <%= pItem.templateOptions.labelRef %>
+                    </td>
+                    <td>
+                      <%= datosEncabezado.ref %><br />
+                    </td>
                   </tr>
                 <% } %>
               </tbody>
             </table><br />
-            <%break;
+            <% break;
           case undefined:
             if(pItem.fieldGroup){ %>
               <div style="clear:both; overflow:auto;">
