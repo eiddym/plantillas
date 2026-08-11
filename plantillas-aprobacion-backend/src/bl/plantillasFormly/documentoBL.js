@@ -16,6 +16,30 @@ const Op = require('sequelize').Op;
 const logger = require('../../lib/logger');
 const FileType = require('file-type');
 
+
+function normalizarIds(valor) {
+  const lista = Array.isArray(valor)
+    ? valor
+    : (valor === undefined || valor === null ? [] : [valor]);
+
+  return lista
+    .map((item) => {
+      if (item && typeof item === 'object') {
+        if (item.id_usuario !== undefined && item.id_usuario !== null) {
+          return item.id_usuario;
+        }
+        if (item.idusuario !== undefined && item.idusuario !== null) {
+          return item.idusuario;
+        }
+        if (item.id !== undefined && item.id !== null) {
+          return item.id;
+        }
+      }
+      return item;
+    })
+    .filter((item) => item !== undefined && item !== null && item !== '');
+}
+
 module.exports = {
 
 
@@ -118,8 +142,8 @@ module.exports = {
 
   documento_enviar: (modeloHistorialFlujo, doc, transaccion, pDirector) =>
   new Promise( (resolve, reject) => {
-    let de = JSON.parse(doc.de);
-    const _de = JSON.parse(doc.de);
+    let de = normalizarIds(JSON.parse(doc.de));
+    const _de = de.slice();
     let aprobaron_de = doc.aprobaron_de || [];
     de = _.pull(de, doc._usuario_creacion)
     if (aprobaron_de && aprobaron_de.length > 0 ) {
@@ -127,8 +151,8 @@ module.exports = {
     } else {
       aprobaron_de = _de.includes(doc._usuario_creacion) ? [doc._usuario_creacion] : [];
     }
-    const via = JSON.parse(doc.via);
-    const para = JSON.parse(doc.para);
+    const via = normalizarIds(JSON.parse(doc.via));
+    const para = normalizarIds(JSON.parse(doc.para));
     let viaActual = 0, i;
     const form = JSON.parse(doc.plantilla);
 
@@ -1226,9 +1250,9 @@ module.exports = {
 
   aprobarVia: (modelos, documento, datos, transaccion) =>
     new Promise((resolve, reject) => {
-      const via = JSON.parse(documento.via) || [];
+      const via = normalizarIds(JSON.parse(documento.via));
       const plantilla = JSON.parse(documento.plantilla);
-      const para = JSON.parse(documento.para)[0];
+      const para = normalizarIds(JSON.parse(documento.para))[0];
       const compDatosGenerales = _.find(plantilla, ['type', 'datosGenerales']);
       const aprobaron_de = documento.aprobaron_de || [];
 
@@ -1245,7 +1269,7 @@ module.exports = {
           return indiceVia = indice + 1;
         }
       });
-      let de = JSON.parse(documento.de);
+      let de = normalizarIds(JSON.parse(documento.de));
       const es_flujo_de = de.length > aprobaron_de.length;
       de = _.pull(de, documento._usuario_creacion)
       if (viaActual && es_flujo_de) {
