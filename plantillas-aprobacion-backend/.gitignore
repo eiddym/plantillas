@@ -17,3 +17,6 @@ npm-debug.log
 .vscode
 #ignore all documents pdf
 public/aprobacion/*.pdf
+src/config/config.js
+src/config/config.json
+src/config/config.json
