@@ -1,0 +1,87 @@
+services:
+  # 1. Base de Datos (PostgreSQL 13)
+  db:
+    image: postgres:13-alpine
+    restart: always
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - red-plantillas
+
+  # 2. Servidor Backend (Node 12.22)
+  backend:
+    build:
+      context: ./plantillas-aprobacion-backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "${BACKEND_PUERTO:-8000}:8000"
+    working_dir: /app
+    command: >
+      sh -c "until node -e \"require('net').connect(5432, 'db').on('connect', () => process.exit(0)).on('error', () => process.exit(1))\"; do
+               echo 'Esperando a la base de datos Postgres...';
+               sleep 2;
+             done;
+             npm install &&
+             echo 'Base de datos lista. Aplicando parches e inicializando BD...';
+             npm run parchar && npm run setup && node index.js"
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./plantillas-aprobacion-backend:/app
+      - backend_node_modules:/app/node_modules
+      - plantillas-documentos:/app/public
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PUERTO: ${DB_PUERTO:-5432}
+      DB_USUARIO: ${DB_USUARIO:-plantillas}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NOMBRE: ${DB_NOMBRE:-plantillas_db}
+      BACKEND_PUERTO: ${BACKEND_PUERTO:-8000}
+      JWT_SECRET: ${JWT_SECRET}
+      OPENSSL_CONF: ${OPENSSL_CONF:-/dev/null}
+      CORREO_HOST: ${CORREO_HOST}
+      CORREO_PUERTO: ${CORREO_PUERTO:-587}
+      CORREO_REMITENTE: ${CORREO_REMITENTE}
+      CORREO_ORIGEN: ${CORREO_ORIGEN}
+      CORREO_USUARIO: ${CORREO_USUARIO}
+      CORREO_PASSWORD: ${CORREO_PASSWORD}
+      CORREO_SECURE: ${CORREO_SECURE:-false}
+      CORREO_IGNORETLS: ${CORREO_IGNORETLS:-false}
+      CORREO_TLS_RECHAZAR: ${CORREO_TLS_RECHAZAR:-true}
+    depends_on:
+      - db
+    networks:
+      - red-plantillas
+
+  frontend:
+    build:
+      context: ./plantillas-aprobacion-frontend
+      dockerfile: docker/Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - red-plantillas
+
+networks:
+  red-plantillas:
+    driver: bridge
+
+volumes:
+  backend_node_modules:
+  pgdata:
+  plantillas-documentos:
