@@ -551,7 +551,10 @@ app.post('/api/v1/plantillasFormly/plantilla_formly/verificar', (req,res) => {
     const roles = req.body.audit_usuario.roles;
     let cont = 0;
     for(let i = 0; i< roles.length;i++){
-      if(roles[i].rol.nombre=="CONFIGURADOR")cont++;
+      if(
+        roles[i].rol &&
+        ["CONFIGURADOR", "ADMIN"].includes(roles[i].rol.nombre)
+      ) cont++;
     }
     plantilla_formly.findOne({
       where:{id_plantilla_formly:req.params.id},
