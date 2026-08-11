@@ -1,0 +1,117 @@
+<div class="container-main">
+  <div class="logo-verificacion-wrapper">
+    <img src="assets/images/logo.png" class="text-button logo-verificacion" alt="AGETIC" ng-click="verificar.irInicio()">
+  </div>
+
+  <md-card style="min-height: 100vh; padding-bottom: 20px;">
+    
+    <!-- PESTAÑA SOLO PARA EL FORMULARIO -->
+    <md-tabs class="md-accent" md-align-tabs="top" md-dynamic-height>
+      <md-tab name="verificar">
+        <md-tab-label>
+          <strong>Verificar Por: Cite y Codigo</strong>
+        </md-tab-label>
+
+        <md-tab-body>
+          <md-button class="md-fab md-mini md-icon-button md-primary" aria-label="home" ng-click="verificar.irInicio()">
+            <md-icon>home</md-icon>
+            <md-tooltip>Volver al inicio</md-tooltip>
+          </md-button>
+
+          <form name="form" id="verificarForm" ng-submit="verificar.verificarDocumento($event)" >
+            <div class="md-padding" layout layout-xs="column" layout-align="center">
+              <md-input-container>
+                <label>Cite</label>
+                <input ng-model="verificar.datos.cite" required>
+              </md-input-container>
+
+              <md-input-container>
+                <label>Codigo</label>
+                <input ng-model="verificar.datos.codigo" required>
+              </md-input-container>
+
+              <md-input-container>
+                <div class="recaptcha" id="recaptcha"></div>
+              </md-input-container>
+
+              <center>
+                <md-button type="submit" class="md-raised md-primary" ng-disabled="form.$invalid">
+                  Validar documento
+                </md-button>
+              </center>
+            </div>
+          </form>
+        </md-tab-body>
+      </md-tab>
+    </md-tabs>
+    <!-- FIN DE LAS PESTAÑAS -->
+
+    <!-- ============================================================ -->
+    <!-- RESULTADOS TOTALMENTE FUERA DE LAS PESTAÑAS (LIBERADOS)      -->
+    <!-- ============================================================ -->
+    <!-- CAMBIO CLAVE: Usamos ng-show para no destruir el DOM -->
+    <div ng-show="verificar.datosDocumento" layout layout-sm="column" layout-xs="column" class="visor-verificado" flex-direction-sm="column">
+
+      <!-- TARJETA IZQUIERDA: PARTICIPANTES -->
+      <!-- Corregimos layout-xs para que sea "column" y no colapse en móvil -->
+      <md-card flex-sm="50" flex-gt-sm="100" flex-gt-md="30" layout="row" layout-sm layout-xs="column" layout-align="start stretch">
+        <section style="width:100%; height:100%;">
+          <md-toolbar class="md-hue-2 titulo-seccion-verificar" layout-align="center center">
+            <div layout="row" class="md-headline">
+              <h2 class="md-toolbar-tools">
+                <span >Participantes del documento</span>
+              </h2>
+            </div>
+          </md-toolbar>
+          <md-list layout-padding class="lista-firmantes">
+            <md-list-item class="md-2-line" ng-repeat="usuario in verificar.datosDocumento.firmantes">
+              <md-icon class="md-48 md-primary">accessibility</md-icon>
+              <div class="md-list-item-text">
+                <label class="texto-firmante">{{usuario.nombres + ' ' + usuario.primer_apellido }}</label>
+                <label class="texto-firmante" ng-show="usuario.segundo_apellido!=null">{{' ' + usuario.segundo_apellido}}</label>
+                <p>{{usuario.ci}}</p>
+                <p>{{usuario.fechaSolicitud | date:"dd/MM/yyyy"}}</p>
+                <p class="texto-descripcion">
+                  {{usuario.descripcion}}
+                </p>
+              </div>
+              <md-divider md-inset hide-sm></md-divider>
+              <md-divider hide-gt-sm></md-divider>
+            </md-list-item>
+          </md-list>
+        </section>
+      </md-card>
+
+      <!-- TARJETA DERECHA: VISOR PDF -->
+      <md-card flex-sm="50" flex-gt-sm="100" flex-gt-md="70" layout layout-align="center center" layout-xs="column">
+        <section style="width:100%; height:100%;">
+          <md-toolbar class="md-hue-2 titulo-seccion-verificar" layout-align="center center">
+            <div layout="row" class="md-headline">
+              <h2 class="md-toolbar-tools">
+                <span class="titulo-card-verificar">Documento Aprobado</span>
+              </h2>
+            </div>
+          </md-toolbar>
+          
+          <md-card-content style="width:100%; padding:0; overflow:hidden;">
+            <!-- CAMBIAMOS ng-if POR ng-show EN EL IFRAME (PC) -->
+            <iframe
+              ng-show="verificar.pdf && !verificar.esMovil"
+              class="iframe-pdf"
+              src="{{verificar.pdf}}"
+              style="width:100%; height:800px; border: none; display: block;"
+              allowfullscreen
+            ></iframe>
+            
+            <!-- CAMBIAMOS ng-if POR ng-show EN EL CANVAS (MÓVIL) -->
+            <div 
+              ng-if="verificar.pdf && verificar.esMovil" 
+              id="canvasContainerVerificado"
+              style="width:100%; height:75vh; overflow-y:auto; overflow-x:hidden; background:#f9f9f9;"
+            ></div>
+          </md-card-content>
+
+        </section>
+      </md-card>
+    </div>
+    <!-- FIN DE LOS RESULTADOS -->
