@@ -348,7 +348,7 @@ module.exports = app => {
 */
 
   app.get('/api/v1/seguridad/usuario_rol', (req,res) => {
-    let campos = ['id_usuario', 'nombres', 'apellidos', 'cargo'];
+    let campos = ['id_usuario', 'fid_unidad', 'nombres', 'apellidos', 'cargo'];
     if(req.query.fields){
       campos = req.query.fields.split(',');
       if(campos.indexOf('contrasena')>-1) campos.splice(campos.indexOf('contrasena'), 1);
@@ -366,7 +366,7 @@ module.exports = app => {
         include:[{
           model:Rol,
           as:'rol',
-          attributes:['id_rol', 'nombre','estado'],
+          attributes:['id_rol', 'nombre', 'peso', 'estado'],
         }],
       }],
     })

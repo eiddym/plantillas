@@ -115,6 +115,7 @@
         <md-input-container class="input-search" ng-show="vm.show_de">
             <label>Usuarios</label>
             <md-select ng-model="model[options.key]['de']" name="select_de"
+            ng-change="vm.normalizarDe()"
             md-on-close="vm.buscar_de=''; vm.show_de=false;"
             data-md-container-class="select-search"
             multiple required>

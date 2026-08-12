@@ -2123,40 +2123,166 @@ module.exports = {
     }),
 
 
-  verificarParticipantesDocumento: (pDatos) =>
+  verificarParticipantesDocumento: (pDatos, modelos) =>
     new Promise((resolve, reject) => {
-      console.log('[BL]Verificando participantes del documento :::', pDatos);
-      const plantillaValorObj = pDatos.plantilla_valor && typeof pDatos.plantilla_valor === 'string'
-        ? JSON.parse(pDatos.plantilla_valor)
-        : {};
-      console.log('PLANTILLA VALOR :::: ', plantillaValorObj)
-      console.log(Object.keys(plantillaValorObj))
-      let existeRepetidos = false;
+      try {
+        const plantillaValorObj = pDatos.plantilla_valor
+          && typeof pDatos.plantilla_valor === 'string'
+          ? JSON.parse(pDatos.plantilla_valor)
+          : {};
 
-      for (const key in plantillaValorObj) {
-        if (key.indexOf('datosGenerales-') > -1) {
-          const datosGenerales = plantillaValorObj[key];
-          const { de, para, via } = datosGenerales;
-          const _de = de || [];
-          const _via = via || [];
-          let participantes = para ? [para.id_usuario] : [];
-          participantes = [
-            ...participantes,
-            ..._de.map((d) => d.id_usuario),
-            ..._via.map((v) => v.id_usuario),
-          ];
-          console.log('participantes del documento ::: ', participantes.length, participantes);
-          existeRepetidos = participantes.some(
-            (element, index) => participantes.indexOf(element) !== index
-          );
-          console.log('EXISTEN Participantes repetidos? ', existeRepetidos);
-          break;
+        const auditUsuario = pDatos.audit_usuario || {};
+        const idCreador = Number(
+          auditUsuario.id_usuario || pDatos._usuario_creacion
+        );
+
+        if (!Number.isInteger(idCreador)) {
+          throw new Error('No se pudo identificar al usuario creador.');
         }
-      }
 
-      resolve({
-        existeParticipantesRepetidos: existeRepetidos,
-      });
+        const componentes = Object.keys(plantillaValorObj)
+          .filter(key => key.indexOf('datosGenerales-') > -1)
+          .map(key => plantillaValorObj[key])
+          .filter(Boolean);
+
+        if (componentes.length === 0) {
+          return resolve({
+            existeParticipantesRepetidos: false,
+            existeErrorParticipantes: false,
+          });
+        }
+
+        const datosGenerales = componentes[0];
+        const de = Array.isArray(datosGenerales.de) ? datosGenerales.de : [];
+        const via = Array.isArray(datosGenerales.via) ? datosGenerales.via : [];
+        const para = datosGenerales.para ? [datosGenerales.para] : [];
+
+        const obtenerIds = (usuarios, campo) => {
+          const ids = usuarios.map(item => Number(item && item.id_usuario));
+
+          if (ids.some(id => !Number.isInteger(id) || id <= 0)) {
+            throw new Error(`Existe un usuario inválido en ${campo}.`);
+          }
+
+          return ids;
+        };
+
+        const idDe = obtenerIds(de, 'DE');
+        const idVia = obtenerIds(via, 'VÍA');
+        const idPara = obtenerIds(para, 'PARA');
+
+        if (idDe.length === 0) {
+          throw new Error('Debe existir al menos un usuario en DE.');
+        }
+
+        const participantes = [...idPara, ...idDe, ...idVia];
+        const existeParticipantesRepetidos = participantes.some(
+          (id, index) => participantes.indexOf(id) !== index
+        );
+
+        if (existeParticipantesRepetidos) {
+          return resolve({
+            existeParticipantesRepetidos: true,
+            existeErrorParticipantes: false,
+          });
+        }
+
+        if (!idDe.includes(idCreador)) {
+          throw new Error('El usuario creador debe estar incluido en DE.');
+        }
+
+        const Usuario = modelos.usuario;
+        const UsuarioRol = modelos.usuario_rol;
+        const Rol = modelos.rol;
+
+        return Promise.all([
+          Usuario.findAll({
+            attributes: ['id_usuario', 'fid_unidad'],
+            where: {
+              id_usuario: [...new Set([idCreador, ...idDe])],
+              estado: 'ACTIVO',
+            },
+          }),
+          UsuarioRol.findAll({
+            attributes: ['fid_usuario', 'fid_rol'],
+            where: {
+              fid_usuario: idCreador,
+              estado: 'ACTIVO',
+            },
+            include: [{
+              model: Rol,
+              as: 'rol',
+              attributes: ['nombre', 'peso'],
+              where: { estado: 'ACTIVO' },
+            }],
+          }),
+        ]).then(([usuarios, rolesCreador]) => {
+          const usuarioCreador = usuarios.find(
+            usuario => Number(usuario.id_usuario) === idCreador
+          );
+
+          if (!usuarioCreador) {
+            throw new Error('El usuario creador no existe o está inactivo.');
+          }
+
+          const rolesOrdenados = rolesCreador
+            .map(relacion => relacion.rol)
+            .sort((a, b) => {
+              const pesoA = Number(a.peso) || 0;
+              const pesoB = Number(b.peso) || 0;
+
+              if (pesoA !== pesoB) return pesoB - pesoA;
+              if (a.nombre === 'JEFE' && b.nombre !== 'JEFE') return -1;
+              if (b.nombre === 'JEFE' && a.nombre !== 'JEFE') return 1;
+              return String(a.nombre).localeCompare(String(b.nombre));
+            });
+
+          if (rolesOrdenados.length === 0) {
+            throw new Error('El usuario creador no tiene un rol activo.');
+          }
+
+          const rolEfectivo = rolesOrdenados[0].nombre;
+
+          if (rolEfectivo === 'JEFE' && idDe.length !== 1) {
+            throw new Error(
+              'Los usuarios con rol JEFE solo pueden figurar ellos mismos en DE.'
+            );
+          }
+
+          const usuariosPorId = {};
+          usuarios.forEach(usuario => {
+            usuariosPorId[Number(usuario.id_usuario)] = usuario;
+          });
+
+          const unidadCreador = usuarioCreador.fid_unidad;
+
+          if (rolEfectivo !== 'JEFE') {
+            const usuarioFueraDeUnidad = idDe.some(id => {
+              if (id === idCreador) return false;
+
+              const usuarioParticipante = usuariosPorId[id];
+
+              return !usuarioParticipante
+                || unidadCreador === null
+                || usuarioParticipante.fid_unidad !== unidadCreador;
+            });
+
+            if (usuarioFueraDeUnidad) {
+              throw new Error(
+                'Todos los usuarios adicionales de DE deben pertenecer a la unidad del creador.'
+              );
+            }
+          }
+
+          resolve({
+            existeParticipantesRepetidos: false,
+            existeErrorParticipantes: false,
+            rolEfectivo,
+          });
+        });
+      } catch (error) {
+        reject(error);
+      }
     }),
 
 };
