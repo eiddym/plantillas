@@ -146,7 +146,7 @@ module.exports = app => {
         })
         .then((multipleResp) => {
           respuestaMultiple = multipleResp;
-          return bl.verificarParticipantesDocumento(req.body);
+          return bl.verificarParticipantesDocumento(req.body, modelos);
         })
         .then(respValidacionParticipantes => {
           if(respValidacionParticipantes.existeParticipantesRepetidos) {
@@ -1087,7 +1087,7 @@ module.exports = app => {
 
         })
         .then((resp) => {
-          return bl.verificarParticipantesDocumento(req.body);
+          return bl.verificarParticipantesDocumento(req.body, modelos);
         })
         // eslint-disable-next-line arrow-body-style
         .then( resp => {
