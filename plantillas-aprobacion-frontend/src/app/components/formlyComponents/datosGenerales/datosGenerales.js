@@ -71,6 +71,7 @@
         .then(function (resultado) {
             vm.usuarios = [];
             vm.usuarios_jefes = [];
+            vm.usuarios_de = [];
             arr = resultado.datos;
 
             var usuarioActual = arr.find(function(item) {
@@ -92,14 +93,6 @@
                         if(rol==="JEFE" ||rol =="CORRESPONDENCIA")
                             push_jefe=true;
                     }
-                    if (xu.id_usuario !== u.id_usuario
-                        && vm.rol_efectivo !== 'JEFE'
-                        && (xu.fid_unidad === null
-                            || xu.fid_unidad === undefined
-                            || u.fid_unidad !== xu.fid_unidad)) {
-                        continue;
-                    }
-
                     vm.usuarios.push((xu.id_usuario === u.id_usuario) ? xu : u);
                     if(push_jefe && xu.id_usuario!=u.id_usuario) vm.usuarios_jefes.push(u);
                 }
@@ -141,14 +134,75 @@
                 }
             }
 
-            vm.usuarios = vm.usuarios.filter(function(usuario) {
-                return Number(usuario.id_usuario) === Number(xu.id_usuario)
-                    || (
-                        vm.rol_efectivo !== 'JEFE'
-                        && xu.fid_unidad !== null
+            /*
+             * DE:
+             * - Si el creador es JEFE, solo puede aparecer el propio creador.
+             * - Si no es JEFE, aparecen usuarios de su misma unidad,
+             *   excepto usuarios con rol JEFE.
+             * - Nunca se permiten usuarios sin unidad.
+             */
+            vm.usuarios_de = arr
+                .map(newUser)
+                .filter(function(usuario) {
+                    var esCreador =
+                        Number(usuario.id_usuario) === Number(xu.id_usuario);
+
+                    var tieneUnidad =
+                        usuario.fid_unidad !== null
+                        && usuario.fid_unidad !== undefined;
+
+                    if (!tieneUnidad) {
+                        return false;
+                    }
+
+                    if (vm.rol_efectivo === 'JEFE') {
+                        return esCreador;
+                    }
+
+                    if (esCreador) {
+                        return true;
+                    }
+
+                    var mismaUnidad =
+                        xu.fid_unidad !== null
                         && xu.fid_unidad !== undefined
-                        && usuario.fid_unidad === xu.fid_unidad
-                    );
+                        && Number(usuario.fid_unidad) === Number(xu.fid_unidad);
+
+                    return mismaUnidad && !usuarioEsJefe(usuario);
+                });
+
+            console.log('DATOS GENERALES - FILTRO DE', {
+                usuarioActual: xu,
+                rolEfectivo: vm.rol_efectivo,
+                cantidadUsuariosDE: vm.usuarios_de.length,
+                usuariosDE: vm.usuarios_de.map(function(usuario) {
+                    return {
+                        id: usuario.id_usuario,
+                        nombre: usuario.nombres + ' ' + usuario.apellidos,
+                        unidad: usuario.fid_unidad,
+                        roles: (usuario.usuario_rol || []).map(function(relacion) {
+                            return relacion.rol && relacion.rol.nombre;
+                        })
+                    };
+                })
+            });
+
+            /*
+             * Se conserva vm.usuarios para compatibilidad con otros
+             * comportamientos del componente, pero las listas visibles
+             * usan usuarios_destinatarios y usuarios_de.
+             */
+            vm.usuarios = vm.usuarios.filter(function(usuario) {
+                return usuario.fid_unidad !== null
+                    && usuario.fid_unidad !== undefined;
+            });
+
+            /*
+             * PARA y VIA conservan la lista original de jefes/
+             * correspondencia, pero nunca muestran usuarios sin unidad.
+             */
+            vm.usuarios_jefes = vm.usuarios_jefes.filter(function(usuario) {
+                return tieneUnidadAsignada(usuario);
             });
 
             normalizarDe();
@@ -176,38 +230,96 @@
         return roles.length ? roles[0].nombre : null;
     }
 
+    function tieneUnidadAsignada(usuario) {
+        if (!usuario) {
+            return false;
+        }
+
+        var unidad = usuario.fid_unidad;
+
+        if (unidad === null || unidad === undefined) {
+            return false;
+        }
+
+        if (unidad === '' || unidad === 0) {
+            return false;
+        }
+
+        if (String(unidad).toLowerCase() === 'null') {
+            return false;
+        }
+
+        if (String(unidad).toLowerCase() === 'undefined') {
+            return false;
+        }
+
+        return true;
+    }
+
+    function usuarioEsJefe(usuario) {
+        if (!usuario || !Array.isArray(usuario.usuario_rol)) {
+            return false;
+        }
+
+        return usuario.usuario_rol.some(function(relacion) {
+            return relacion.rol
+                && relacion.rol.nombre === 'JEFE';
+        });
+    }
+
     function normalizarDe() {
         var datos = sc.model[sc.options.key];
         if (!datos) return;
 
         var de = Array.isArray(datos.de) ? datos.de : [];
-        var creador = de.filter(function(usuario) {
-            return Number(usuario.id_usuario) === Number(xu.id_usuario);
-        })[0] || xu;
 
         if (vm.rol_efectivo === 'JEFE') {
-            datos.de = [creador];
+            datos.de = vm.usuarios_de.filter(function(usuario) {
+                return Number(usuario.id_usuario) === Number(xu.id_usuario);
+            });
             return;
         }
 
         datos.de = de.filter(function(usuario, index, lista) {
             var id = Number(usuario.id_usuario);
+
             var repetido = lista.some(function(item, itemIndex) {
                 return itemIndex < index
                     && Number(item.id_usuario) === id;
             });
 
-            if (repetido) return false;
-            if (id === Number(xu.id_usuario)) return true;
+            if (repetido) {
+                return false;
+            }
 
-            return xu.fid_unidad !== null
+            if (!tieneUnidadAsignada(usuario)) {
+                return false;
+            }
+
+            var esCreador =
+                id === Number(xu.id_usuario);
+
+            if (esCreador) {
+                return true;
+            }
+
+            var mismaUnidad =
+                xu.fid_unidad !== null
                 && xu.fid_unidad !== undefined
-                && usuario.fid_unidad === xu.fid_unidad;
+                && Number(usuario.fid_unidad) === Number(xu.fid_unidad);
+
+            return mismaUnidad && !usuarioEsJefe(usuario);
         });
 
-        if (!datos.de.some(function(usuario) {
+        var creadorTieneUnidad =
+            xu.fid_unidad !== null
+            && xu.fid_unidad !== undefined;
+
+        var creadorSeleccionado = datos.de.some(function(usuario) {
             return Number(usuario.id_usuario) === Number(xu.id_usuario);
-        })) {
+        });
+
+        if (creadorTieneUnidad && !creadorSeleccionado) {
             datos.de.unshift(xu);
         }
     }
@@ -218,7 +330,8 @@
             nombres: el.nombres,
             apellidos: el.apellidos,
             cargo: el.cargo,
-            fid_unidad: el.fid_unidad
+            fid_unidad: el.fid_unidad,
+            usuario_rol: el.usuario_rol || []
         };
     }
 
