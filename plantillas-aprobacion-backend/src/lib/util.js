@@ -1,4 +1,5 @@
 const http = require('http');
+const QRCode = require('qrcode');
 const hash = require('object-hash');
 const html_pdf = require('html-pdf');
 const html_pdf1 = require('html-pdf');
@@ -500,87 +501,7 @@ function generarPDF (pl) {
       pl.caracteristicas_especificas[i].type = "checkbox1";
     }
   }
-// pl.codigo = 'XYZ456';
-// --- INICIO DE INTEGRACIÓN DEL CÓDIGO QR ---
-const QRCode = require('qrcode');
-
-const pDatos = pl; // Aseguramos la referencia de los datos
-pDatos.doc = pDatos.doc || {};
-pDatos.doc.plantilla = (typeof pDatos.doc.plantilla === 'string') ? JSON.parse(pDatos.doc.plantilla) : (pDatos.doc.plantilla || {});
-
-// 1. Recuperación del CITE oficial (con barras y guiones originales)
-let citeOficial = "";
-citeOficial = (pDatos.numeracion && pDatos.numeracion !== "true") ? pDatos.numeracion :
-              (pDatos.doc && pDatos.doc.nombre) ? pDatos.doc.nombre :
-              pDatos.nombre || "";
-
-if (typeof citeOficial === 'string' && citeOficial.toLowerCase().endsWith('.pdf')) {
-    citeOficial = citeOficial.slice(0, -4);
-}
-
-// Rescate de emergencia desde plantilla_valor si viene sin formato
-if (citeOficial && !citeOficial.includes('/') && pDatos.doc && pDatos.doc.plantilla_valor) {
-    try {
-        const pValor = JSON.parse(pDatos.doc.plantilla_valor);
-        if (pValor['cite-0'] && pValor['cite-0'].cite) {
-            citeOficial = pValor['cite-0'].cite;
-        }
-    } catch (e) {
-        console.log("Error recuperando CITE desde plantilla_valor");
-    }
-}
-
-// 2. Captura del código de verificación único
-const codigoVerif = pDatos.codigo || pDatos.codigoSeguridad || "";
-
-// Función interna encapsulada para ejecutar tu renderizado original con ejs y html-pdf
-const generarEjsYPdfConQR = () => {
-  ejs.renderFile(ruta_ejs, pDatos, (error, resultHTML) => {
-    if (resultHTML) {
-      const options = {
-        filename: ruta_file,
-        format: 'Letter',
-        orientation: 'portrait',
-        border: "2cm",
-        type: "application/pdf",
-      };
-
-      html_pdf.create(resultHTML, options).toStream((err, stream) => {
-        if (err) {
-          console.log(`hubo un error al generar ${ruta_file} fecha:${genFecha.format()}`);
-          console.log('error ', err);
-        }else {
-          console.log(`Se creo exitosamente el archivo ${ruta_file} fecha:${genFecha.format()}`);
-        }
-      });
-    }else {
-      console.log(`hubo un error al generar ${ruta_file} fecha:${genFecha.format()}`);
-      console.log('error ', error);
-    }
-  });
-};
-
-// 3. Condición de ejecución: Si el documento está aprobado y tiene código, generamos el QR en Base64
-if (codigoVerif !== "") {
-  // Limpiamos la ruta base para evitar duplicar sufijos de verificación
-  const baseUrl = (typeof config !== 'undefined' && config.urlVerificar) ? config.urlVerificar.replace(/\/verificar\/?$/, '') : 'https://docs.marabuntarl.com';
-  
-  const urlVerif = `${baseUrl}/#/verificar?cite=${encodeURIComponent(citeOficial)}&codigo=${encodeURIComponent(codigoVerif)}`;
-
-  QRCode.toDataURL(urlVerif).then(urlBase64 => {
-    pDatos.qr_base64 = urlBase64;
-    pDatos.codigo_ver_texto = codigoVerif;
-    console.log(`[EXITO QR] Generado correctamente para CITE: ${citeOficial}`);
-    generarEjsYPdfConQR();
-  }).catch(err => {
-    console.error("[ERROR QR]", err);
-    generarEjsYPdfConQR(); // Si falla el QR, genera el PDF de manera normal para no bloquear el flujo
-  });
-} else {
-  console.log("[AVISO] El documento no cuenta con código de verificación, generando PDF normal.");
-  generarEjsYPdfConQR();
-}
-// --- FIN DE INTEGRACIÓN DEL CÓDIGO QR ---
+  // pl.codigo = 'XYZ456';
 }
 
 function formatearFecha(date, horas = false) {
@@ -768,42 +689,49 @@ const historicoVectorT =(pVector,pObj,pModelo,pModeloHis, pIdUsuario, pTransacci
 const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject) => {
   const nombreDocumento = formatoNombreDoc(pDatos.doc.nombre);
   pDatos.nombre = `${nombreDocumento}.pdf`;
+
   const rutaDocumento = `${dirDocumento}${pDatos.nombre}`;
   const rutaPlantilla = `${__dirname}/html_plantilla/documento.ejs`;
 
   const numeracion = pDatos.form_actual[0].templateOptions.numeracionPagina || false;
   const membrete = pDatos.form_actual[0].templateOptions.tipoMembrete || 'sin membrete';
   const tipoHoja = pDatos.form_actual[0].templateOptions.tipoHoja || 'Letter';
-  let alto = 0, ancho = 0;
+
+  let alto = 0;
+  let ancho = 0;
 
   switch (tipoHoja) {
-    case "Letter":
+    case 'Letter':
       ancho = '216mm';
       alto = '279mm';
       break;
-    case "Oficio":
+    case 'Oficio':
       ancho = '216mm';
       alto = '330mm';
       break;
-    case "A4":
+    case 'A4':
       ancho = '210mm';
       alto = '297mm';
       break;
-    case "Externo":
+    case 'Externo':
       ancho = '210mm';
       alto = '279mm';
       break;
-    case "Legal":
+    case 'Legal':
       ancho = '210mm';
       alto = '329mm';
       break;
+    default:
+      ancho = '216mm';
+      alto = '279mm';
   }
-  // Combinacion de altura carta, ancho A4
-  if (membrete == 'externo') {
+
+  if (membrete === 'externo') {
     ancho = '210mm';
     alto = '279mm';
   }
-  if (membrete == 'legal') {
+
+  if (membrete === 'legal') {
     ancho = '210mm';
     alto = '329mm';
   }
@@ -815,12 +743,13 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
   pDatos.html = false;
   pDatos.ruta = ruta;
   pDatos.numeracion = numeracion;
-  pDatos.mensaje = "Prohibida la reproducción.";
+  pDatos.mensaje = 'Prohibida la reproducción.';
   pDatos.exp = pDatos.grupo;
   pDatos.urlVerificar = config.urlVerificar;
 
   let marcaAgua = true;
   const roles = pDatos.audit_usuario.roles;
+
   for (let i = 0; i < roles.length; i++) {
     if (roles[i].fid_rol == 4) {
       marcaAgua = false;
@@ -828,64 +757,149 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
     }
   }
 
-  if (firma === true)
+  if (firma === true) {
     marcaAgua = false;
+  }
+
   pDatos.marcaAgua = marcaAgua;
-
   pDatos.doc.plantilla = JSON.parse(pDatos.doc.plantilla);
-  return ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
 
-    if (pHtml) {
+  const codigoVerif = String(
+    pDatos.codigo ||
+    pDatos.codigoSeguridad ||
+    ''
+  ).trim();
+
+  let citeOficial = '';
+
+  if (pDatos.numeracion && pDatos.numeracion !== 'true') {
+    citeOficial = String(pDatos.numeracion).trim();
+  } else if (pDatos.doc && pDatos.doc.nombre) {
+    citeOficial = String(pDatos.doc.nombre).trim();
+  } else if (pDatos.nombre) {
+    citeOficial = String(pDatos.nombre).trim();
+  }
+
+  citeOficial = citeOficial.replace(/\.pdf$/i, '');
+
+  const urlConfigurada =
+    (config && config.urlVerificar)
+      ? String(config.urlVerificar).trim()
+      : 'http://192.168.1.7/verificar';
+
+  const baseUrl = urlConfigurada
+    .replace(/\/verificar\/?$/i, '')
+    .replace(/\/+$/g, '');
+
+  const rutaVerificacion = `${baseUrl}/#/verificar`;
+
+  const renderizarPdf = () => {
+    ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
+      if (pError || !pHtml) {
+        console.error('[ERROR EJS PDF]', pError);
+        return reject(pError || new Error('No se pudo renderizar el HTML.'));
+      }
+
       const configuracion = {
         filename: rutaDocumento,
         orientation: 'portrait',
         height: alto,
         width: ancho,
         border: {
-          top: (membrete == 'legal') ? "1.7cm" : "25mm",
-          right: (membrete == 'externo' || membrete == 'legal') ? "1.7cm" : "2.5cm",
-          bottom: "2.5cm",
-          left: "25mm",
+          top: (membrete === 'legal') ? '1.7cm' : '25mm',
+          right: (membrete === 'externo' || membrete === 'legal') ? '1.7cm' : '2.5cm',
+          bottom: '3.8cm',
+          left: '25mm'
         },
         type: 'application/pdf',
         footer: {
-          height: "8mm",
-          contents: (numeracion == 'true' || numeracion == true) ? '<div style="float:right;"><span style="color: #444;">{{page}}</span></div>' : '',
+          height: '8mm',
+          contents: (numeracion === 'true' || numeracion === true)
+            ? '<div style="float:right;"><span style="color: #444;">{{page}}</span></div>'
+            : ''
         },
         header: {
-          height: "25mm",
+          height: '25mm'
         },
-        quality: "100",
+        quality: '100'
       };
 
-      return html_pdf.create(pHtml, configuracion).toFile(rutaDocumento, (pErrorCrear, pStream) => {
-        if (pErrorCrear) {
+      html_pdf.create(pHtml, configuracion).toFile(
+        rutaDocumento,
+        (pErrorCrear, pStream) => {
+          if (!pErrorCrear) {
+            console.log(`[PDF OK] ${rutaDocumento}`);
+            return resolve(pDatos);
+          }
+
           console.log('Error en la creacion del documento pdf + ruta', rutaDocumento);
           console.log('Error en la creacion del documento pdf', pErrorCrear, pStream);
-          // return reject((process.env.NODE_ENV == 'production') ? "No se pudo crear el pdf del documento" : errorCrear);
+
           setTimeout(() => {
-            html_pdf1.create(pHtml, configuracion).toFile(rutaDocumento, (errorCrear, pStream) => {
-              if (errorCrear) {
-                console.log('REVISANDO EL SEGUNDO ERROR AL CREAR', errorCrear);
-                return reject((process.env.NODE_ENV == 'production') ? "No se pudo crear el pdf del documento" : errorCrear);
-              }
-              else {
+            html_pdf1.create(pHtml, configuracion).toFile(
+              rutaDocumento,
+              (errorCrear, segundoStream) => {
+                if (errorCrear) {
+                  console.log('REVISANDO EL SEGUNDO ERROR AL CREAR', errorCrear);
+                  return reject(
+                    process.env.NODE_ENV === 'production'
+                      ? 'No se pudo crear el pdf del documento'
+                      : errorCrear
+                  );
+                }
+
+                console.log(`[PDF OK] ${rutaDocumento}`);
                 return resolve(pDatos);
               }
-            });
+            );
           }, 900);
         }
-        else {
-          return resolve(pDatos);
-        }
+      );
+    });
+  };
+
+  if (codigoVerif && citeOficial && firma === true) {
+    const urlVerif =
+      `${rutaVerificacion}` +
+      `?cite=${encodeURIComponent(citeOficial)}` +
+      `&codigo=${encodeURIComponent(codigoVerif)}`;
+
+    pDatos.codigo = codigoVerif;
+    pDatos.codigoSeguridad = codigoVerif;
+    pDatos.qr_url = urlVerif;
+
+    console.log('[QR DEBUG]', JSON.stringify({
+      cite: citeOficial,
+      codigo: codigoVerif,
+      url: urlVerif
+    }));
+
+    return QRCode.toDataURL(urlVerif, {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 240
+    })
+      .then((urlBase64) => {
+        pDatos.qr_base64 = urlBase64;
+        pDatos.codigo_ver_texto = codigoVerif;
+
+        console.log(`[EXITO QR] Generado correctamente para CITE: ${citeOficial}`);
+        return renderizarPdf();
+      })
+      .catch((err) => {
+        console.error('[ERROR QR]', err);
+        return renderizarPdf();
       });
-    }
-    else {
-      console.log('Revisando el error en la generacion del pdf', pError);
-      return reject((process.env.NODE_ENV == 'production') ? "No se pudo generar el pdf del documento" : pError);
-    }
+  }
+
+  console.warn('[AVISO QR] No se genera QR', {
+    firma,
+    tieneCite: Boolean(citeOficial),
+    tieneCodigo: Boolean(codigoVerif)
   });
-})
+
+  return renderizarPdf();
+});
 
 const generarAnulador = (pDatos) => new Promise((resolve, reject) => {
   const rutaDocumento = `${dirDocumento}${generarCodigo(8, 'A')}.pdf`;
@@ -1370,8 +1384,8 @@ const validarContactos = (req, res, next) => {
   console.log('Revisando el contador', cont);
 
   if(cont > 0) return next();
-  else return res.status(412).send(formatearMensaje('ERROR', 'Usted no esta autorizado.'))
-}
+  else return res.status(412).send(formatearMensaje('ERROR', 'Usted no esta autorizado.'));
+};
 
 module.exports = {
   funcionCabeceras,
@@ -1385,10 +1399,6 @@ module.exports = {
   historico,
   generarPDF,
   historicoVector,
-  historicoT,
-  historicoVectorT,
-  desserializarDeJson,
-  convertirLike,
   generarDocumento,
   generarHtml,
   consulta,

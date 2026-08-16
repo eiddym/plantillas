@@ -138,7 +138,13 @@ app.post('/api/v1/plantillasFormly/generarDocumento', (req, res) => {
     if(docResp.aprobador_cd_actual !== null && docOrigen.aprobaron_cd == null) enFirma = false;
     req.body.grupo = docResp.grupo;
     req.body.codigo = '';
-    if(docEncontrado.firma) req.body.codigo = docEncontrado.firma.codigo;
+
+    if (docEncontrado.firma && docEncontrado.firma.codigo) {
+      req.body.codigo = docEncontrado.firma.codigo;
+    }
+
+    datos.codigo = req.body.codigo;
+    datos.codigoSeguridad = req.body.codigoSeguridad || '';
     datos.grupo = docResp.grupo;
     anulado = docEncontrado.anulado;
   })

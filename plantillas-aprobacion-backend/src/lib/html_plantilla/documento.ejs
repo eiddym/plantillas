@@ -1629,20 +1629,28 @@
         <%}%>
     </div>
 <% if (locals.qr_base64 && locals.codigo_ver_texto) { %>
-<div style="position: fixed; bottom: 0; width: 100%; border-top: 1px solid #bdc3c7; padding-top: 10px; background-color: #ffffff; font-family: sans-serif;">
-    <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-            <td style="width: 15%; text-align: center; vertical-align: middle;">
-                <img src="<%= qr_base64 %>" style="width: 80px; height: 80px;" alt="QR Autenticidad">
-                <div style="font-size: 8px; color: #555; margin-top: 2px;">Escanear para verificar</div>
-            </td>
-            <td style="width: 85%; text-align: right; vertical-align: middle; font-size: 11px; color: #333; padding-right: 20px; line-height: 1.5;">
-                <strong style="color: #E65100;">Código de Verificación:</strong> <%= codigo_ver_texto %><br>
-                <strong style="color: #E65100;">Verificar en:</strong> https://docs.marabuntarl.com/#/verificar<br>
-                <strong style="color: #E65100;">Sede Central:</strong> Uyuni, Provincia Antonio Quijarro
-            </td>
-        </tr>
-    </table>
+<div style="position: fixed; bottom: 0; left: 0; right: 0; width: 100%; border-top: 1px solid #bdc3c7; padding-top: 8px; background-color: #ffffff; font-family: sans-serif;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="width: 22%; text-align: center; vertical-align: middle;">
+        <img
+          src="<%= qr_base64 %>"
+          style="width: 72px; height: 72px;"
+          alt="Código QR de verificación">
+        <div style="font-size: 8px; color: #555; margin-top: 2px;">
+          Escanear para verificar
+        </div>
+      </td>
+      <td style="width: 78%; vertical-align: middle; font-size: 10px; color: #333; padding-left: 8px; line-height: 1.4;">
+        <strong style="color: #E65100;">Código de verificación:</strong>
+        <%= codigo_ver_texto %><br>
+        <strong style="color: #E65100;">Verificar en:</strong>
+        <%= locals.qr_url || urlVerificar %><br>
+        <strong style="color: #E65100;">Sede Central:</strong>
+        Uyuni, Provincia Antonio Quijarro
+      </td>
+    </tr>
+  </table>
 </div>
 <% } %>
   </body>
