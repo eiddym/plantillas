@@ -163,9 +163,6 @@
                     vmd.data.docs_grupo = resultado.datos.resultado;
                 });
             }
-            if (data.pdf.esDispositivoMovil) {
-                Util.loadCanvas(data.pdf.pdf_buffer, '#canvasContainer');
-            }
 
             DataService.get(restUrl + 'seguridad/usuario/'+vmd.data.dc._usuario_creacion)
             .then(function (respuesta) {

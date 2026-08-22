@@ -79,7 +79,8 @@ module.exports = app => {
       app.use(app.src.auth.initialize());
 
     // Ruta estatica de acceso a la imagen del membrete.
-    app.use('/public/membrete.png', express.static("public/images/membrete.png"));
+    console.log('[MEMBRETE PATH]', process.cwd(), 'public/images/membrete.png');
+app.use('/public/membrete.png', express.static('public/images/membrete.png'));
     app.use('/flibs/pdfjs/pdf.worker.js', express.static("librerias_frontend_extra/pdf.js-viewer/pdf.worker.js"));
 
     // verifica si hay errores en el formato json

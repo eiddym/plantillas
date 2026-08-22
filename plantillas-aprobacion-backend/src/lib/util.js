@@ -1,3 +1,4 @@
+const path = require('path');
 const http = require('http');
 const QRCode = require('qrcode');
 const hash = require('object-hash');
@@ -17,6 +18,58 @@ const dirPlantillas = `${raiz}public/plantillas/`;
 const dirInformes = `${raiz}public/informes/`;
 const dirDocumento = config.ruta_documentos;
 const dirAdjuntosAprobacion = config.aprobacionCD.ruta_externos_aprobacion;
+
+const crearPdfConPartes = (
+  pHtml,
+  pDatos,
+  rutaDocumento,
+  rutaHeader,
+  rutaFooter
+) => new Promise((resolve, reject) => {
+  ejs.renderFile(rutaHeader, pDatos, (headerError, headerHtml) => {
+    if (headerError) {
+      return reject(headerError);
+    }
+
+    ejs.renderFile(rutaFooter, pDatos, (footerError, footerHtml) => {
+      if (footerError) {
+        return reject(footerError);
+      }
+
+      const configuracion = {
+        border: {
+          top: '10mm',
+          right: '20mm',
+          bottom: '10mm',
+          left: '20mm'
+        },
+        format: pDatos.tipoHoja || 'Letter',
+        type: 'pdf',
+        timeout: 30000,
+        localUrlAccess: true,
+        header: {
+          height: '30mm',
+          contents: headerHtml
+        },
+        footer: {
+          height: '20mm',
+          contents: footerHtml
+        }
+      };
+
+      html_pdf.create(pHtml, configuracion).toFile(
+        rutaDocumento,
+        (pErrorCrear, pStream) => {
+          if (pErrorCrear) {
+            return reject(pErrorCrear);
+          }
+
+          return resolve(pStream);
+        }
+      );
+    });
+  });
+});
 
 const funcionCabeceras = (objs) => {
   const cabs = [];
@@ -211,11 +264,13 @@ Función que realiza la validacion de una cadena de texto con formato json.
 ingresa "[{id_usuario:4}]"
 salida true/false
 */
-const  validarTextoJson=(pTextoJson) => {
-  if (/^[\],:{}\s]*$/.test(pTextoJson.replace(/\\["\\\/bfnrtu]/g, '@').
-  replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-  replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) return true;
-  else  return false;
+const validarTextoJson = (pTextoJson) => {
+  try {
+    JSON.parse(pTextoJson);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 /**
@@ -691,7 +746,26 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
   pDatos.nombre = `${nombreDocumento}.pdf`;
 
   const rutaDocumento = `${dirDocumento}${pDatos.nombre}`;
-  const rutaPlantilla = `${__dirname}/html_plantilla/documento.ejs`;
+  const rutaPlantilla = `${__dirname}/html_plantilla/documento-pdf.ejs`;
+  const rutaHeader = `${__dirname}/html_plantilla/pdf-header.ejs`;
+  const rutaFooter = `${__dirname}/html_plantilla/pdf-footer.ejs`;
+
+  try {
+    const logoData = fs.readFileSync(
+      `${__dirname}/html_plantilla/assets/logo-pdf.png`
+    ).toString('base64');
+
+    pDatos.logo_base64 = `data:image/png;base64,${logoData}`;
+    console.log('[PDF FORM ACTUAL]', JSON.stringify(
+      pDatos.form_actual && pDatos.form_actual[0]
+    ));
+
+    pDatos.logoPath = pDatos.logo_base64;
+  } catch (error) {
+    console.warn('[PDF LOGO] No se pudo cargar la imagen del logo:', error.message);
+    pDatos.logo_base64 = '';
+    pDatos.logoPath = '';
+  }
 
   const numeracion = pDatos.form_actual[0].templateOptions.numeracionPagina || false;
   const membrete = pDatos.form_actual[0].templateOptions.tipoMembrete || 'sin membrete';
@@ -763,6 +837,7 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
 
   pDatos.marcaAgua = marcaAgua;
   pDatos.doc.plantilla = JSON.parse(pDatos.doc.plantilla);
+  pDatos.entidad = config.entidad || {};
 
   const codigoVerif = String(
     pDatos.codigo ||
@@ -794,67 +869,198 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
   const rutaVerificacion = `${baseUrl}/#/verificar`;
 
   const renderizarPdf = () => {
+    pDatos.entidad = config.entidad || {};
+    pDatos.logoPath = pDatos.logo_base64 || '';
+
+    console.log('[PDF TEMPLATE DATA]', {
+      tieneQr: Boolean(pDatos.qr_base64),
+      tieneCodigo: Boolean(pDatos.codigo_ver_texto),
+      qrUrl: pDatos.qr_url || '',
+      logoPath: pDatos.logoPath || ''
+    });
+
     ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
       if (pError || !pHtml) {
         console.error('[ERROR EJS PDF]', pError);
         return reject(pError || new Error('No se pudo renderizar el HTML.'));
       }
 
-      const configuracion = {
-        filename: rutaDocumento,
-        orientation: 'portrait',
-        height: alto,
-        width: ancho,
-        border: {
-          top: (membrete === 'legal') ? '1.7cm' : '25mm',
-          right: (membrete === 'externo' || membrete === 'legal') ? '1.7cm' : '2.5cm',
-          bottom: '3.8cm',
-          left: '25mm'
-        },
-        type: 'application/pdf',
-        footer: {
-          height: '8mm',
-          contents: (numeracion === 'true' || numeracion === true)
-            ? '<div style="float:right;"><span style="color: #444;">{{page}}</span></div>'
-            : ''
-        },
-        header: {
-          height: '25mm'
-        },
-        quality: '100'
-      };
+      pDatos.pdf_cite =
+        pDatos.doc && pDatos.doc.nombre
+          ? String(pDatos.doc.nombre)
+          : '';
 
-      html_pdf.create(pHtml, configuracion).toFile(
-        rutaDocumento,
-        (pErrorCrear, pStream) => {
-          if (!pErrorCrear) {
-            console.log(`[PDF OK] ${rutaDocumento}`);
-            return resolve(pDatos);
+      pDatos.pdf_expediente =
+        pDatos.exp !== undefined && pDatos.exp !== null
+          ? String(pDatos.exp)
+          : (pDatos.doc && pDatos.doc.grupo
+            ? String(pDatos.doc.grupo)
+            : '');
+
+      console.log('[PDF DATA KEYS]', JSON.stringify({
+        keys: Object.keys(pDatos || {}),
+        docKeys: pDatos.doc ? Object.keys(pDatos.doc) : [],
+        formKeys: pDatos.form_actual
+          ? pDatos.form_actual.map((item) => item.key)
+          : []
+      }));
+
+      console.log('[PDF DOC SHAPE]', JSON.stringify({
+        nombre: pDatos.doc && pDatos.doc.nombre,
+        plantillaTipo: pDatos.doc && typeof pDatos.doc.plantilla,
+        plantillaKeys: pDatos.doc && pDatos.doc.plantilla &&
+          typeof pDatos.doc.plantilla === 'object'
+          ? Object.keys(pDatos.doc.plantilla)
+          : [],
+        plantillaArray: pDatos.doc && Array.isArray(pDatos.doc.plantilla)
+      }));
+
+      console.log('[PDF DOC PLANTILLA]', JSON.stringify({
+        tipo: pDatos.doc && typeof pDatos.doc.plantilla,
+        keys: pDatos.doc && pDatos.doc.plantilla &&
+          typeof pDatos.doc.plantilla === 'object'
+          ? Object.keys(pDatos.doc.plantilla)
+          : [],
+        longitud: pDatos.doc && pDatos.doc.plantilla
+          ? String(pDatos.doc.plantilla).length
+          : 0,
+        inicio: pDatos.doc && pDatos.doc.plantilla
+          ? String(pDatos.doc.plantilla).slice(0, 500)
+          : ''
+      }));
+
+                  console.log('[PDF FIELD VALUES]', JSON.stringify(
+        (pDatos.doc && Array.isArray(pDatos.doc.plantilla)
+          ? pDatos.doc.plantilla
+          : []
+        ).map((valor, indice) => ({
+          indice,
+          key: pDatos.form_actual && pDatos.form_actual[indice]
+            ? pDatos.form_actual[indice].key
+            : '',
+          tipo: typeof valor,
+          keys: valor && typeof valor === 'object'
+            ? Object.keys(valor)
+            : [],
+          valor: valor && typeof valor === 'object'
+            ? {
+                valor: valor.valor,
+                value: valor.value,
+                fecha: valor.fecha,
+                date: valor.date,
+                texto: valor.texto
+              }
+            : String(valor).slice(0, 300)
+        }))
+      ));
+
+      console.log('[PDF PLANTILLA VALOR]', {
+        tipo: typeof pDatos.doc && pDatos.doc
+          ? typeof pDatos.doc.plantilla_valor
+          : 'sin-doc',
+        valor: pDatos.doc && pDatos.doc.plantilla_valor
+          ? String(pDatos.doc.plantilla_valor).slice(0, 1000)
+          : ''
+      });
+
+          const candidatosFecha = [];
+
+      const buscarFecha = (valor, ruta, profundidad) => {
+        if (profundidad > 6 || valor === null || valor === undefined) {
+          return;
+        }
+
+        if (typeof valor === 'string') {
+          const texto = valor.trim();
+
+          if (
+            /fecha|date|cite|emision|emisión/i.test(ruta) ||
+            /^\\d{1,2}[/\\-]\\d{1,2}[/\\-]\\d{2,4}$/.test(texto) ||
+            /^\\d{4}-\\d{2}-\\d{2}/.test(texto)
+          ) {
+            candidatosFecha.push({
+              ruta,
+              valor: texto.slice(0, 200)
+            });
           }
 
-          console.log('Error en la creacion del documento pdf + ruta', rutaDocumento);
-          console.log('Error en la creacion del documento pdf', pErrorCrear, pStream);
-
-          setTimeout(() => {
-            html_pdf1.create(pHtml, configuracion).toFile(
-              rutaDocumento,
-              (errorCrear, segundoStream) => {
-                if (errorCrear) {
-                  console.log('REVISANDO EL SEGUNDO ERROR AL CREAR', errorCrear);
-                  return reject(
-                    process.env.NODE_ENV === 'production'
-                      ? 'No se pudo crear el pdf del documento'
-                      : errorCrear
-                  );
-                }
-
-                console.log(`[PDF OK] ${rutaDocumento}`);
-                return resolve(pDatos);
-              }
-            );
-          }, 900);
+          return;
         }
+
+        if (typeof valor !== 'object') {
+          return;
+        }
+
+        Object.keys(valor).forEach((clave) => {
+          const siguiente = valor[clave];
+
+          if (
+            typeof siguiente === 'string' ||
+            (siguiente && typeof siguiente === 'object')
+          ) {
+            buscarFecha(
+              siguiente,
+              ruta + '.' + clave,
+              profundidad + 1
+            );
+          }
+        });
+      };
+
+      buscarFecha(pDatos, 'pDatos', 0);
+
+      console.log(
+        '[PDF DATE CANDIDATES]',
+        JSON.stringify(candidatosFecha.slice(0, 100))
       );
+
+      const citeModel =
+        pDatos.model_actual &&
+        pDatos.model_actual['cite-0']
+          ? pDatos.model_actual['cite-0']
+          : {};
+
+      const posiblesFechas = [
+        citeModel.fecha,
+        citeModel.date,
+        pDatos.fecha,
+        pDatos.fechaDocumento,
+        pDatos.doc && pDatos.doc.fecha
+      ];
+
+      pDatos.pdf_fecha =
+        posiblesFechas.find((valor) => valor) || '';
+
+      console.log('[PDF DATE SELECTED]', JSON.stringify({
+        fuente: citeModel.fecha
+          ? 'model_actual.cite-0.fecha'
+          : 'fallback',
+        fecha: pDatos.pdf_fecha
+      }));
+
+      pDatos.pdf_codigo =
+        pDatos.codigoSeguridad || pDatos.codigo_ver_texto || '';
+
+      crearPdfConPartes(
+        pHtml,
+        pDatos,
+        rutaDocumento,
+        rutaHeader,
+        rutaFooter
+      )
+        .then(() => {
+          console.log(`[PDF OK] ${rutaDocumento}`);
+          return resolve(pDatos);
+        })
+        .catch((errorCrear) => {
+          console.log('Error en la creacion del documento pdf + ruta', rutaDocumento);
+          console.log('Error en la creacion del documento pdf', errorCrear);
+          return reject(
+            process.env.NODE_ENV === 'production'
+              ? 'No se pudo crear el pdf del documento'
+              : errorCrear
+          );
+        });
     });
   };
 
