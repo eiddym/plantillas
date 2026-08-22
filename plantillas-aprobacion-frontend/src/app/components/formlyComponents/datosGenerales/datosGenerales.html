@@ -126,7 +126,7 @@
                 class="header-searchbox md-text">
             </md-select-header>
             <md-optgroup label="usuarios">
-                <md-option ng-value="u" ng-repeat="u in vm.usuarios | filter:vm.buscar_de">
+                <md-option ng-value="u" ng-repeat="u in vm.usuarios_de | filter:vm.buscar_de">
                     {{ u.nombres+' '+u.apellidos }}
                 </md-option>
             </md-optgroup>

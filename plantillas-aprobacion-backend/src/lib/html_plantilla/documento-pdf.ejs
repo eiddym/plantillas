@@ -334,6 +334,7 @@
         width: 75%;
       }
 
+
 </style>
   </head>
 
@@ -348,7 +349,7 @@
     %>
     <div class="<%= (marcaAgua == true)? 'fondo-texto':'none' %>"></div>
     <div class="mi-contenido">
-      <%# Funcion que retorna html de acuerdo al tipo de campo  %>
+            <%# Funcion que retorna html de acuerdo al tipo de campo  %>
       <%
 
       function formatDate(date, horas=false) {
@@ -478,7 +479,7 @@
                 </div><br>
               <% } %>
               <% break; %>
-case 'lista': %>
+            case 'lista': %>
             <table width="100%" class="lista-tabla" cellspacing="0">
               <tr>
               <%  if(pItem.templateOptions.className=='ap-text-center'){  %>
@@ -1617,24 +1618,7 @@ case 'lista': %>
     </div>
 
     <!-- TODO: SI es html debe mostrarse???, deberia irse al final. en todo caso no mostrar -->
-      <div class="institution-footer">
-        <div class="institution-footer-line"></div>
-        <div class="institution-footer-data">
-          <%= (entidad && entidad.direccion) || '' %>
-          <% if (entidad && entidad.nit) { %>
-            &nbsp;&nbsp;|&nbsp;&nbsp;<%= entidad.nit %>
-          <% } %>
-          <% if (entidad && entidad.telefono) { %>
-            &nbsp;&nbsp;|&nbsp;&nbsp;<%= entidad.telefono %>
-          <% } %>
-          <% if (entidad && entidad.correo) { %>
-            &nbsp;&nbsp;|&nbsp;&nbsp;<%= entidad.correo %>
-          <% } %>
-          <% if (entidad && entidad.web) { %>
-            &nbsp;&nbsp;|&nbsp;&nbsp;<%= entidad.web %>
-          <% } %>
-        </div>
-      </div>
 
+    
 </body>
 </html>
