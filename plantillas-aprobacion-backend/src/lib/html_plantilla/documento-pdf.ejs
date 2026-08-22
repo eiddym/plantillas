@@ -349,6 +349,109 @@
     %>
     <div class="<%= (marcaAgua == true)? 'fondo-texto':'none' %>"></div>
     <div class="mi-contenido">
+    <!-- ===== CABECERA SIMULADA (paginación + logo + línea + metadatos + QR) ===== -->
+    <style>
+      .cabecera-completa {
+        width: 100%;
+        margin-top: -0.1cm;
+        margin-bottom: 10px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 7pt;
+        color: #222;
+      }
+      .cabecera-pagina {
+        text-align: right;
+        font-size: 9pt;
+        margin-bottom: 4px;
+      }
+      .cabecera-logo {
+        margin-bottom: 4px;
+      }
+      .cabecera-logo img {
+        height: 42px !important;
+        max-height: 42px !important;
+        width: auto !important;
+        display: block !important;
+      }
+      .cabecera-linea {
+        width: 100%;
+        height: 1.6px;
+        background-color: #c4a484;
+        margin: 4px 0 6px 0;
+      }
+      .cabecera-info {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+      .cabecera-info > div {
+        display: table-cell;
+        vertical-align: top;
+      }
+      .cabecera-meta {
+        width: 68%;
+        line-height: 1.35;
+      }
+      .cabecera-right {
+        width: 32%;
+        text-align: center;
+      }
+      .cabecera-fecha {
+        margin-bottom: 4px;
+        text-align: center;
+        font-size: 9.5pt;
+      }
+      .cabecera-qr {
+        display: inline-block;
+        text-align: center;
+      }
+      .cabecera-qr img {
+        width: 68px !important;
+        height: 68px !important;
+        display: block !important;
+        margin: 0 auto;
+      }
+      .cabecera-qr-caption {
+        font-size: 6.5pt;
+        color: #555;
+        margin-top: 2px;
+        text-align: center;
+        white-space: nowrap;
+      }
+    </style>
+
+    <div class="cabecera-completa">
+
+      <!-- Logo -->
+      <div class="cabecera-logo">
+        <% if (typeof logo_base64 !== 'undefined' && logo_base64) { %>
+          <img src="<%= logo_base64 %>" alt="Logo">
+        <% } %>
+      </div>
+
+      <!-- Línea -->
+      <div class="cabecera-linea"></div>
+
+      <!-- Metadatos + QR -->
+      <div class="cabecera-info">
+        <div class="cabecera-meta">
+          <%= typeof pdf_cite !== 'undefined' ? pdf_cite : '' %><br>
+          Expediente : <%= typeof pdf_expediente !== 'undefined' ? pdf_expediente : '' %><br>
+          Código de verificación : <%= typeof pdf_codigo !== 'undefined' ? pdf_codigo : '' %>
+        </div>
+        <div class="cabecera-right">
+          <div class="cabecera-fecha"><%= typeof pdf_fecha !== 'undefined' ? pdf_fecha : '' %></div>
+          <% if (typeof qr_base64 !== 'undefined' && qr_base64) { %>
+            <div class="cabecera-qr">
+              <img src="<%= qr_base64 %>" alt="QR">
+              <div class="cabecera-qr-caption">Escanear para verificar</div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <!-- ===== FIN CABECERA SIMULADA ===== -->
+
             <%# Funcion que retorna html de acuerdo al tipo de campo  %>
       <%
 

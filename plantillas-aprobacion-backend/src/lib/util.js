@@ -26,11 +26,38 @@ const crearPdfConPartes = (
   rutaHeader,
   rutaFooter
 ) => new Promise((resolve, reject) => {
+  const fs = require('fs');
+  const path = require('path');
+  const os = require('os');
+
+  // === Generar archivos temporales para logo y QR ===
+  const tmpDir = os.tmpdir();
+  let logoFile = null;
+  let qrFile = null;
+
+  try {
+    if (pDatos.logo_base64 && typeof pDatos.logo_base64 === 'string' && pDatos.logo_base64.startsWith('data:image')) {
+      const base64Data = pDatos.logo_base64.replace(/^data:image\/\w+;base64,/, '');
+      logoFile = path.join(tmpDir, `logo-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
+      fs.writeFileSync(logoFile, Buffer.from(base64Data, 'base64'));
+      pDatos.logo_file_url = 'file://' + logoFile;
+      console.log('[PDF TMP] Logo temporal creado:', logoFile);
+    }
+    if (pDatos.qr_base64 && typeof pDatos.qr_base64 === 'string' && pDatos.qr_base64.startsWith('data:image')) {
+      const base64Data = pDatos.qr_base64.replace(/^data:image\/\w+;base64,/, '');
+      qrFile = path.join(tmpDir, `qr-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
+      fs.writeFileSync(qrFile, Buffer.from(base64Data, 'base64'));
+      pDatos.qr_file_url = 'file://' + qrFile;
+      console.log('[PDF TMP] QR temporal creado:', qrFile);
+    }
+  } catch (err) {
+    console.warn('[PDF TMP] Error creando archivos temporales:', err.message);
+  }
+
   ejs.renderFile(rutaHeader, pDatos, (headerError, headerHtml) => {
     if (headerError) {
       return reject(headerError);
     }
-
     ejs.renderFile(rutaFooter, pDatos, (footerError, footerHtml) => {
       if (footerError) {
         return reject(footerError);
@@ -38,21 +65,21 @@ const crearPdfConPartes = (
 
       const configuracion = {
         border: {
-          top: '10mm',
-          right: '20mm',
-          bottom: '10mm',
-          left: '20mm'
+          top: '0.5cm',
+          right: '2cm',
+          bottom: '1cm',
+          left: '2cm'
         },
         format: pDatos.tipoHoja || 'Letter',
         type: 'pdf',
         timeout: 30000,
         localUrlAccess: true,
         header: {
-          height: '30mm',
+          height: '1mm',
           contents: headerHtml
         },
         footer: {
-          height: '20mm',
+          height: '16mm',
           contents: footerHtml
         }
       };
@@ -60,17 +87,21 @@ const crearPdfConPartes = (
       html_pdf.create(pHtml, configuracion).toFile(
         rutaDocumento,
         (pErrorCrear, pStream) => {
+          // Limpiar archivos temporales
+          try {
+            if (logoFile && fs.existsSync(logoFile)) fs.unlinkSync(logoFile);
+            if (qrFile && fs.existsSync(qrFile)) fs.unlinkSync(qrFile);
+          } catch (e) {}
+
           if (pErrorCrear) {
             return reject(pErrorCrear);
           }
-
           return resolve(pStream);
         }
       );
     });
   });
 });
-
 const funcionCabeceras = (objs) => {
   const cabs = [];
   for (let i = 0; i < objs.length; i++) {
@@ -879,7 +910,43 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
       logoPath: pDatos.logoPath || ''
     });
 
-    ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
+    
+      // === Variables para cabecera (deben existir ANTES de renderizar el cuerpo) ===
+      pDatos.pdf_cite =
+        pDatos.doc && pDatos.doc.nombre
+          ? String(pDatos.doc.nombre).replace(/\.pdf$/i, '')
+          : '';
+      pDatos.pdf_expediente =
+        pDatos.exp !== undefined && pDatos.exp !== null
+          ? String(pDatos.exp)
+          : (pDatos.doc && pDatos.doc.grupo
+            ? String(pDatos.doc.grupo)
+            : '');
+      pDatos.pdf_codigo =
+        pDatos.codigoSeguridad || pDatos.codigo_ver_texto || pDatos.codigo || '';
+      
+      // Fecha
+      const citeModel =
+        pDatos.model_actual && pDatos.model_actual['cite-0']
+          ? pDatos.model_actual['cite-0']
+          : {};
+      const posiblesFechas = [
+        citeModel.fecha,
+        citeModel.date,
+        pDatos.fecha,
+        pDatos.fechaDocumento,
+        pDatos.doc && pDatos.doc.fecha
+      ];
+      pDatos.pdf_fecha = posiblesFechas.find((valor) => valor) || '';
+      
+      console.log('[PDF VARS PRE-RENDER]', {
+        cite: pDatos.pdf_cite,
+        exp: pDatos.pdf_expediente,
+        codigo: pDatos.pdf_codigo,
+        fecha: pDatos.pdf_fecha
+      });
+
+      ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
       if (pError || !pHtml) {
         console.error('[ERROR EJS PDF]', pError);
         return reject(pError || new Error('No se pudo renderizar el HTML.'));
