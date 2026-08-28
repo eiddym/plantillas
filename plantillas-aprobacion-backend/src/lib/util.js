@@ -786,15 +786,29 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
       `${__dirname}/html_plantilla/assets/logo-pdf.png`
     ).toString('base64');
 
+    const logoFerecominData = fs.readFileSync(
+      `${__dirname}/html_plantilla/assets/logo-ferecomin.png`
+    ).toString('base64');
+
     pDatos.logo_base64 = `data:image/png;base64,${logoData}`;
-    console.log('[PDF FORM ACTUAL]', JSON.stringify(
-      pDatos.form_actual && pDatos.form_actual[0]
+    pDatos.logo_ferecomin_base64 =
+      `data:image/png;base64,${logoFerecominData}`;
+    console.log('[PDF FORM TITULOS]', JSON.stringify(
+      (pDatos.form_actual || []).map((item, index) => ({
+        index,
+        type: item && item.type,
+        key: item && item.key,
+        tipo: item && item.templateOptions && item.templateOptions.tipo,
+        label: item && item.templateOptions && item.templateOptions.label,
+        className: item && item.templateOptions && item.templateOptions.className
+      }))
     ));
 
     pDatos.logoPath = pDatos.logo_base64;
   } catch (error) {
     console.warn('[PDF LOGO] No se pudo cargar la imagen del logo:', error.message);
     pDatos.logo_base64 = '';
+    pDatos.logo_ferecomin_base64 = '';
     pDatos.logoPath = '';
   }
 
