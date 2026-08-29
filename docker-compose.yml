@@ -1,4 +1,14 @@
 services:
+  # 0. Detector de IP del host (corre una vez antes del backend)
+  detector-ip:
+    image: alpine:3.20
+    network_mode: host
+    volumes:
+      - ./detectar-ip-host.sh:/detectar-ip-host.sh:ro
+      - shared-config:/shared
+    command: sh -c "apk add --no-cache iproute2 >/dev/null 2>&1; sh /detectar-ip-host.sh"
+    restart: "no"
+
   # 1. Base de Datos (PostgreSQL 13)
   db:
     image: postgres:13-alpine
@@ -30,6 +40,10 @@ services:
                echo 'Esperando a la base de datos Postgres...';
                sleep 2;
              done;
+             if [ -f /shared/url_verificacion.env ] && [ -z \"$$URL_VERIFICACION\" ]; then
+               export $$(cat /shared/url_verificacion.env | xargs);
+               echo \"[backend] URL_VERIFICACION tomada del detector: $$URL_VERIFICACION\";
+             fi;
              npm install &&
              echo 'Base de datos lista. Aplicando parches e inicializando BD...';
              npm run parchar && node index.js"
@@ -39,6 +53,7 @@ services:
       - ./plantillas-aprobacion-backend:/app
       - backend_node_modules:/app/node_modules
       - plantillas-documentos:/app/public
+      - shared-config:/shared:ro
     env_file:
       - .env
     environment:
@@ -62,6 +77,7 @@ services:
       CORREO_TLS_RECHAZAR: ${CORREO_TLS_RECHAZAR:-true}
     depends_on:
       - db
+      - detector-ip
     networks:
       - red-plantillas
 
@@ -85,3 +101,4 @@ volumes:
   backend_node_modules:
   pgdata:
   plantillas-documentos:
+  shared-config:
