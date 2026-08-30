@@ -1164,7 +1164,7 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
     return QRCode.toDataURL(urlVerif, {
       errorCorrectionLevel: 'M',
       margin: 2,
-      width: 240
+      width: 120
     })
       .then((urlBase64) => {
         pDatos.qr_base64 = urlBase64;
