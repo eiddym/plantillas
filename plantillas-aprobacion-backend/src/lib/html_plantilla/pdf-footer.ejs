@@ -29,12 +29,23 @@
   }
 </style>
 
+<%
+  var footerEntidad = (typeof entidad !== 'undefined' && entidad) ? entidad : {};
+%>
 <div class="pdf-footer">
   <div class="pdf-footer-line"></div>
   <div class="pdf-footer-datos">
-    ZONA SOPOCACHI, CALLE JOSE RESEGUIN N° 2039, ENTRE ASPAZU, EDIFICIO RAMOS, PISO 1, LA PAZ - BOLIVIA<br>
-    M.C./NIT: 484874028 &nbsp;|&nbsp; TELÉFONO: 71617875 &nbsp;|&nbsp; CORREO: contacto@ajjminingcompany.com<br>
-    ajjminingcompany.com
+    <%= footerEntidad.direccion || '' %><br>
+    <%= footerEntidad.nit || '' %>
+    <% if (footerEntidad.telefono) { %>
+      &nbsp;|&nbsp; <%= footerEntidad.telefono %>
+    <% } %>
+    <% if (footerEntidad.correo) { %>
+      &nbsp;|&nbsp; <%= footerEntidad.correo %>
+    <% } %><br>
+    <% if (footerEntidad.web) { %>
+      <%= footerEntidad.web %>
+    <% } %>
   </div>
   <div class="pdf-footer-pagina">
     {{page}}/{{pages}}
