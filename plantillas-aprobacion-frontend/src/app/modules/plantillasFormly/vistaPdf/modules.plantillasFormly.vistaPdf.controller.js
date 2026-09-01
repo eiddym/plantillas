@@ -6,7 +6,7 @@
     .controller('VistaPdfController', VistaPdfController);
 
   /** @ngInject */
-  function VistaPdfController($scope, DataService, restUrl, Storage, $sce, $location, Documento, Util) {
+  function VistaPdfController($scope, DataService, restUrl, Storage, $sce, $location, Documento, Util, $timeout) {
       var vm = this;
       var datos_enviar = Storage.getSession('datos_enviar');
 
@@ -23,11 +23,15 @@
               vm.flag_html=true;
               if (datos_enviar.esDocumentoExterno) vm.flag_html=false;
               vm.show_pdf=!datos_enviar.esDispositivoMovil;
-               if (datos_enviar.esDispositivoMovil) {
-            setTimeout(function() {
-                Util.loadCanvas(datos_enviar.pdf_buffer, '#canvasContainer');
-            }, 500);
-         }    //funciones
+              if (datos_enviar.esDispositivoMovil) {
+                  // Esperar múltiples ciclos digest con ng-show
+                  $timeout(function () {
+                      $timeout(function () {
+                          Util.loadCanvas(datos_enviar.pdf_buffer, '#canvasContainer');
+                      }, 50);
+                  }, 0);
+              }
+              //funciones
               vm.verHtml = function(){ vm.flag_html=true; }
               vm.verPdf = function(){ vm.flag_html=false; }
               vm.load = true;
