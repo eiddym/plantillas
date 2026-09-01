@@ -109,8 +109,10 @@ gulp.task('clean', function () {
 
 gulp.task('copy-pdf-worker', function () {
   return gulp.src([
+    'bower_components/pdf.js-viewer/pdf.js',
     'bower_components/pdf.js-viewer/pdf.worker.js'
   ])
   .pipe(gulp.dest(path.join(conf.paths.dist, '/lib')));
 });
+
 gulp.task('build', ['html', 'fonts', 'other', 'oauth', 'copy-pdf-worker']);

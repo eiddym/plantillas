@@ -329,13 +329,30 @@
 
     function loadCanvas(url, idCanvasContainer) {
     console.log("===> EJECUTANDO VISOR VERSION FINAL 2026 <====");
+    console.log("PDF MOBILE DEBUG", {
+        selector: idCanvasContainer,
+        hasBuffer: !!url,
+        bufferType: Object.prototype.toString.call(url),
+        bufferBytes: url && (url.byteLength || url.length || 0),
+        pdfjsLoaded: !!(window.pdfjsLib || window.PDFJS),
+        worker: window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions
+            ? window.pdfjsLib.GlobalWorkerOptions.workerSrc
+            : null
+    });
 
     var container = document.querySelector(idCanvasContainer);
     if (!container) {
         console.warn("loadCanvas: contenedor no encontrado:", idCanvasContainer);
+        console.warn("  Esperando a que el contenedor se inserte en el DOM...");
         return;
     }
+    
+    // Limpiar contenedor y mostrar estado de carga
     container.innerHTML = '';
+    var loaderDiv = document.createElement('div');
+    loaderDiv.style.cssText = 'padding:16px;text-align:center;color:#999;font-size:14px';
+    loaderDiv.textContent = 'Cargando PDF…';
+    container.appendChild(loaderDiv);
 
     // ── NO tocar workerSrc ni disableWorker ──────────────────────────
     // El workerSrc ya está configurado en index.html apuntando al CDN.
@@ -369,9 +386,9 @@ function renderPage(page) {
                       || container.closest('md-card-content') && container.closest('md-card-content').offsetWidth
                       || 600;
 
-    var unscaledViewport = page.getViewport({ scale: 1 });
+    var unscaledViewport = page.getViewport(1);
     var scale            = (containerWidth * 0.95) / unscaledViewport.width;
-    var viewport         = page.getViewport({ scale: scale });
+    var viewport         = page.getViewport(scale);
 
     var outputScale = window.devicePixelRatio || 1;
 
@@ -397,6 +414,10 @@ function renderPage(page) {
 }
 
     var pdfLib = window.pdfjsLib || window.PDFJS;
+
+    if (pdfLib) {
+        pdfLib.disableWorker = true;
+    }
     if (!pdfLib || !pdfLib.getDocument) {
         console.error("loadCanvas: pdfjsLib no disponible");
         return;
@@ -409,6 +430,20 @@ function renderPage(page) {
         }
     }).catch(function(err) {
         console.error("Error al leer PDF:", err);
+
+        if (container) {
+            var mensaje = err && err.message
+                ? err.message
+                : String(err);
+
+            container.innerHTML =
+                '<div class="pdf-mobile-error">' +
+                'Error al visualizar el PDF:<br>' +
+                '<small>' +
+                mensaje.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                '</small>' +
+                '</div>';
+        }
     });
 }
 

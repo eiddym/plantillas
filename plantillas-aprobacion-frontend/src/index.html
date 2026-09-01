@@ -67,12 +67,21 @@
     <!-- endinject -->
     <!-- endbuild -->
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.1.266/pdf.min.js"></script>
+    <script src="lib/pdf.js"></script>
     <script>
-        window.pdfjsLib = window.pdfjsLib || window.PDFJS;
-        if (window.pdfjsLib) {
-            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.1.266/pdf.worker.min.js';
+      window.pdfjsLib = window.pdfjsLib || window.PDFJS;
+
+      if (window.pdfjsLib) {
+        var pdfWorkerUrl = window.location.origin + '/lib/pdf.worker.js';
+
+        if (window.pdfjsLib.GlobalWorkerOptions) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
         }
+
+        if (window.pdfjsLib.workerSrc !== undefined) {
+          window.pdfjsLib.workerSrc = pdfWorkerUrl;
+        }
+      }
     </script>
 
 </body>
