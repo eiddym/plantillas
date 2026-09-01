@@ -112,11 +112,18 @@ function buscar() {
           
           if (vm.esMovil) {
             $timeout(function() {
-              console.log('DEBUG - Llamando loadCanvas con:', typeof vm.pdf_buffer);
-              var container = document.querySelector('#canvasContainerVerificado');
-              console.log('[DEBUG] offsetWidth antes de loadCanvas:', container ? container.offsetWidth : 'NO EXISTE');
-              Util.loadCanvas(response.data, '#canvasContainerVerificado');
-            }, 800);
+              $timeout(function() {
+                var container = document.querySelector('#canvasContainerVerificado');
+                if (container) {
+                  Util.loadCanvas(response.data, '#canvasContainerVerificado');
+                } else {
+                  console.warn('buscar: contenedor no existe, reintentando...');
+                  $timeout(function() {
+                    Util.loadCanvas(response.data, '#canvasContainerVerificado');
+                  }, 100);
+                }
+              }, 50);
+            }, 0);
           }
         }
       });  // ← cierra .then(function(response))
@@ -159,8 +166,17 @@ function verificarDocumento() {
           vm.pdf_buffer = response.data;
           if (vm.esMovil) {
             $timeout(function() {
-              // delay para ng-if
-              Util.loadCanvas(response.data, '#canvasContainerVerificado');
+              $timeout(function() {
+                var container = document.querySelector('#canvasContainerVerificado');
+                if (container) {
+                  Util.loadCanvas(response.data, '#canvasContainerVerificado');
+                } else {
+                  console.warn('verificarDocumento: contenedor no existe, reintentando...');
+                  $timeout(function() {
+                    Util.loadCanvas(response.data, '#canvasContainerVerificado');
+                  }, 100);
+                }
+              }, 50);
             }, 0); // ← cierra $timeout
           } // ← cierra if(vm.esMovil)
         } // ← cierra if(response)

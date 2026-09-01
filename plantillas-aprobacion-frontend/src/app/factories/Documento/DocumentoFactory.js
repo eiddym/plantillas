@@ -99,7 +99,7 @@ function DocumentoFactory(DataService, restUrl, backUrl, Datetime, UtilFormly, M
                   var config = {
                     data: datosEnviar,
                     templateUrl: 'app/factories/Documento/dialogPDF.html',
-                    controller: ['data', '$scope', '$mdDialog', 'Util', DialogPDFController]
+                    controller: ['data', '$scope', '$mdDialog', '$timeout', 'Util', DialogPDFController]
                   };
                   Modal.show(config);
                 });
@@ -128,7 +128,7 @@ function DocumentoFactory(DataService, restUrl, backUrl, Datetime, UtilFormly, M
       @param {Objeto} scope Scope del controlador
       @param {Objeto} mdDialog mdDialog usado para cerrar el modal
     */
-    function DialogPDFController(data, $scope, $mdDialog, Util){
+    function DialogPDFController(data, $scope, $mdDialog, $timeout, Util){
     //   $log.log("CHECK DATA ", data);
         var vmd = $scope;
         vmd.data={};
@@ -146,10 +146,22 @@ function DocumentoFactory(DataService, restUrl, backUrl, Datetime, UtilFormly, M
         vmd.verPdf = function(){
             vmd.data.flag_html = false;
             if (!vmd.data.show_pdf && vmd._pdf_buffer) {
-                // Esperar a que Angular muestre el canvasContainer en el DOM
-                setTimeout(function() {
-                    Util.loadCanvas(vmd._pdf_buffer, '#canvasContainerDialog');
-                }, 300);
+                // Esperar múltiples ciclos digest para que ng-if inserte el DOM
+                // En móvil, 0ms puede no ser suficiente; esperamos 2 ciclos anidados
+                $timeout(function () {
+                    $timeout(function () {
+                        var container = document.querySelector('#canvasContainerDialog');
+                        if (container) {
+                            Util.loadCanvas(vmd._pdf_buffer, '#canvasContainerDialog');
+                        } else {
+                            console.warn('verPdf: contenedor aún no existe, reintentando...');
+                            // Reintento una vez más después de 100ms
+                            $timeout(function () {
+                                Util.loadCanvas(vmd._pdf_buffer, '#canvasContainerDialog');
+                            }, 100);
+                        }
+                    }, 50);
+                }, 0);
             }
         };
 
