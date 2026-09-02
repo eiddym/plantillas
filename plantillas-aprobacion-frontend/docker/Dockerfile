@@ -6,8 +6,13 @@ WORKDIR /app
 # Instalar dependencias del sistema necesarias para Bower y Git
 RUN apk add --no-cache git python make g++
 
-# Forzar la instalación global de Bower compatible con Node 6
-RUN npm install -g bower@1.8.8 && \
+# npm 3 / Node 6 sobre Alpine puede fallar resolviendo uid/gid.
+# unsafe-perm evita que npm intente usar el usuario nobody durante scripts.
+ENV npm_config_unsafe_perm=true
+
+# Instalar Bower compatible con Node 6 y verificar la herramienta.
+RUN npm config set unsafe-perm true && \
+    npm install -g --unsafe-perm bower@1.8.8 && \
     ln -sf /usr/local/lib/node_modules/bower/bin/bower /usr/local/bin/bower && \
     node --version && \
     npm --version && \
@@ -20,7 +25,7 @@ COPY package.json package-lock.json bower.json .bowerrc ./
 RUN npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000 && \
-    npm install --no-audit --no-fund && \
+    npm install --unsafe-perm --no-audit --no-fund && \
     /usr/local/bin/bower install --allow-root
 
 # Copiar el resto del código fuente del frontend
