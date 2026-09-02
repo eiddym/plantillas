@@ -1,84 +1,110 @@
-name: plantillas
-
 services:
+  detector-ip:
+    image: alpine:3.20
+    network_mode: host
+    volumes:
+      - ./detectar-ip-host.sh:/detectar-ip-host.sh:ro
+      - shared-config:/shared
+    command: >
+      sh -c "apk add --no-cache iproute2 >/dev/null 2>&1;
+      sh /detectar-ip-host.sh"
+    restart: "no"
+
   db:
     image: postgres:13-alpine
-    container_name: plantillas-db
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      POSTGRES_DB: ${DB_NOMBRE}
-      POSTGRES_USER: ${DB_USUARIO}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - plantillas_postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${DB_USUARIO} -d ${DB_NOMBRE}"
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
         ]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
     networks:
-      - plantillas_network
+      - red-plantillas
 
   backend:
     build:
       context: ./plantillas-aprobacion-backend
       dockerfile: Dockerfile
-    container_name: plantillas-backend
     restart: unless-stopped
+    working_dir: /app
+    command: >
+      sh -c "until node -e \"require('net').connect(5432, 'db')
+      .on('connect', () => process.exit(0))
+      .on('error', () => process.exit(1))\"; do
+      echo 'Esperando a PostgreSQL...';
+      sleep 2;
+      done;
+      if [ -f /shared/url_verificacion.env ] &&
+      [ -z \"$$URL_VERIFICACION\" ]; then
+      export $$(cat /shared/url_verificacion.env | xargs);
+      echo '[backend] URL_VERIFICACION configurada automáticamente';
+      fi;
+      npm install &&
+      npm run parchar &&
+      node index.js"
     env_file:
       - .env
     environment:
-      NODE_ENV: production
+      NODE_ENV: ${NODE_ENV:-production}
       DB_HOST: db
-      DB_PORT: 5432
+      DB_PUERTO: 5432
+      DB_USUARIO: ${DB_USUARIO}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NOMBRE: ${DB_NOMBRE}
+      BACKEND_PUERTO: ${BACKEND_PUERTO:-8000}
+      JWT_SECRET: ${JWT_SECRET}
+      OPENSSL_CONF: ${OPENSSL_CONF:-/dev/null}
+      CORREO_HOST: ${CORREO_HOST}
+      CORREO_PUERTO: ${CORREO_PUERTO:-587}
+      CORREO_REMITENTE: ${CORREO_REMITENTE}
+      CORREO_ORIGEN: ${CORREO_ORIGEN}
+      CORREO_USUARIO: ${CORREO_USUARIO}
+      CORREO_PASSWORD: ${CORREO_PASSWORD}
+      CORREO_SECURE: ${CORREO_SECURE:-false}
+      CORREO_IGNORETLS: ${CORREO_IGNORETLS:-false}
+      CORREO_TLS_RECHAZAR: ${CORREO_TLS_RECHAZAR:-true}
     depends_on:
       db:
         condition: service_healthy
-    expose:
-      - "8000"
+      detector-ip:
+        condition: service_completed_successfully
     volumes:
-      - plantillas_documentos:/app/public/documentos
-      - plantillas_externos:/app/public/externos
-      - plantillas_aprobacion:/app/public/aprobacion
+      - plantillas-documentos:/app/public
+      - shared-config:/shared:ro
     networks:
-      - plantillas_network
+      - red-plantillas
 
   frontend:
     build:
       context: ./plantillas-aprobacion-frontend
       dockerfile: docker/Dockerfile
-    container_name: plantillas-frontend
     restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      BACKEND_URL: ${BACKEND_URL:-http://backend:8000}
     depends_on:
       backend:
         condition: service_started
     ports:
-      - "${FRONTEND_PORT:-80}:80"
+      - "${FRONTEND_PUERTO:-80}:80"
     networks:
-      - plantillas_network
+      - red-plantillas
 
 networks:
-  plantillas_network:
-    name: plantillas_network
+  red-plantillas:
     driver: bridge
 
 volumes:
-  plantillas_postgres_data:
-    name: plantillas_postgres_data
-  plantillas_documentos:
-    name: plantillas_documentos
-  plantillas_externos:
-    name: plantillas_externos
-  plantillas_aprobacion:
-    name: plantillas_aprobacion
+  pgdata:
+  plantillas-documentos:
+  shared-config:

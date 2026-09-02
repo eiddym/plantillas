@@ -1,75 +1,105 @@
 # Despliegue con Dockge
 
-Este proyecto puede desplegarse como un stack Docker Compose mediante Dockge.
+Este proyecto se despliega como un stack Docker Compose mediante Dockge.
+
+La configuración productiva se encuentra en:
+
+```text
+docker-compose.production.yml
+```
 
 ## Requisitos
 
-- Docker Engine y Docker Compose disponibles en el servidor.
-- Dockge instalado y accesible.
-- Acceso del servidor a GitHub.
-- Un puerto HTTP disponible; por defecto se usa el puerto 80.
-- Un archivo `.env` configurado a partir de `.env.sample`.
+- VPS Linux con Docker Engine y Docker Compose.
+- Dockge instalado.
+- Acceso del VPS a GitHub.
+- Un dominio o subdominio recomendado para producción.
+- Archivo `.env` privado creado desde `.env.sample`.
+- Puerto HTTP/HTTPS disponible.
+- Espacio persistente para PostgreSQL y documentos PDF.
 
-## Crear el archivo de entorno
+## Preparar variables
 
-En el servidor, antes del despliegue, copie el archivo de ejemplo:
+En el directorio del stack:
 
 ```bash
 cp .env.sample .env
 ```
 
-Edite `.env` y complete las credenciales, datos de base de datos, secretos JWT, URL pública e identidad institucional.
+Edite `.env` y complete todas las credenciales, secretos y datos institucionales.
 
-Nunca suba `.env` a Git.
+Nunca suba `.env` al repositorio.
 
-## Crear el stack en Dockge
+## URL QR de verificación
+
+El servicio `detector-ip` intenta detectar la IP del servidor y generar una URL LAN de verificación.
+
+Para producción en Hostinger con dominio y HTTPS, defina manualmente:
+
+```dotenv
+URL_VERIFICACION=https://documentos.tudominio.com/verificar
+```
+
+La URL debe ser accesible desde los teléfonos que escanearán los códigos QR.
+
+## Crear stack en Dockge
 
 1. Abra Dockge.
-2. Seleccione `Compose` y luego `Create Stack`.
-3. Asigne un nombre, por ejemplo: `plantillas`.
-4. Configure Dockge para clonar el repositorio:
+2. Cree un nuevo stack.
+3. Nombre sugerido:
+
+   ```text
+   plantillas-marabunta
+   ```
+
+4. Clone el repositorio:
 
    ```text
    https://github.com/eiddym/plantillas.git
    ```
 
-5. Seleccione una rama estable o un tag de versión.
-6. Use el archivo:
+5. Seleccione la rama:
+
+   ```text
+   prod/marabunta
+   ```
+
+6. Use:
 
    ```text
    docker-compose.production.yml
    ```
 
-7. Configure las variables de entorno según `.env.sample`.
-8. Inicie el stack.
+7. Cargue o cree el archivo `.env` privado.
+8. Despliegue el stack.
 
 ## Servicios
 
 | Servicio | Función | Exposición |
 |---|---|---|
-| `frontend` | Aplicación web AngularJS servida por Nginx | Puerto configurado mediante `FRONTEND_PORT` |
-| `backend` | API Node.js y generación de documentos PDF | Red interna Docker |
+| `detector-ip` | Genera URL QR LAN si no existe una manual | No expuesto |
 | `db` | PostgreSQL 13 | Red interna Docker |
+| `backend` | API Node.js, lógica documental y PDFs | Red interna Docker |
+| `frontend` | AngularJS y Nginx | Puerto `FRONTEND_PUERTO` |
 
 ## Persistencia
 
-Los siguientes volúmenes deben conservarse al actualizar el stack:
+| Volumen | Contenido |
+|---|---|
+| `pgdata` | PostgreSQL |
+| `plantillas-documentos` | Documentos PDF, adjuntos y archivos públicos |
+| `shared-config` | Configuración compartida de despliegue y URL QR |
 
-- `plantillas_postgres_data`: datos de PostgreSQL.
-- `plantillas_documentos`: PDFs generados.
-- `plantillas_externos`: archivos externos.
-- `plantillas_aprobacion`: archivos del flujo de aprobación.
+No elimine estos volúmenes sin realizar respaldos validados.
 
-No elimine estos volúmenes salvo que exista un respaldo validado.
+## Verificación posterior
 
-## Actualización
+Después del despliegue:
 
-1. Realice respaldo de la base de datos y archivos.
-2. Actualice la referencia Git a una rama estable o tag.
-3. Use `Redeploy` en Dockge.
-4. Verifique el inicio de `db`, `backend` y `frontend`.
-5. Pruebe el acceso web, creación de documento, PDF y verificación QR.
-
-## Notas
-
-Actualmente el stack de producción construye las imágenes desde el repositorio. En una siguiente versión se recomienda usar imágenes precompiladas y versionadas en GitHub Container Registry para acelerar y estandarizar los despliegues.
+1. Confirme que PostgreSQL esté saludable.
+2. Confirme que backend y frontend estén activos.
+3. Ingrese a la aplicación.
+4. Cree un documento de prueba.
+5. Genere y visualice el PDF en escritorio y móvil.
+6. Escanee el QR desde un teléfono externo.
+7. Confirme que la URL QR use el dominio productivo y HTTPS.
