@@ -7,13 +7,21 @@ WORKDIR /app
 RUN apk add --no-cache git python make g++
 
 # Forzar la instalación global de Bower compatible con Node 6
-RUN npm install -g bower@1.8.8
+RUN npm install -g bower@1.8.8 && \
+    ln -sf /usr/local/lib/node_modules/bower/bin/bower /usr/local/bin/bower && \
+    node --version && \
+    npm --version && \
+    bower --version
 
 # Copiar archivos de dependencias
 COPY package.json package-lock.json bower.json .bowerrc ./
 
 # Instalar dependencias locales
-RUN npm install && bower install --allow-root
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm install --no-audit --no-fund && \
+    /usr/local/bin/bower install --allow-root
 
 # Copiar el resto del código fuente del frontend
 COPY . .
