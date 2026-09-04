@@ -31,8 +31,17 @@ RUN npm install --no-audit --no-fund
 # Copiar el resto del backend: index.js, src, parches, public y recursos.
 COPY . .
 
-# El usuario node debe poder escribir documentos y archivos temporales.
-RUN chown -R node:node /app
+# Los archivos config.js y config.json no se versionan; crearlos desde los samples.
+# Las credenciales y valores productivos se leen desde variables de entorno.
+RUN if [ ! -f /app/src/config/config.js ] && \
+       [ -f /app/src/config/config.js.sample ]; then \
+      cp /app/src/config/config.js.sample /app/src/config/config.js; \
+    fi && \
+    if [ ! -f /app/src/config/config.json ] && \
+       [ -f /app/src/config/config.json.sample ]; then \
+      cp /app/src/config/config.json.sample /app/src/config/config.json; \
+    fi && \
+    chown -R node:node /app
 
 EXPOSE 8000
 

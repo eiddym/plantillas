@@ -46,7 +46,7 @@ services:
 
   # ============================================================
   # 2. Backend Node.js
-  # Espera PostgreSQL, toma URL QR automática si es necesaria,
+  # Espera PostgreSQL, ejecuta migraciones y seeders en primera instalación,
   # aplica parches idempotentes e inicia API.
   # ============================================================
   backend:
@@ -62,12 +62,28 @@ services:
       echo 'Esperando a PostgreSQL...';
       sleep 2;
       done;
-      if [ -f /shared/url_verificacion.env ] &&
-      [ -z \"$$URL_VERIFICACION\" ]; then
-      export $$(cat /shared/url_verificacion.env | xargs);
-      echo '[backend] URL_VERIFICACION obtenida del detector';
+
+      echo '[backend] Ejecutando migraciones...';
+      npx sequelize-cli db:migrate || true;
+
+      echo '[backend] Verificando seeders...';
+      if [ \"\$(echo \"SELECT COUNT(*) FROM usuario;\" | PGPASSWORD=${DB_PASSWORD} psql -h db -U ${DB_USUARIO} -d ${DB_NOMBRE} -t -A 2>/dev/null)\" = \"0\" ]; then
+        echo '[backend] Tabla usuario vacía: ejecutando seeders...';
+        npx sequelize-cli db:seed:all || echo '[backend] Seeders fallaron, continuar de todos modos';
+      else
+        echo '[backend] Tabla usuario ya tiene datos: saltando seeders';
       fi;
-      npm run parchar &&
+
+      if [ -f /shared/url_verificacion.env ] &&
+      [ -z \"\$\$URL_VERIFICACION\" ]; then
+        export \$\$(cat /shared/url_verificacion.env | xargs);
+        echo '[backend] URL_VERIFICACION obtenida del detector';
+      fi;
+
+      echo '[backend] Aplicando parches...';
+      npm run parchar;
+
+      echo '[backend] Iniciando API...';
       node index.js"
     env_file:
       - .env
@@ -135,13 +151,6 @@ services:
       traefik.http.routers.docs-marabunta-http.entrypoints: "web"
       traefik.http.routers.docs-marabunta-http.middlewares: "docs-marabunta-https"
       traefik.http.middlewares.docs-marabunta-https.redirectscheme.scheme: "https"
-
-      # Alternativa para Nginx o Apache ejecutado directamente en el host:
-      # 1. Eliminar red traefik-public y labels traefik.*.
-      # 2. Descomentar el bloque ports:
-      #
-      # ports:
-      #   - "127.0.0.1:${FRONTEND_PUERTO:-8080}:80"
 
 networks:
   red-plantillas:
