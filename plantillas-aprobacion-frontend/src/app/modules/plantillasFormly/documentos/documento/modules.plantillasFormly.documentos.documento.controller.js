@@ -7,7 +7,7 @@
     .controller('DocumentoController', DocumentoController);
 
   /** @ngInject */
-  function DocumentoController(DataService, restUrl, Modal, Message, UtilFormly, Storage, $stateParams, $location, backUrl, Panel, Documento, ExpirationTime) {
+  function DocumentoController(DataService, restUrl, Modal, Message, UtilFormly, Storage, $stateParams, $location, backUrl, Panel, Documento, ExpirationTime, $mdDialog) {
     var vm = this;
     var cuenta = Storage.getUser();
 
@@ -19,6 +19,7 @@
     vm.sw_enviado = true;
     vm.sw_rechazado = false;
     vm.url_img = null;
+    vm.tipoHoja = 'Letter';
 
     // cargamos funciones
     vm.cargarPlantilla = cargarPlantilla;
@@ -30,6 +31,8 @@
     vm.verObservaciones = verObservaciones;
     vm.verDocumento = verDocumento;
     vm.copearDocumento = copearDocumento;
+    vm.cambiarTamanoHoja = cambiarTamanoHoja;
+    vm.abrirModalTamanoHoja = abrirModalTamanoHoja;
 
     iniciar();
 
@@ -139,6 +142,17 @@
         else
             vm.form_actual = UtilFormly.dataToView(angular.fromJson(pl.plantilla));
 
+        if (vm.form_actual[0] && vm.form_actual[0].templateOptions) {
+            var th = vm.form_actual[0].templateOptions.tipoHoja;
+            if (!th || th === 'A4') {
+                th = 'Letter';
+                vm.form_actual[0].templateOptions.tipoHoja = 'Letter';
+            }
+            vm.tipoHoja = th;
+        } else {
+            vm.tipoHoja = 'Letter';
+        }
+
         actualizarPagina(vm.form_actual[0]);
 
         vm.doc.nombre = (model)? pl.nombre : pl.nombre+' - '+cuenta.first_name+' '+cuenta.last_name;
@@ -219,6 +233,16 @@
     function guardar(enviar, sw_location){
       if(vm.enviarEjecutandose > 1) {
         return;
+      }
+      if (vm.form_actual[0] && vm.form_actual[0].templateOptions) {
+        vm.form_actual[0].templateOptions.tipoHoja = vm.tipoHoja || 'Letter';
+        try {
+          var plantillaObj = angular.fromJson(vm.doc.plantilla);
+          if (plantillaObj && plantillaObj[0] && plantillaObj[0].templateOptions) {
+            plantillaObj[0].templateOptions.tipoHoja = vm.tipoHoja || 'Letter';
+            vm.doc.plantilla = angular.toJson(plantillaObj);
+          }
+        } catch (e) {}
       }
       var documento = {
           nombre: vm.doc.nombre,
@@ -364,6 +388,58 @@
 
     function volverAtras() {
         $location.path('documentos');
+    }
+
+    function cambiarTamanoHoja(tipo) {
+        if (!tipo) return;
+        vm.tipoHoja = tipo;
+        if (vm.form_actual[0] && vm.form_actual[0].templateOptions) {
+            vm.form_actual[0].templateOptions.tipoHoja = tipo;
+        }
+        try {
+            var plantillaObj = angular.fromJson(vm.doc.plantilla);
+            if (plantillaObj && plantillaObj[0] && plantillaObj[0].templateOptions) {
+                plantillaObj[0].templateOptions.tipoHoja = tipo;
+                vm.doc.plantilla = angular.toJson(plantillaObj);
+            }
+        } catch (e) {
+            console.error('Error al actualizar tipoHoja:', e);
+        }
+    }
+
+    function abrirModalTamanoHoja(ev) {
+        $mdDialog.show({
+            controller: ['$scope', '$mdDialog', 'tipoHojaActual', DialogTamanoHojaController],
+            controllerAs: 'vmd',
+            templateUrl: 'app/modules/plantillasFormly/documentos/documento/modalTamanoHoja.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            locals: {
+                tipoHojaActual: vm.tipoHoja || 'Letter'
+            }
+        }).then(function(tipoSeleccionado) {
+            if (tipoSeleccionado) {
+                cambiarTamanoHoja(tipoSeleccionado);
+            }
+        });
+    }
+
+    function DialogTamanoHojaController($scope, $mdDialog, tipoHojaActual) {
+        var vmd = this;
+        vmd.tipoHoja = tipoHojaActual || 'Letter';
+
+        vmd.seleccionar = function(tipo) {
+            vmd.tipoHoja = tipo;
+        };
+
+        vmd.guardar = function() {
+            $mdDialog.hide(vmd.tipoHoja);
+        };
+
+        vmd.cancelar = function() {
+            $mdDialog.cancel();
+        };
     }
 
     function vistaPrevia(){
