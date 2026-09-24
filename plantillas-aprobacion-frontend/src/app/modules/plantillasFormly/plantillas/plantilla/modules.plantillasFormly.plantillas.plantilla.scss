@@ -113,19 +113,14 @@
         }
     }
     md-content.documento {
-        max-height: 86vh;
-        @media screen and (max-height: 800px) {
-            max-height: 83vh;
-        }
+        height: auto !important;
+        max-height: none !important;
     }
     div.documento-edit {
-        overflow-y: auto;
-        max-height: 78vh;
-        @media screen and (max-height: 800px) {
-            max-height: 72vh;
-        }
+        overflow-y: visible !important;
+        overflow-x: hidden !important;
+        max-height: none !important;
     }
-
 }
 .menu-content-json {
     padding: 5px 10px;
