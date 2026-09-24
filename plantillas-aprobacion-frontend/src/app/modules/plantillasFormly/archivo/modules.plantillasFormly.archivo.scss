@@ -1,0 +1,15 @@
+.container-archivo {
+  padding: 10px;
+
+  md-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  md-toolbar.md-table-toolbar {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+  }
+}

@@ -54,10 +54,12 @@ module.exports = app => {
 */
 
   app.get('/api/v1/monitoreo/pendientes', (req, res) => {
+    const idUnidad = req.query.id_unidad || req.query.fid_unidad;
+    const filtroUnidad = (idUnidad && !isNaN(parseInt(idUnidad))) ? `and u.fid_unidad = ${parseInt(idUnidad)} ` : '';
 
     const qry = "select * from crosstab($$ " +
                 "select d.via_actual, u.nombres , u.apellidos, d.estado, count(d.estado) from documento d, usuario u " +
-                "where d.estado in ('ENVIADO','RECHAZADO','DERIVADO') and u.id_usuario = d.via_actual and u.estado= 'ACTIVO' " +
+                `where d.estado in ('ENVIADO','RECHAZADO','DERIVADO') and u.id_usuario = d.via_actual and u.estado= 'ACTIVO' ${filtroUnidad}` +
                 "group by d.via_actual, d.estado, u.nombres , u.apellidos " +
                 "order by u.nombres , u.apellidos $$ " +
                 ", $$VALUES ('ENVIADO'::text), ('RECHAZADO'::text), ('DERIVADO'::text) $$) " +

@@ -634,6 +634,60 @@ module.exports = app => {
     });
   });
 
+  app.get('/api/v1/plantillasFormly/documento/:id/archivo', filtros, (req, res) => {
+    const usuarioModel = app.src.db.models.usuario;
+    const auditUser = req.body.audit_usuario || {};
+    const idUsuario = req.params.id || auditUser.id_usuario;
+
+    usuarioModel.findByPk(idUsuario)
+    .then(pUsuario => {
+      const esAdminOMae = (auditUser && (auditUser.username === 'admin' || auditUser.es_mae === true)) || (pUsuario && pUsuario.es_mae === true);
+      const fidUnidad = pUsuario ? pUsuario.fid_unidad : null;
+
+      if (!esAdminOMae && fidUnidad) {
+        return usuarioModel.findAll({ attributes: ['id_usuario'], where: { fid_unidad: fidUnidad, estado: 'ACTIVO' } })
+          .then(usersUnit => {
+            const uIds = usersUnit.map(u => u.id_usuario);
+            return { [Op.or]: [{ fid_unidad: fidUnidad }, { _usuario_creacion: { [Op.in]: uIds } }] };
+          });
+      } else {
+        return Promise.resolve({});
+      }
+    })
+    .then(condicionScope => {
+      const opciones = {
+        where: {
+          estado: { [Op.ne]: 'ELIMINADO' },
+          ...condicionScope
+        }
+      };
+
+      if (req.query.filter !== '' && req.xfilter) {
+        opciones.where[Op.and] = { [Op.or]: req.xfilter };
+      }
+      if (req.query.fields) opciones.attributes = req.query.fields.split(',');
+      if (req.query.limit) opciones.limit = parseInt(req.query.limit);
+      if (req.query.page) opciones.offset = (parseInt(req.query.limit || 20) * (parseInt(req.query.page || 1) - 1)) || 0;
+
+      if (req.query.order) {
+        const orderDir = (req.query.order.charAt(0) === '-') ? 'DESC' : 'ASC';
+        const orderField = (req.query.order.charAt(0) === '-') ? req.query.order.substring(1) : req.query.order;
+        opciones.order = [[orderField, orderDir]];
+      } else {
+        opciones.order = [['_fecha_creacion', 'DESC']];
+      }
+
+      return documento.findAndCountAll(opciones);
+    })
+    .then(pRespuesta => {
+      res.send(util.formatearMensaje("EXITO", "La busqueda fue exitosa", { total: pRespuesta.count, resultado: pRespuesta.rows }));
+    })
+    .catch(pError => {
+      logger.error('Error en busqueda de archivo', pError);
+      res.status(412).send(util.formatearMensaje("ERROR", pError));
+    });
+  });
+
   /**
     @apiVersion 2.0.0
     @apiGroup Documento

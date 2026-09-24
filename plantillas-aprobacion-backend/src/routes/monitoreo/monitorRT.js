@@ -78,7 +78,17 @@ module.exports = app => {
     };
     if(req.query.relacion) opcionesMonitor.where.relacionado=req.query.relacion;
 
-    monitor.findAll(opcionesMonitor)
+    const idUnidad = req.query.id_unidad || req.query.fid_unidad;
+    const procConsulta = idUnidad ?
+      usuario.findAll({ attributes: ['id_usuario'], where: { fid_unidad: idUnidad, estado: 'ACTIVO' } })
+        .then(uList => {
+          const uIds = uList.map(u => u.id_usuario);
+          opcionesMonitor.where.fid_usuario = { [Op.in]: uIds };
+          return monitor.findAll(opcionesMonitor);
+        }) :
+      monitor.findAll(opcionesMonitor);
+
+    procConsulta
     .then( pLog => {
 
       pLog.forEach((pItem, pIndice) => {
@@ -167,7 +177,18 @@ module.exports = app => {
         offset: page,
       };
     if(req.query.relacion) opcionesMonitor.where.relacionado=req.query.relacion;
-    monitor.findAndCountAll(opcionesMonitor)
+
+    const idUnidad = req.query.id_unidad || req.query.fid_unidad;
+    const procUsuarios = idUnidad ?
+      usuario.findAll({ attributes: ['id_usuario'], where: { fid_unidad: idUnidad, estado: 'ACTIVO' } })
+        .then(uList => {
+          const uIds = uList.map(u => u.id_usuario);
+          opcionesMonitor.where.fid_usuario = { [Op.in]: uIds };
+          return monitor.findAndCountAll(opcionesMonitor);
+        }) :
+      monitor.findAndCountAll(opcionesMonitor);
+
+    procUsuarios
     .then( pResp => {
         tot = pResp.count.length;
         pResp.rows.forEach( it => {
@@ -271,7 +292,21 @@ module.exports = app => {
         limit: 20,
         offset: page,
       };
-    monitor.findAndCountAll(opcionesMonitor)
+    const idUnidad = req.query.id_unidad || req.query.fid_unidad;
+    const procDocs = idUnidad ?
+      usuario.findAll({ attributes: ['id_usuario'], where: { fid_unidad: idUnidad, estado: 'ACTIVO' } })
+        .then(uList => {
+          const uIds = uList.map(u => u.id_usuario);
+          return documento.findAll({ attributes: ['id_documento'], where: { [Op.or]: [{ fid_unidad: idUnidad }, { _usuario_creacion: { [Op.in]: uIds } }] } });
+        })
+        .then(dList => {
+          const dIds = dList.map(d => d.id_documento);
+          opcionesMonitor.where.fid_documento = { [Op.in]: dIds };
+          return monitor.findAndCountAll(opcionesMonitor);
+        }) :
+      monitor.findAndCountAll(opcionesMonitor);
+
+    procDocs
     .then( pResp => {
         tot = pResp.count.length;
         pResp.rows.forEach( it => {

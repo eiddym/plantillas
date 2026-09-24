@@ -6,13 +6,18 @@
     .controller('MonitoreoController', MonitoreoController);
 
   /** @ngInject */
-  function MonitoreoController(charColors, DataService, restUrl, Modal, $window, $filter, Documento) {
+  function MonitoreoController(charColors, DataService, restUrl, Modal, $window, $filter, Documento, Storage) {
     var vm = this,
       fecha_actual = new Date(),
       limite_inferior = 1990,
       limite_inferior_contable = 2018,
       limite_superior = 2130;
-      
+
+    var cuenta = Storage.getUser();
+    var esSuperAdmin = cuenta.username === 'admin' || (cuenta.roles && cuenta.roles.some(function(r) { return r.rol && r.rol.nombre === 'SUPERADMIN'; }));
+    var esMae = cuenta.es_mae === true;
+    vm.esAdminOMae = esSuperAdmin || esMae;
+    vm.idUnidadFilter = (!vm.esAdminOMae && (cuenta.id_unidad || cuenta.fid_unidad)) ? (cuenta.id_unidad || cuenta.fid_unidad) : null;
 
     iniciar();
     reiniciarChart();
@@ -58,10 +63,11 @@
       for (var j = limite_inferior_contable - 1; j < fecha_actual.getFullYear(); j++) vm.aniosContables.push(j + 1);
       
       vm.anioContable = vm.aniosContables.length -1;
-      DataService.get(restUrl + 'seguridad/usuario/?fields=id_usuario,usuario,nombres,apellidos&order=nombres&estado=ACTIVO')
+      var urlUsuarios = restUrl + 'seguridad/usuario/?fields=id_usuario,usuario,nombres,apellidos&order=nombres&estado=ACTIVO' + (vm.idUnidadFilter ? ('&fid_unidad=' + vm.idUnidadFilter) : '');
+      DataService.get(urlUsuarios)
         .then(function (respuesta) {
           vm.usuarios = respuesta.datos.resultado;
-          vm.usuario = vm.usuarios[0].id_usuario;
+          if (vm.usuarios && vm.usuarios.length) vm.usuario = vm.usuarios[0].id_usuario;
         })
 
       DataService.get(restUrl + 'presupuesto/gestiones')
@@ -218,26 +224,30 @@
     }
 
     function consultarDocumentosUsuarioEstados(fechaInicial, fechaFinal) {
-      DataService.get(restUrl + 'monitoreo/estados?fechaInicial=' + fechaInicial + '&&fechaFinal=' + fechaFinal)
+      var url = restUrl + 'monitoreo/estados?fechaInicial=' + fechaInicial + '&fechaFinal=' + fechaFinal + (vm.idUnidadFilter ? ('&id_unidad=' + vm.idUnidadFilter) : '');
+      DataService.get(url)
       .then(function (respuesta) {
         vm.estados = respuesta.datos;
       })
     }
 
     function consultarDocumentosPendientes() {
-      DataService.get(restUrl + 'monitoreo/pendientes')
+      var url = restUrl + 'monitoreo/pendientes' + (vm.idUnidadFilter ? ('?id_unidad=' + vm.idUnidadFilter) : '');
+      DataService.get(url)
       .then(function (respuesta) {
         vm.pendientes = [];
-        respuesta.datos[0].map(function (item) {
-          vm.pendientes.push({
-            nombres: item.nombres,
-            apellidos: item.apellidos,
-            ENVIADO: item.ENVIADO,
-            RECHAZADO: item.RECHAZADO,
-            DERIVADO: item.DERIVADO,
-            total: (item.ENVIADO + item.RECHAZADO + item.DERIVADO)
-          })
-        });
+        if (respuesta.datos && respuesta.datos[0]) {
+          respuesta.datos[0].map(function (item) {
+            vm.pendientes.push({
+              nombres: item.nombres,
+              apellidos: item.apellidos,
+              ENVIADO: item.ENVIADO,
+              RECHAZADO: item.RECHAZADO,
+              DERIVADO: item.DERIVADO,
+              total: (item.ENVIADO + item.RECHAZADO + item.DERIVADO)
+            })
+          });
+        }
       });
     }
 
@@ -354,10 +364,11 @@
         var anio = vm.anio + limite_inferior,
           mes = vm.mes + 1;
         
+        var paramUnidad = vm.idUnidadFilter ? ('&id_unidad=' + vm.idUnidadFilter) : '';
         var url_get = [
-          restUrl + 'monitoreo/global/?anio=' + anio + '&mes=' + mes,
-          restUrl + 'monitoreo/usuario/?anio=' + anio + '&mes=' + mes + '&page=' + vm.page,
-          restUrl + 'monitoreo/documento/?anio=' + anio + '&mes=' + mes + '&page=' + vm.page,
+          restUrl + 'monitoreo/global/?anio=' + anio + '&mes=' + mes + paramUnidad,
+          restUrl + 'monitoreo/usuario/?anio=' + anio + '&mes=' + mes + '&page=' + vm.page + paramUnidad,
+          restUrl + 'monitoreo/documento/?anio=' + anio + '&mes=' + mes + '&page=' + vm.page + paramUnidad,
           restUrl + 'monitoreo/' + vm.usuario + '/documento/?anio=' + anio + '&mes=' + mes
         ];
         DataService.get(url_get[vm.grafico.cod])

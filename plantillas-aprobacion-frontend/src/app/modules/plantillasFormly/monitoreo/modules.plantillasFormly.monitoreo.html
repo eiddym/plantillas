@@ -2,7 +2,13 @@
     <md-card>
         <md-toolbar class="md-table-toolbar">
             <div class="md-toolbar-tools">
-                <md-icon>grid_on</md-icon> <span>Monitoreo</span>
+                <md-icon>insights</md-icon> <span>Monitoreo</span>
+                <span class="scope-badge-unit" ng-if="!monitoreo.esAdminOMae">
+                    <md-icon>apartment</md-icon> Vista de Unidad
+                </span>
+                <span class="scope-badge-unit" ng-if="monitoreo.esAdminOMae" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2);">
+                    <md-icon>public</md-icon> Vista Global (MAE / Admin)
+                </span>
                 <div flex></div>
                 <md-button class="md-icon-button" ng-click="monitoreo.refrescarChart()">
                     <md-tooltip>Actualizar</md-tooltip>
@@ -109,8 +115,10 @@
                     </md-button>
                 </div>
             </div>
-            <div layout layout-align="center start" ng-if="[4, 5, 6, 7, 8, 9].indexOf(monitoreo.grafico.cod) == -1">
-                <chart-graph ancho="1000" alto="500" tipo="monitoreo.chart.tipo" datos="monitoreo.chart.datos" actualizar="monitoreo.chart.actualizar" reiniciar="monitoreo.chart.reiniciar" ></chart-graph>
+            <div class="chart-container-card" ng-if="[4, 5, 6, 7, 8, 9].indexOf(monitoreo.grafico.cod) == -1">
+                <div layout layout-align="center start">
+                    <chart-graph ancho="1000" alto="480" tipo="monitoreo.chart.tipo" datos="monitoreo.chart.datos" actualizar="monitoreo.chart.actualizar" reiniciar="monitoreo.chart.reiniciar" ></chart-graph>
+                </div>
             </div>
             
             <!--Presupuesto-->
@@ -217,14 +225,14 @@
                         </thead>
                         <tbody md-body>
                             <tr md-row md-select="item" ng-repeat="item in monitoreo.estados | orderBy:monitoreo.ordenarPor:monitoreo.ordenInverso ">                        
-                                <td md-cell>{{item.nombres}} {{item.apellidos}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.CREADO}}, 255 ,{{255+item.CREADO}})">{{item.CREADO}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.ENVIADO}}, 255 , {{255+item.ENVIADO}})">{{item.ENVIADO}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.DERIVADO}}, 255 ,{{255+item.DERIVADO}})">{{item.DERIVADO}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.APROBADO}}, 255 ,{{255+item.APROBADO}})">{{item.APROBADO}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.RECHAZADO}}, 255 ,{{255+item.RECHAZADO}})">{{item.RECHAZADO}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.CERRADO}}, 255 ,{{255+item.CERRADO}})">{{item.CERRADO}}</td>                           
-                                <td md-cell style="text-align: left; padding-left:20px; background-color: rgb({{255-item.ELIMINADO}}, 255 ,{{255+item.ELIMINADO}})">{{item.ELIMINADO}}</td>                            
+                                <td md-cell><strong>{{item.nombres}} {{item.apellidos}}</strong></td>                           
+                                <td md-cell><span class="badge-estado {{item.CREADO ? 'count-active' : 'count-zero'}}">{{item.CREADO || 0}}</span></td>                           
+                                <td md-cell><span class="badge-estado {{item.ENVIADO ? 'count-warning' : 'count-zero'}}">{{item.ENVIADO || 0}}</span></td>                           
+                                <td md-cell><span class="badge-estado {{item.DERIVADO ? 'count-active' : 'count-zero'}}">{{item.DERIVADO || 0}}</span></td>                           
+                                <td md-cell><span class="badge-estado {{item.APROBADO ? 'count-success' : 'count-zero'}}">{{item.APROBADO || 0}}</span></td>                           
+                                <td md-cell><span class="badge-estado {{item.RECHAZADO ? 'count-danger' : 'count-zero'}}">{{item.RECHAZADO || 0}}</span></td>                           
+                                <td md-cell><span class="badge-estado {{item.CERRADO ? 'count-success' : 'count-zero'}}">{{item.CERRADO || 0}}</span></td>                           
+                                <td md-cell><span class="badge-estado {{item.ELIMINADO ? 'count-danger' : 'count-zero'}}">{{item.ELIMINADO || 0}}</span></td>                            
                             </tr>
                         </tbody>
                     </table> 

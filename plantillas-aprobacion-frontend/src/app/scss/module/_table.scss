@@ -246,3 +246,76 @@ table th[class*="col-"] {
     border-bottom: 0;
   }
 }
+
+/* Vibrant modern action icons styling for tables */
+td.md-table-options, .md-table-options {
+  white-space: nowrap;
+  
+  .md-icon-button {
+    margin: 0 3px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    line-height: 36px;
+    border-radius: 50%;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+
+    &:hover {
+      transform: scale(1.15);
+      background-color: rgba(15, 23, 42, 0.08) !important;
+    }
+
+    md-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      color: #0284c7; /* Default Galactic Blue */
+    }
+
+    /* Specific action colors by button class or icon content */
+    &.boton-eliminar {
+      &:hover {
+        background-color: rgba(239, 68, 68, 0.12) !important;
+      }
+      md-icon {
+        color: #ef4444 !important; /* Rose Red */
+      }
+    }
+  }
+
+  /* Target specific icons */
+  md-icon {
+    &[ng-reflect-md-font-icon="remove_red_eye"],
+    &:contains("remove_red_eye"),
+    &:contains("visibility") {
+      color: #0284c7 !important; /* Galactic Blue for view */
+    }
+
+    &[ng-reflect-md-font-icon="timeline"],
+    &:contains("timeline"),
+    &:contains("show_chart"),
+    &:contains("trending_up") {
+      color: #0891b2 !important; /* Cyan / Progress for timeline */
+    }
+
+    &[ng-reflect-md-font-icon="check"],
+    &:contains("check"),
+    &:contains("checked"),
+    &:contains("done") {
+      color: #10b981 !important; /* Emerald Green for approve/check */
+    }
+
+    &[ng-reflect-md-font-icon="delete"],
+    &:contains("delete"),
+    &:contains("delete_forever") {
+      color: #ef4444 !important; /* Red for delete */
+    }
+
+    &[ng-reflect-md-font-icon="mode_edit"],
+    &:contains("mode_edit"),
+    &:contains("edit") {
+      color: #f59e0b !important; /* Amber for edit */
+    }
+  }
+}
