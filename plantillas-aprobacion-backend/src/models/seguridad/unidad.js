@@ -27,6 +27,21 @@ module.exports = (sequelize, DataType) => {
             defaultValue: 'ACTIVO',
             xlabel: 'Estado',
         },
+        fid_unidad_padre: {
+            type: DataType.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'unidad',
+                key: 'id_unidad',
+                xchoice: 'nombre',
+            },
+            xlabel: 'Unidad Padre',
+        },
+        ruta: {
+            type: DataType.STRING,
+            allowNull: true,
+            xlabel: 'Ruta Jerárquica',
+        },
         _usuario_creacion: {
             type: DataType.INTEGER,
             allowNull: false,
@@ -46,5 +61,9 @@ module.exports = (sequelize, DataType) => {
           },
         },
     });
+    unidad.associate = (models) => {
+        unidad.belongsTo(models.unidad, { as: 'unidad_padre', foreignKey: 'fid_unidad_padre' });
+        unidad.hasMany(models.unidad, { as: 'subunidades', foreignKey: 'fid_unidad_padre' });
+    };
     return unidad;
 };

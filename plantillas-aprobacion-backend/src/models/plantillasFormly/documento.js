@@ -117,6 +117,21 @@ module.exports = (sequelize, DataType) => {
             type: DataType.INTEGER,
             xlabel: 'Derivado de',
         },
+        lote_id: {
+            type: DataType.INTEGER,
+            allowNull: true,
+            xlabel: 'ID del Lote de Trámite',
+        },
+        raiz_cite: {
+            type: DataType.INTEGER,
+            allowNull: true,
+            xlabel: 'Documento Raíz del Trámite',
+        },
+        cites_referidos: {
+            type: DataType.JSONB,
+            defaultValue: [],
+            xlabel: 'CITEs Referenciados',
+        },
         grupo: {
             type: DataType.INTEGER,
             xlabel: 'Grupo',
@@ -152,6 +167,8 @@ module.exports = (sequelize, DataType) => {
         documento.hasMany(models.solicitud_aprobacion_cd, {as: 'solicitud_aprobacion_cd', foreignKey: 'fid_documento'});
         documento.hasMany(models.historial_flujo, {as: 'historial_flujo', foreignKey: 'id_documento'});
         documento.hasMany(models.notificacion, {as: 'notificacion', foreignKey: 'fid_documento'});
+        documento.belongsTo(models.documento, {as: 'padre', foreignKey: 'documento_padre'});
+        documento.hasMany(models.documento, {as: 'hijos', foreignKey: 'documento_padre'});
     };
     return documento;
 };

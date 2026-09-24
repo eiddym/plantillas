@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "postgres" ,
-    "password": "postgres",
-    "database": "name_database",
-    "host": "127.0.0.1",
+    "username": null,
+    "password": null,
+    "database": null,
+    "host": null,
     "port": 5432,
     "dialect": "postgres",
     "pool": {
@@ -14,10 +14,10 @@
     "timezone": "America/La_Paz"
   },
   "test": {
-    "username": "postgres",
-    "password": "postgres",
-    "database": "name_database",
-    "host": "127.0.0.1",
+    "username": null,
+    "password": null,
+    "database": null,
+    "host": null,
     "port": 5432,
     "dialect": "postgres",
     "pool": {
@@ -27,10 +27,10 @@
     }
   },
   "production": {
-    "username": "postgres",
-    "password": "postgres",
-    "database": "name_databaese",
-    "host": "127.0.0.1",
+    "username": null,
+    "password": null,
+    "database": null,
+    "host": null,
     "port": 5432,
     "dialect": "postgres",
     "pool": {

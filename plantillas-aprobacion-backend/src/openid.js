@@ -13,10 +13,15 @@ module.exports = async (app) => {
       return issuer;
     }
 
-    issuer = await discovery();
-    // inicializamos datos de registro del cliente
-    client = new issuer.Client(app.src.config.config.client);
-    client.CLOCK_TOLERANCE = 5;
+    try {
+      issuer = await discovery();
+      // inicializamos datos de registro del cliente
+      client = new issuer.Client(app.src.config.config.client);
+      client.CLOCK_TOLERANCE = 5;
+    } catch (error) {
+      console.warn('[OpenID Warning] No se pudo conectar con el servidor Issuer:', error.message || error);
+      return null;
+    }
   }
   return client;
 };

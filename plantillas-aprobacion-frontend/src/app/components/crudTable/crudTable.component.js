@@ -120,7 +120,8 @@
 
         function estadoModificado(item) {
             item._usuario_modificacion = vm.usuario;
-            DataService.put(vm.url+Util.getId(item, vm.fieldsData), angular.copy(item));
+            var targetUrl = (vm.url && vm.url.endsWith('/')) ? vm.url : vm.url + '/';
+            DataService.put(targetUrl + Util.getId(item, vm.fieldsData), angular.copy(item));
             if(vm.fields.indexOf('_usuario_modificacion')===-1) delete item._usuario_modificacion;
         }
 
