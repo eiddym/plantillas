@@ -37,6 +37,12 @@
 
     return service;
 
+    function buildUrlWithId(url, id) {
+      if (id === undefined || id === null || id === '') return url;
+      var hasSlash = url && url.charAt(url.length - 1) === '/';
+      return (hasSlash ? url : url + '/') + id + '/';
+    }
+
     function list(url, query) {
       return $http.get(url + (query ? '?' + Util.serialize(query) : ''))
       .then(function (response) {
@@ -51,7 +57,8 @@
     }
 
     function save(url, data) {
-      return $http[data.id ? 'put' : 'post'](url + (data.id ? data.id + '/': ''), data)
+      var requestUrl = data.id ? buildUrlWithId(url, data.id) : url;
+      return $http[data.id ? 'put' : 'post'](requestUrl, data)
       .then(function (response) {
         if(response.data){
           return response.data;
@@ -69,7 +76,8 @@
     }
 
     function put(url, data) {
-      return $http.put(url + (data.id ? data.id + '/': ''), data)
+      var requestUrl = data.id ? buildUrlWithId(url, data.id) : url;
+      return $http.put(requestUrl, data)
       .then(function (response) {
         if(response.data){
           return response.data;
@@ -100,7 +108,8 @@
     }
 
     function patch(url, data) {
-      return $http.patch(url + (data.id ? data.id + '/': ''), data)
+      var requestUrl = data.id ? buildUrlWithId(url, data.id) : url;
+      return $http.patch(requestUrl, data)
       .then(function (response) {
         if(response.data){
           return response.data;
@@ -144,7 +153,7 @@
     }
 
     function remove(url, id, noID) {
-      var urlRemove = noID == true ? url: url + id + '/';
+      var urlRemove = noID == true ? url : buildUrlWithId(url, id);
       return $http.delete(urlRemove)
       .then(function (response) {
         if(response.data){
@@ -158,7 +167,8 @@
     }
 
     function get(url, id) {
-      return $http.get(url + (id ? id + '/' : ''))
+      var requestUrl = id ? buildUrlWithId(url, id) : url;
+      return $http.get(requestUrl)
       .then(function (response) {
         if(response.data){
           return response.data;

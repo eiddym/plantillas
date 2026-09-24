@@ -159,6 +159,38 @@ module.exports = app => {
 
   @apiSampleRequest off
 */
+  app.get('/api/v1/seguridad/unidad_arbol', async (req, res) => {
+    try {
+      const unidades = await unidad.findAll({
+        where: { estado: 'ACTIVO' },
+        order: [['ruta', 'ASC'], ['nombre', 'ASC']]
+      });
+
+      const mapa = {};
+      const arbol = [];
+
+      unidades.forEach(u => {
+        const item = u.toJSON();
+        item.children = [];
+        mapa[item.id_unidad] = item;
+      });
+
+      unidades.forEach(u => {
+        if (u.fid_unidad_padre && mapa[u.fid_unidad_padre]) {
+          mapa[u.fid_unidad_padre].children.push(mapa[u.id_unidad]);
+        } else {
+          arbol.push(mapa[u.id_unidad]);
+        }
+      });
+
+      const util = app.src.lib.util;
+      res.status(200).send(util.formatearMensaje("EXITO", "Obtención de árbol de unidades exitosa.", arbol));
+    } catch (error) {
+      const util = app.src.lib.util;
+      res.status(412).send(util.formatearMensaje("ERROR", error.message || error));
+    }
+  });
+
   app.options('/api/v1/seguridad/unidad', sequelizeFormly.formly(unidad, app.src.db.models));
   app.post("/api/v1/seguridad/unidad", sequelizeHandlers.create(unidad)); 
   app.put("/api/v1/seguridad/unidad/:id", sequelizeHandlers.update(unidad)); 

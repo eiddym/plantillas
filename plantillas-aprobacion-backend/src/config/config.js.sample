@@ -1,6 +1,13 @@
 const params = require('./config.json');
 const logger = require('../lib/logger');
 
+const envBoolean = (value, fallback = false) => {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  return String(value).toLowerCase() === 'true';
+};
+
 module.exports = () => {
   let env = process.env.NODE_ENV;
 
@@ -47,9 +54,24 @@ module.exports = () => {
     ruta_documentos: process.env.RUTA_DOCUMENTOS || "./public/documentos/",
     host: process.env.HOST_BACKEND || 'localhost:8001', // Host backend sobre dominio
     front: process.env.HOST_FRONTEND || 'localhost:3000', // Host frontend sobre dominio
-    urlVerificar: process.env.URL_VERIFICACION || 'https://mi.dominio.net/verificar',
+    urlVerificar: process.env.URL_VERIFICACION || 'http://192.168.1.7/verificar',
+
+    entidad: {
+      nombre: process.env.ENTIDAD_NOMBRE || '',
+      razon_social: process.env.ENTIDAD_RAZON_SOCIAL || process.env.ENTIDAD_NOMBRE || '',
+      personeria_juridica: process.env.ENTIDAD_PERSONERIA_JURIDICA || '',
+      afiliacion: process.env.ENTIDAD_AFILIACION || '',
+      direccion: process.env.ENTIDAD_DIRECCION || '',
+      nit: process.env.ENTIDAD_NIT || '',
+      telefono: process.env.ENTIDAD_TELEFONO || '',
+      correo: process.env.ENTIDAD_CORREO || '',
+      web: process.env.ENTIDAD_WEB || '',
+      sede: process.env.ENTIDAD_SEDE || ''
+    },
     prefijo: 1, // Prefijo en los documentos para su verificación
-    tiempo_token: process.env.TIEMPO_TOKEN || 60, // Tiempo en minutos, tiempo de vida del token.
+    tiempo_token: Number(process.env.TIEMPO_TOKEN || 60), // Tiempo de vida del token en minutos.
+    tiempo_inactividad: Number(process.env.TIEMPO_INACTIVIDAD || 15), // Inactividad máxima en minutos.
+    tiempo_sesion_absoluto: Number(process.env.TIEMPO_SESION_ABSOLUTO || 480), // Duración absoluta en minutos.
     validacion: {},
     sistema: {
       // remover el [], dejar solamente el numero identificador.
@@ -63,10 +85,15 @@ module.exports = () => {
       host: process.env.CORREO_HOST || 'localhost', // localhost
       remitente: process.env.CORREO_REMITENTE || 'Sistema de plantillas', // Sistema de ...
       origen: process.env.CORREO_ORIGEN || 'plantillas@entidad.net', // example@abc.de
-      secure: process.env.CORREO_SECURE || false,
-      ignoreTLS: process.env.CORREO_IGNORETLS || false,
+      user: process.env.CORREO_USUARIO || process.env.CORREO_ORIGEN,
+      pass: process.env.CORREO_PASSWORD || '',
+      secure: envBoolean(process.env.CORREO_SECURE, false),
+      ignoreTLS: envBoolean(process.env.CORREO_IGNORETLS, false),
       tls: {
-        rejectUnauthorized: process.env.CORREO_TLS_RECHAZAR || false,
+        rejectUnauthorized: envBoolean(
+          process.env.CORREO_TLS_RECHAZAR,
+          true
+        ),
       },
     },
     notificacion: {
@@ -112,6 +139,19 @@ module.exports = () => {
       url_devolucion: process.env.ACTIVOS_DEVOLUCION || 'http://localhost:3000/api/v2/activos/devolucion',
       url_consulta_por_usuario: process.env.ACTIVOS_CONSULTA_POR_USUARIO || 'http://localhost:3000/api/v2/activos/usuario',
       token: process.env.ACTIVOS_TOKEN || 'Bearer TOKEN_ACCESO',
+    },
+    // Configuracion de cliente SMTP,
+    mail: {
+      host: process.env.MAIL_HOST || 'smtp.gmail.com',
+      port: process.env.MAIL_PORT || 587,
+      secure: false, // true para 465, false para otros puertos
+      auth: {
+        user: process.env.MAIL_USER || 'tu-correo@dominio.com',
+        pass: process.env.MAIL_PASS || 'tu-password-o-token'
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
     },
     // Configuracion de cliente, para ciudadania digital
     issuer: process.env.ISSUER || 'https://account-idetest.agetic.gob.bo/',
