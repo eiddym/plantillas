@@ -169,6 +169,7 @@ module.exports = (sequelize, DataType) => {
         documento.hasMany(models.notificacion, {as: 'notificacion', foreignKey: 'fid_documento'});
         documento.belongsTo(models.documento, {as: 'padre', foreignKey: 'documento_padre'});
         documento.hasMany(models.documento, {as: 'hijos', foreignKey: 'documento_padre'});
+        documento.belongsTo(models.usuario, {as: 'usuario_creacion', foreignKey: '_usuario_creacion'});
     };
     return documento;
 };

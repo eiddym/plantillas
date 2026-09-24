@@ -636,19 +636,25 @@ module.exports = app => {
 
   app.get('/api/v1/plantillasFormly/documento/:id/archivo', filtros, (req, res) => {
     const usuarioModel = app.src.db.models.usuario;
+    const unidadModel = app.src.db.models.unidad;
     const auditUser = req.body.audit_usuario || {};
-    const idUsuario = req.params.id || auditUser.id_usuario;
+    const reqId = (req.params.id && req.params.id !== 'null' && req.params.id !== 'undefined') ? req.params.id : null;
+    const idUsuario = reqId || auditUser.id_usuario;
+
+    if (!idUsuario) {
+      return res.status(400).send(util.formatearMensaje("ERROR", "Identificador de usuario no válido"));
+    }
 
     usuarioModel.findByPk(idUsuario)
     .then(pUsuario => {
-      const esAdminOMae = (auditUser && (auditUser.username === 'admin' || auditUser.es_mae === true)) || (pUsuario && pUsuario.es_mae === true);
+      const esAdminOMae = (auditUser && (auditUser.username === 'admin' || auditUser.usuario === 'admin' || auditUser.es_mae === true)) || (pUsuario && pUsuario.es_mae === true);
       const fidUnidad = pUsuario ? pUsuario.fid_unidad : null;
 
       if (!esAdminOMae && fidUnidad) {
         return usuarioModel.findAll({ attributes: ['id_usuario'], where: { fid_unidad: fidUnidad, estado: 'ACTIVO' } })
           .then(usersUnit => {
             const uIds = usersUnit.map(u => u.id_usuario);
-            return { [Op.or]: [{ fid_unidad: fidUnidad }, { _usuario_creacion: { [Op.in]: uIds } }] };
+            return { [Op.or]: [{ _usuario_creacion: { [Op.in]: uIds } }, { via_actual: idUsuario }] };
           });
       } else {
         return Promise.resolve({});
@@ -658,23 +664,38 @@ module.exports = app => {
       const opciones = {
         where: {
           estado: { [Op.ne]: 'ELIMINADO' },
+          nombre: { [Op.like]: '%/%' }, // SOLO ARCHIVOS CON CITE
           ...condicionScope
-        }
+        },
+        include: [
+          {
+            model: usuarioModel,
+            as: 'usuario_creacion',
+            attributes: ['id_usuario', 'nombres', 'apellidos', 'usuario', 'fid_unidad'],
+            include: [
+              {
+                model: unidadModel,
+                as: 'unidad',
+                attributes: ['id_unidad', 'nombre', 'sigla']
+              }
+            ]
+          },
+          {
+            model: documento,
+            as: 'padre',
+            attributes: ['id_documento', 'nombre', 'nombre_plantilla', 'abreviacion', 'estado', 'fecha', '_fecha_creacion']
+          },
+          {
+            model: documento,
+            as: 'hijos',
+            attributes: ['id_documento', 'nombre', 'nombre_plantilla', 'abreviacion', 'estado', 'fecha', '_fecha_creacion', 'documento_padre']
+          }
+        ],
+        order: [['_fecha_creacion', 'DESC']]
       };
 
-      if (req.query.filter !== '' && req.xfilter) {
+      if (req.query.filter && req.query.filter !== '' && req.xfilter) {
         opciones.where[Op.and] = { [Op.or]: req.xfilter };
-      }
-      if (req.query.fields) opciones.attributes = req.query.fields.split(',');
-      if (req.query.limit) opciones.limit = parseInt(req.query.limit);
-      if (req.query.page) opciones.offset = (parseInt(req.query.limit || 20) * (parseInt(req.query.page || 1) - 1)) || 0;
-
-      if (req.query.order) {
-        const orderDir = (req.query.order.charAt(0) === '-') ? 'DESC' : 'ASC';
-        const orderField = (req.query.order.charAt(0) === '-') ? req.query.order.substring(1) : req.query.order;
-        opciones.order = [[orderField, orderDir]];
-      } else {
-        opciones.order = [['_fecha_creacion', 'DESC']];
       }
 
       return documento.findAndCountAll(opciones);
