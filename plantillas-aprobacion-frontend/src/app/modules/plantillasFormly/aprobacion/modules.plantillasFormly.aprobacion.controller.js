@@ -131,8 +131,9 @@
 
         vmd.data.html=data.pdf.html;
         vmd.data.pdf=data.pdf.pdf;
+        vmd.data.pdf_buffer=data.pdf.pdf_buffer;
         vmd.data.flag_html=true;
-        vmd.data.show_pdf=!data.pdf.esDispositivoMovil;
+        vmd.data.show_pdf=false; // Visor limpio estilo móvil (sin barras ni botones innecesarios)
 
         //funciones
         vmd.cerrar = cerrar;
@@ -145,7 +146,23 @@
 
         vmd.mostrarPdf = function (id, sw){ if(sw) Documento.showPdfx(id); else Documento.showPdfId(id, false); }
         vmd.verHtml=function(){ vmd.data.flag_html=true; }
-        vmd.verPdf=function(){ vmd.data.flag_html=false; }
+        vmd.verPdf=function(){
+            vmd.data.flag_html=false;
+            if (vmd.data.pdf_buffer) {
+                $timeout(function () {
+                    $timeout(function () {
+                        var container = document.querySelector('#canvasContainer');
+                        if (container) {
+                            Util.loadCanvas(vmd.data.pdf_buffer, '#canvasContainer');
+                        } else {
+                            $timeout(function () {
+                                Util.loadCanvas(vmd.data.pdf_buffer, '#canvasContainer');
+                            }, 100);
+                        }
+                    }, 50);
+                }, 0);
+            }
+        };
 
         iniciar();
 
