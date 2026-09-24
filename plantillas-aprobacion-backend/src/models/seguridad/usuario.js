@@ -65,6 +65,11 @@ module.exports = (sequelize, DataType) => {
             xlabel: 'virtual',
             defaultValue: false,
         },
+        es_mae: {
+            type: DataType.BOOLEAN,
+            xlabel: 'Es MAE / Director',
+            defaultValue: false,
+        },
         estado: {
             type: DataType.ENUM('ACTIVO', 'INACTIVO'),
             defaultValue: 'ACTIVO',
