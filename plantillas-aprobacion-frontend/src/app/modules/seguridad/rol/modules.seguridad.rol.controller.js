@@ -28,6 +28,25 @@
         vmd.estados = [{id:"ACTIVO", name: "ACTIVO"},{id:"INACTIVO", name: "INACTIVO"}];
 
 
+        function ordenarMenusPorPadre(listaMenus) {
+            if (!angular.isArray(listaMenus)) return [];
+            var padres = listaMenus.filter(function(m) { return m.fid_menu_padre === null; });
+            var ordenados = [];
+            padres.forEach(function(padre) {
+                ordenados.push(padre);
+                var hijos = listaMenus.filter(function(m) { return m.fid_menu_padre === padre.id_menu; });
+                hijos.forEach(function(hijo) {
+                    ordenados.push(hijo);
+                });
+            });
+            listaMenus.forEach(function(m) {
+                if (ordenados.indexOf(m) === -1) {
+                    ordenados.push(m);
+                }
+            });
+            return ordenados;
+        }
+
         if (!vmd.data.id_rol) vmd.data._fecha_creacion = new Date();
         vmd.data._fecha_modificacion = new Date();
         obtenerMenus();
@@ -35,7 +54,7 @@
             if(vmd.data.id_rol){
                 DataService.get(restUrl+"seguridad/menu?limit=1000&estado=ACTIVO")
                 .then(function(respuesta){
-                    vmd.menus = respuesta.datos.resultado;
+                    vmd.menus = ordenarMenusPorPadre(respuesta.datos.resultado);
                     return DataService.get(restUrl+"seguridad/rol/"+vmd.data.id_rol+"/menu");
                 })
                 .then(function(respuesta){
@@ -53,7 +72,7 @@
             }else {
                 DataService.get(restUrl+"seguridad/menu?limit=1000&estado=ACTIVO")
                 .then(function(respuesta){
-                    vmd.menus = respuesta.datos.resultado;
+                    vmd.menus = ordenarMenusPorPadre(respuesta.datos.resultado);
                 })
             }
 
