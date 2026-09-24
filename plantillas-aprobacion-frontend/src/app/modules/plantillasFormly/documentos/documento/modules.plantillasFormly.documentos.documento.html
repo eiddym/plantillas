@@ -32,12 +32,6 @@
                             {{ (documento.id_documento==0)? 'Guardar y enviar documento' : 'Enviar documento' }}
                         </md-tooltip>
                     </md-button>
-                    <md-button class="md-fab md-accent" ng-click="documento.abrirModalTamanoHoja($event)" ng-if="!documento.sw_enviado" style="background-color: #0284c7;">
-                        <md-icon>aspect_ratio</md-icon>
-                        <md-tooltip md-direction="right">
-                            Tamaño de hoja: {{ documento.tipoHoja === 'Oficio' ? 'Oficio (21.6 x 33cm)' : 'Carta (21.6 x 27.9cm)' }}
-                        </md-tooltip>
-                    </md-button>
                 </div>
                 <md-input-container style="max-width: 100%; min-width: 250px;" flex flex-xs="100">
                     <label for="documento-nombre"> Nombre del documento </label>
