@@ -5,7 +5,7 @@ Este proyecto se despliega como un stack Docker Compose mediante Dockge.
 La configuración productiva se encuentra en:
 
 ```text
-docker-compose.production.yml
+docker-compose.yml
 ```
 
 ## Requisitos
@@ -26,7 +26,7 @@ En el directorio del stack:
 cp .env.sample .env
 ```
 
-Edite `.env` y complete todas las credenciales, secretos y datos institucionales.
+Edite `.env` y complete todas las credenciales, secretos, configuración SMTP de correos y datos institucionales.
 
 Nunca suba `.env` al repositorio.
 
@@ -67,7 +67,7 @@ La URL debe ser accesible desde los teléfonos que escanearán los códigos QR.
 6. Use:
 
    ```text
-   docker-compose.production.yml
+   docker-compose.yml
    ```
 
 7. Cargue o cree el archivo `.env` privado.

@@ -14,19 +14,25 @@ services:
     image: postgres:13-alpine
     restart: always
     ports:
-      - "5433:5432"
+      - "${DB_PUERTO_HOST:-5433}:5432"
     env_file:
       - .env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-plantillas_db}
+      POSTGRES_USER: ${POSTGRES_USER:-plantillas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-plantillas} -d ${POSTGRES_DB:-plantillas_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - red-plantillas
 
-  # 2. Servidor Backend (Node 12.22)
+  # 2. Servidor Backend (Node.js)
   backend:
     build:
       context: ./plantillas-aprobacion-backend
@@ -40,12 +46,20 @@ services:
                echo 'Esperando a la base de datos Postgres...';
                sleep 2;
              done;
+             echo '[backend] Ejecutando migraciones...';
+             npx sequelize-cli db:migrate || true;
+             echo '[backend] Verificando seeders...';
+             if [ \"\$(echo \"SELECT COUNT(*) FROM usuario;\" | PGPASSWORD=${DB_PASSWORD:-postgres} psql -h db -U ${DB_USUARIO:-plantillas} -d ${DB_NOMBRE:-plantillas_db} -t -A 2>/dev/null)\" = \"0\" ]; then
+               echo '[backend] Tabla usuario vacía: ejecutando seeders...';
+               npx sequelize-cli db:seed:all || echo '[backend] Seeders fallaron, continuar de todos modos';
+             else
+               echo '[backend] Tabla usuario ya tiene datos: saltando seeders';
+             fi;
              if [ -f /shared/url_verificacion.env ] && [ -z \"$$URL_VERIFICACION\" ]; then
                export $$(cat /shared/url_verificacion.env | xargs);
                echo \"[backend] URL_VERIFICACION tomada del detector: $$URL_VERIFICACION\";
              fi;
-             npm install &&
-             echo 'Base de datos lista. Aplicando parches e inicializando BD...';
+             echo '[backend] Aplicando parches e inicializando API...';
              npm run parchar && node index.js"
     tty: true
     stdin_open: true
@@ -54,40 +68,50 @@ services:
       - backend_node_modules:/app/node_modules
       - plantillas-documentos:/app/public
       - shared-config:/shared:ro
+      - plantillas-runtime-config:/app/runtime-config
     env_file:
       - .env
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
       DB_HOST: ${DB_HOST:-db}
       DB_PUERTO: ${DB_PUERTO:-5432}
       DB_USUARIO: ${DB_USUARIO:-plantillas}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NOMBRE: ${DB_NOMBRE:-plantillas_db}
       BACKEND_PUERTO: ${BACKEND_PUERTO:-8000}
       JWT_SECRET: ${JWT_SECRET}
       OPENSSL_CONF: ${OPENSSL_CONF:-/dev/null}
-      CORREO_HOST: ${CORREO_HOST}
-      CORREO_PUERTO: ${CORREO_PUERTO:-587}
-      CORREO_REMITENTE: ${CORREO_REMITENTE}
-      CORREO_ORIGEN: ${CORREO_ORIGEN}
-      CORREO_USUARIO: ${CORREO_USUARIO}
-      CORREO_PASSWORD: ${CORREO_PASSWORD}
+      CORREO_HOST: ${CORREO_HOST:-${SMTP_HOST}}
+      CORREO_PUERTO: ${CORREO_PUERTO:-${SMTP_PORT:-587}}
+      CORREO_REMITENTE: ${CORREO_REMITENTE:-${SMTP_FROM_NAME:-Sistema de Plantillas}}
+      CORREO_ORIGEN: ${CORREO_ORIGEN:-${SMTP_FROM_EMAIL:-${SMTP_USER}}}
+      CORREO_USUARIO: ${CORREO_USUARIO:-${SMTP_USER}}
+      CORREO_PASSWORD: ${CORREO_PASSWORD:-${SMTP_PASSWORD}}
       CORREO_SECURE: ${CORREO_SECURE:-false}
       CORREO_IGNORETLS: ${CORREO_IGNORETLS:-false}
       CORREO_TLS_RECHAZAR: ${CORREO_TLS_RECHAZAR:-true}
+      SMTP_HOST: ${SMTP_HOST:-${CORREO_HOST}}
+      SMTP_PORT: ${SMTP_PORT:-${CORREO_PUERTO:-587}}
+      SMTP_USER: ${SMTP_USER:-${CORREO_USUARIO}}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-${CORREO_PASSWORD}}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-${CORREO_REMITENTE}}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-${CORREO_ORIGEN}}
     depends_on:
-      - db
-      - detector-ip
+      db:
+        condition: service_healthy
+      detector-ip:
+        condition: service_started
     networks:
       - red-plantillas
 
+  # 3. Servidor Frontend (Nginx)
   frontend:
     build:
       context: ./plantillas-aprobacion-frontend
       dockerfile: docker/Dockerfile
     restart: always
     ports:
-      - "80:80"
+      - "${FRONTEND_PUERTO:-80}:80"
     depends_on:
       - backend
     networks:
@@ -102,3 +126,4 @@ volumes:
   pgdata:
   plantillas-documentos:
   shared-config:
+  plantillas-runtime-config:
