@@ -78,11 +78,13 @@ module.exports = app => {
     }
     const _fechaInicial = moment(req.query.fechaInicial).format('YYYY-MM-DD');
     const _fechaFinal = moment(req.query.fechaFinal).format('YYYY-MM-DD');
+    const idUnidad = req.query.id_unidad || req.query.fid_unidad;
+    const filtroUnidad = (idUnidad && !isNaN(parseInt(idUnidad))) ? `and u.fid_unidad = ${parseInt(idUnidad)} ` : '';
 
     const qry = "select * from crosstab($$ " +
         "select h._usuario_creacion, u.nombres , u.apellidos, h.accion, count(h.accion) " +
         "from historial_flujo h, usuario u " +
-        `where u.id_usuario = h._usuario_creacion and u.estado = 'ACTIVO' and h._fecha_creacion between '${_fechaInicial}'::date and '${_fechaFinal}'::date ` +
+        `where u.id_usuario = h._usuario_creacion and u.estado = 'ACTIVO' ${filtroUnidad}and h._fecha_creacion between '${_fechaInicial}'::date and '${_fechaFinal}'::date ` +
         "GROUP BY h._usuario_creacion, u.nombres , u.apellidos, h.accion " +
         "order by u.nombres , u.apellidos " +
         "$$ , $$VALUES ('CREADO'::text), ('ENVIADO'::text), ('DERIVADO'::text), ('APROBADO'::text), ('RECHAZADO'::text), ('CERRADO'::text), ('ELIMINADO'::text) $$) " +

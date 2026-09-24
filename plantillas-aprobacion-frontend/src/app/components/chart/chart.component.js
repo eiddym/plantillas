@@ -5,22 +5,22 @@
         .module('app')
         .constant('charColors', {
             bo: {
-                rojo: 'rgba(211, 47, 47, 0.7)',
-                azul: 'rgba(48, 79, 254, 0.7)',
-                amarillo: 'rgba(255, 171, 0, 0.7)',
-                celeste: 'rgba(0, 184, 212, 0.7)',
-                lila: 'rgba(123, 31, 162, 0.7)',
-                naranja: 'rgba(230, 74, 25, 0.7)',
-                verde: 'rgba(104, 159, 56, 0.7)'
+                rojo: '#ef4444',
+                azul: '#0284c7',
+                amarillo: '#f59e0b',
+                celeste: '#06b6d4',
+                lila: '#8b5cf6',
+                naranja: '#f97316',
+                verde: '#10b981'
             },
             bg: {
-                rojo: 'rgba(211,47,47, 0.1)',
-                azul: 'rgba(48, 79, 254, 0.1)',
-                amarillo: 'rgba(255, 171, 0, 0.1)',
-                celeste: 'rgba(0, 184, 212, 0.1)',
-                lila: 'rgba(123, 31, 162, 0.1)',
-                naranja: 'rgba(230, 74, 25, 0.1)',
-                verde: 'rgba(104, 159, 56, 0.1)'
+                rojo: 'rgba(239, 68, 68, 0.15)',
+                azul: 'rgba(2, 132, 199, 0.15)',
+                amarillo: 'rgba(245, 158, 11, 0.15)',
+                celeste: 'rgba(6, 182, 212, 0.15)',
+                lila: 'rgba(139, 92, 246, 0.15)',
+                naranja: 'rgba(249, 115, 22, 0.15)',
+                verde: 'rgba(16, 185, 129, 0.15)'
             }
         })
         .directive('chartGraph', ['$timeout', '$window', function ($timeout, $window) {

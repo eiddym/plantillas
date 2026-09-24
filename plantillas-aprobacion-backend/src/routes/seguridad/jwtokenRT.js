@@ -126,6 +126,9 @@ function xautenticacion(req, res, usar_ldap=1){
         email: usuario.email,
         date_joined: usuario._fecha_creacion,
         ldap:req.ldap,
+        id_unidad: usuario.fid_unidad,
+        fid_unidad: usuario.fid_unidad,
+        es_mae: usuario.es_mae || false
       }
 
       const datosTemporal={

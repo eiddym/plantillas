@@ -142,6 +142,12 @@
         controller: 'MonitoreoController',
         controllerAs: 'monitoreo'
       })
+      .state('archivo', {
+        url: '/archivo',
+        templateUrl: 'app/modules/plantillasFormly/archivo/modules.plantillasFormly.archivo.html',
+        controller: 'ArchivoController',
+        controllerAs: 'vm'
+      })
       .state('catalogos', {
         url: '/catalogos',
         templateUrl: 'app/modules/plantillasFormly/catalogos/modules.plantillasFormly.catalogos.html',
