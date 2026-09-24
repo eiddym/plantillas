@@ -32,6 +32,12 @@
                             {{ (documento.id_documento==0)? 'Guardar y enviar documento' : 'Enviar documento' }}
                         </md-tooltip>
                     </md-button>
+                    <md-button class="md-fab md-accent" ng-click="documento.abrirModalTamanoHoja($event)" ng-if="!documento.sw_enviado" style="background-color: #0284c7;">
+                        <md-icon>aspect_ratio</md-icon>
+                        <md-tooltip md-direction="right">
+                            Tamaño de hoja: {{ documento.tipoHoja === 'Oficio' ? 'Oficio (21.6 x 33cm)' : 'Carta (21.6 x 27.9cm)' }}
+                        </md-tooltip>
+                    </md-button>
                 </div>
                 <md-input-container style="max-width: 100%; min-width: 250px;" flex flex-xs="100">
                     <label for="documento-nombre"> Nombre del documento </label>
@@ -55,7 +61,14 @@
                   * {{dg.nombre_plantilla}} -- <span class="ap-cursor-pointer" ng-click="documento.verDocumento(dg.id_documento)">{{dg.nombre}}</span>
                 </div>
               </div>
-              <div class="pagina" ng-if="documento.load">
+              <div style="display: flex; justify-content: flex-end; align-items: center; padding: 6px 16px 2px 16px;" ng-if="!documento.sw_enviado">
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #334155; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" ng-click="documento.abrirModalTamanoHoja($event)">
+                  <md-icon style="font-size: 16px; width: 16px; height: 16px; min-width: 16px; color: #0284c7; margin: 0;">aspect_ratio</md-icon>
+                  <span><strong>Hoja:</strong> {{ documento.tipoHoja === 'Oficio' ? 'Oficio (21.6 x 33.0 cm)' : 'Carta (21.6 x 27.9 cm)' }}</span>
+                  <md-icon style="font-size: 14px; width: 14px; height: 14px; min-width: 14px; color: #64748b; margin: 0;">edit</md-icon>
+                </div>
+              </div>
+              <div class="pagina" ng-class="{'pagina-oficio': documento.tipoHoja === 'Oficio', 'pagina-carta': documento.tipoHoja !== 'Oficio'}" ng-if="documento.load">
                 <form name="documento.formu" novalidate>
                   <img class="img-membrete" ng-src="{{documento.url_img}}" ng-if="documento.url_img" />
                   <formly-form class="view-formly-form" model="documento.model_actual" fields="documento.form_actual"></formly-form>

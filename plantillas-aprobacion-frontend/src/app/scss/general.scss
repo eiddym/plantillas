@@ -9,9 +9,9 @@ div.md-toolbar-tools span{
 /********************************/
 
 .pagina {
-    max-width: 210mm;
+    max-width: 216mm;
     width: 100%;
-    min-height: 297mm;
+    min-height: 279mm;
     padding: 20mm;
     margin: 10mm auto;
     border: 1px #D3D3D3 solid;
@@ -19,6 +19,17 @@ div.md-toolbar-tools span{
     background: white;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    transition: all 0.3s ease;
+
+    &.pagina-carta {
+        max-width: 216mm;
+        min-height: 279mm;
+    }
+
+    &.pagina-oficio {
+        max-width: 216mm;
+        min-height: 330mm;
+    }
 
     @media screen and (max-width: 959px) {
         max-width: 100%;
