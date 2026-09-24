@@ -12,17 +12,17 @@ const configCorreoLocal=config.correo;
 // const cliente = new Client();
 
 const jsonConfig = {
-  //service: 'GMAIL',
   port: configCorreoLocal.port,
   host: configCorreoLocal.host,
   secure: configCorreoLocal.secure,
   ignoreTLS: configCorreoLocal.ignoreTLS,
   tls: {
-    rejectUnauthorized: true,
+    rejectUnauthorized: configCorreoLocal.tls ? configCorreoLocal.tls.rejectUnauthorized : true,
   },
-  auth: {
-    user: configCorreoLocal.origen,
-  },
+  auth: (configCorreoLocal.user && configCorreoLocal.pass) ? {
+    user: configCorreoLocal.user,
+    pass: configCorreoLocal.pass,
+  } : undefined,
 };
 
 const transporte = nodemailer.createTransport(jsonConfig);
