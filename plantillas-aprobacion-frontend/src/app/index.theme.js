@@ -9,7 +9,7 @@
     function ThemeConfig($mdThemingProvider) {
         
         $mdThemingProvider.theme('default')
-                .primaryPalette('light-blue')
+                .primaryPalette('blue-grey')
                 .accentPalette('cyan');
                
     }
