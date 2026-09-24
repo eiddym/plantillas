@@ -273,7 +273,10 @@ td.md-table-options, .md-table-options {
       color: #0284c7; /* Default Galactic Blue */
     }
 
-    /* Specific action colors by button class or icon content */
+    &.boton-extra md-icon {
+      color: #0284c7;
+    }
+
     &.boton-eliminar {
       &:hover {
         background-color: rgba(239, 68, 68, 0.12) !important;
@@ -282,40 +285,17 @@ td.md-table-options, .md-table-options {
         color: #ef4444 !important; /* Rose Red */
       }
     }
-  }
 
-  /* Target specific icons */
-  md-icon {
-    &[ng-reflect-md-font-icon="remove_red_eye"],
-    &:contains("remove_red_eye"),
-    &:contains("visibility") {
-      color: #0284c7 !important; /* Galactic Blue for view */
+    &.boton-editar md-icon {
+      color: #f59e0b !important;
     }
 
-    &[ng-reflect-md-font-icon="timeline"],
-    &:contains("timeline"),
-    &:contains("show_chart"),
-    &:contains("trending_up") {
-      color: #0891b2 !important; /* Cyan / Progress for timeline */
+    &.boton-aprobar md-icon {
+      color: #10b981 !important;
     }
 
-    &[ng-reflect-md-font-icon="check"],
-    &:contains("check"),
-    &:contains("checked"),
-    &:contains("done") {
-      color: #10b981 !important; /* Emerald Green for approve/check */
-    }
-
-    &[ng-reflect-md-font-icon="delete"],
-    &:contains("delete"),
-    &:contains("delete_forever") {
-      color: #ef4444 !important; /* Red for delete */
-    }
-
-    &[ng-reflect-md-font-icon="mode_edit"],
-    &:contains("mode_edit"),
-    &:contains("edit") {
-      color: #f59e0b !important; /* Amber for edit */
+    &.boton-flujo md-icon {
+      color: #0891b2 !important;
     }
   }
 }
