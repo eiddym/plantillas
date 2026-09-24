@@ -2,19 +2,19 @@
 <form name="obsForm">
   <md-toolbar>
       <div class="md-toolbar-tools">
-          <h2><md-icon>picture_as_pdf</md-icon> Documento creado por {{data.nombres +' '+ data.apellidos}}</h2>
+          <h2 style="color: #ffffff !important; display: flex; align-items: center; gap: 8px;"><md-icon style="color: #38bdf8 !important;">picture_as_pdf</md-icon> <span style="color: #ffffff !important;">Documento creado por {{data.nombres +' '+ data.apellidos}}</span></h2>
           <span flex></span>
           <md-button class="md-icon-button" aria-label="Ver pdf" ng-click="verPdf()" ng-if="data.flag_html">
               <md-tooltip>Ver PDF</md-tooltip>
-              <md-icon aria-label="Close dialog">picture_as_pdf</md-icon>
+              <md-icon style="color: #ffffff !important;" aria-label="Close dialog">picture_as_pdf</md-icon>
           </md-button>
           <md-button class="md-icon-button" aria-label="Ver html" ng-click="verHtml()" ng-if="!data.flag_html">
               <md-tooltip>Ver html</md-tooltip>
-              <md-icon aria-label="Close dialog">code</md-icon>
+              <md-icon style="color: #ffffff !important;" aria-label="Close dialog">code</md-icon>
           </md-button>
           <md-button class="md-icon-button" aria-label="Cerrar" ng-click="cerrar()">
               <md-tooltip>Cerrar</md-tooltip>
-              <md-icon aria-label="Close dialog">close</md-icon>
+              <md-icon style="color: #ffffff !important;" aria-label="Close dialog">close</md-icon>
           </md-button>
       </div>
   </md-toolbar>

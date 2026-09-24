@@ -1,19 +1,19 @@
 <md-dialog aria-label="Documento PDF" class="formly-dialog formly-column-{{column}} dialog-pdf" style="max-width: 800px; width: 100%;" >
   <md-toolbar>
       <div class="md-toolbar-tools">
-          <h2><md-icon>picture_as_pdf</md-icon> Vista previa</h2>
+          <h2 style="color: #ffffff !important; display: flex; align-items: center; gap: 8px;"><md-icon style="color: #38bdf8 !important;">picture_as_pdf</md-icon> <span style="color: #ffffff !important;">Vista previa</span></h2>
           <span flex></span>
           <md-button class="md-icon-button" aria-label="Ver pdf" ng-click="verPdf()" ng-if="data.flag_html">
               <md-tooltip>Ver PDF</md-tooltip>
-              <md-icon aria-label="Close dialog">picture_as_pdf</md-icon>
+              <md-icon style="color: #ffffff !important;" aria-label="Close dialog">picture_as_pdf</md-icon>
           </md-button>
           <md-button class="md-icon-button" aria-label="Ver html" ng-click="verHtml()" ng-if="!data.flag_html">
               <md-tooltip>Ver html</md-tooltip>
-              <md-icon aria-label="Close dialog">code</md-icon>
+              <md-icon style="color: #ffffff !important;" aria-label="Close dialog">code</md-icon>
           </md-button>
           <md-button class="md-icon-button" aria-label="Cerrar" ng-click="cerrar()">
               <md-tooltip>Cerrar</md-tooltip>
-              <md-icon aria-label="Close dialog">close</md-icon>
+              <md-icon style="color: #ffffff !important;" aria-label="Close dialog">close</md-icon>
           </md-button>
       </div>
   </md-toolbar>
@@ -24,10 +24,10 @@
       <md-tooltip>{{item.firmante}}</md-tooltip>
     </div>
   </div>
-  <md-dialog-content class="md-dialog-content" style="max-height:none; overflow-y:auto; padding:8px;">
+  <md-dialog-content class="md-dialog-content" style="max-height: calc(90vh - 120px); overflow-y: auto; overflow-x: hidden; padding: 12px; background: #f8fafc;">
      <div ng-if="data.flag_html" bind-html-compile="data.html"></div>
-    <iframe class="iframe-pdf" src="{{data.pdf}}" style="width:100%; height:600px; border: none;" ng-if="data.show_pdf && !data.flag_html" allowfullscreen></iframe>
-    <div id="canvasContainerDialog" ng-if="!data.flag_html" style="width:100%; min-height:400px; height:auto; overflow-y:visible;"></div>
+    <iframe class="iframe-pdf" src="{{data.pdf}}" style="width:100%; height:calc(90vh - 140px); min-height:450px; border: none; display: block;" ng-if="data.show_pdf && !data.flag_html" allowfullscreen></iframe>
+    <div id="canvasContainerDialog" ng-if="!data.flag_html" style="width:100%; height:auto; overflow:visible;"></div>
 
   </md-dialog-content>
 

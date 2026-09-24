@@ -1,7 +1,12 @@
 acme-sidenav {
 
 	md-toolbar {
-		background-color: $colorSecondary !important;
+		background-color: $colorPrimary !important;
+		color: #ffffff !important;
+
+		h1, span, md-icon, i {
+			color: #ffffff !important;
+		}
 	}
 
 	.sidenav-title {
