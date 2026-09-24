@@ -399,7 +399,7 @@ module.exports = app => {
   app.get('/api/v1/plantillasFormly/documento', sequelizeHandlers.query(documento));
 
   function filtros (req,res,next){
-      if(req.query.filter!='')
+      if(req.query.filter && req.query.filter!='')
         util.consulta(req,res,next,documento)
       else next();
   }
@@ -634,7 +634,7 @@ module.exports = app => {
     });
   });
 
-  app.get('/api/v1/plantillasFormly/documento/:id/archivo', filtros, (req, res) => {
+  app.get('/api/v1/plantillasFormly/documento/:id/archivo', (req, res) => {
     const usuarioModel = app.src.db.models.usuario;
     const unidadModel = app.src.db.models.unidad;
     const auditUser = req.body.audit_usuario || {};
@@ -676,7 +676,7 @@ module.exports = app => {
               {
                 model: unidadModel,
                 as: 'unidad',
-                attributes: ['id_unidad', 'nombre', 'sigla']
+                attributes: ['id_unidad', 'nombre', 'abreviacion']
               }
             ]
           },
