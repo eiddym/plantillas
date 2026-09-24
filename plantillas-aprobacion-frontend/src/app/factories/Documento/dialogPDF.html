@@ -26,7 +26,7 @@
   </div>
   <md-dialog-content class="md-dialog-content" style="max-height: calc(90vh - 120px); overflow-y: auto; overflow-x: hidden; padding: 12px; background: #f8fafc;">
      <div ng-if="data.flag_html" bind-html-compile="data.html"></div>
-    <iframe class="iframe-pdf" src="{{data.pdf}}" style="width:100%; height:calc(90vh - 140px); min-height:450px; border: none; display: block;" ng-if="data.show_pdf && !data.flag_html" allowfullscreen></iframe>
+    <iframe class="iframe-pdf" src="{{data.pdf + '#toolbar=0&navpanes=0&scrollbar=1&view=FitH'}}" style="width:100%; height:calc(90vh - 140px); min-height:450px; border: none; display: block;" ng-if="data.show_pdf && !data.flag_html" allowfullscreen></iframe>
     <div id="canvasContainerDialog" ng-if="!data.flag_html" style="width:100%; height:auto; overflow:visible;"></div>
 
   </md-dialog-content>

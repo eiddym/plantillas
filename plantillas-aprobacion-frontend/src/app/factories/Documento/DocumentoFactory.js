@@ -136,7 +136,7 @@ function DocumentoFactory(DataService, restUrl, backUrl, Datetime, UtilFormly, M
         vmd.data.pdf=data.pdf;
         vmd.data.flag_html=true;
         vmd.data.firmas=data.firmas || [];
-        vmd.data.show_pdf = !data.esDispositivoMovil;
+        vmd.data.show_pdf = false; // Visor limpio estilo móvil (sin barras ni botones innecesarios)
         vmd._pdf_buffer = data.pdf_buffer; // guardar para renderizar al cambiar vista
 
     //funciones
@@ -145,17 +145,13 @@ function DocumentoFactory(DataService, restUrl, backUrl, Datetime, UtilFormly, M
         vmd.verHtml = function(){ vmd.data.flag_html = true; }
         vmd.verPdf = function(){
             vmd.data.flag_html = false;
-            if (!vmd.data.show_pdf && vmd._pdf_buffer) {
-                // Esperar múltiples ciclos digest para que ng-if inserte el DOM
-                // En móvil, 0ms puede no ser suficiente; esperamos 2 ciclos anidados
+            if (vmd._pdf_buffer) {
                 $timeout(function () {
                     $timeout(function () {
                         var container = document.querySelector('#canvasContainerDialog');
                         if (container) {
                             Util.loadCanvas(vmd._pdf_buffer, '#canvasContainerDialog');
                         } else {
-                            console.warn('verPdf: contenedor aún no existe, reintentando...');
-                            // Reintento una vez más después de 100ms
                             $timeout(function () {
                                 Util.loadCanvas(vmd._pdf_buffer, '#canvasContainerDialog');
                             }, 100);

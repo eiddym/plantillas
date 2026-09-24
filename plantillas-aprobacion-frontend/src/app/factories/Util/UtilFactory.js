@@ -425,6 +425,7 @@ function renderPage(page) {
 
     pdfLib.getDocument(pdfData).promise.then(function(pdfDoc) {
         console.log("PDF leído con éxito. Páginas:", pdfDoc.numPages);
+        container.innerHTML = '';
         for (var num = 1; num <= pdfDoc.numPages; num++) {
             pdfDoc.getPage(num).then(renderPage);
         }
