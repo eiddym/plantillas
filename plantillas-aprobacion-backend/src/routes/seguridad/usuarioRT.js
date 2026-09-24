@@ -152,6 +152,29 @@ module.exports = app => {
     }
   }
 	*/
+  app.get('/api/v1/seguridad/usuario_mae_info', (req, res) => {
+    Usuario.findOne({
+      attributes: ['id_usuario', 'usuario', 'nombres', 'apellidos', 'cargo', 'es_mae'],
+      where: { es_mae: true, estado: 'ACTIVO' }
+    })
+    .then(maeUser => {
+      if (maeUser) {
+        res.status(200).send(util.formatearMensaje("EXITO", "MAE actual obtenido.", {
+          mae_ocupado: true,
+          mae: maeUser
+        }));
+      } else {
+        res.status(200).send(util.formatearMensaje("EXITO", "No hay MAE asignado.", {
+          mae_ocupado: false,
+          mae: null
+        }));
+      }
+    })
+    .catch(error => {
+      res.status(412).send(util.formatearMensaje("ERROR", error.message || error));
+    });
+  });
+
   app.get('/api/v1/seguridad/usuario', (req,res) => {
     // Si existe consultas.
     if(Object.keys(req.query).length != 0){
@@ -708,9 +731,12 @@ module.exports = app => {
             if(!usuarioCrear.roles || usuarioCrear.roles.length==0){
               throw new Error("Debe elegir minimamente un rol.");
             }
-            return Usuario.create(usuarioCrear, {
-                transaction: t,
-              });
+
+            const crearProc = () => Usuario.create(usuarioCrear, { transaction: t });
+            if (usuarioCrear.es_mae === true) {
+              return Usuario.update({ es_mae: false }, { where: {}, transaction: t }).then(crearProc);
+            }
+            return crearProc();
 
           }
         })
@@ -859,7 +885,11 @@ module.exports = app => {
     // Actualiza la informacion del usuario.
     .then(filas => {
       const actual=JSON.parse(JSON.stringify(usuario));
-      return usuarioRespuesta.update(usuario,{transaction:t});
+      const updateProc = () => usuarioRespuesta.update(usuario, {transaction: t});
+      if (usuario.es_mae === true) {
+        return Usuario.update({ es_mae: false }, { where: { id_usuario: { [Op.ne]: req.params.id } }, transaction: t }).then(updateProc);
+      }
+      return updateProc();
     })
     // Inserta las relaciones usuario - rol del usuario.
     .then(respuesta => {

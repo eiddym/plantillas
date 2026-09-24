@@ -140,6 +140,26 @@
 
             })
 
+            DataService.get(restUrl + "seguridad/usuario_mae_info")
+            .then(function(resMae) {
+              if (resMae && resMae.datos) {
+                if (resMae.datos.mae_ocupado && resMae.datos.mae) {
+                  var mae = resMae.datos.mae;
+                  if (vmd.data.id_usuario && vmd.data.id_usuario === mae.id_usuario) {
+                    vmd.data.es_mae = true;
+                    vmd.data.mae_ocupado_por_otro = false;
+                  } else {
+                    vmd.data.es_mae = false;
+                    vmd.data.mae_ocupado_por_otro = true;
+                    vmd.data.mae_titular_nombre = (mae.nombres + ' ' + (mae.apellidos || '')).trim() + ' (' + mae.usuario + ')';
+                  }
+                } else {
+                  vmd.data.es_mae = vmd.data.es_mae || false;
+                  vmd.data.mae_ocupado_por_otro = false;
+                }
+              }
+            });
+
             DataService.get(restUrl+"seguridad/unidad?fields=id_unidad,nombre,abreviacion")
             .then(function (respuesta) {
                 vmd.data.unidades = respuesta.datos.resultado;
@@ -174,6 +194,7 @@
               cargo:vmd.data.cargo,
               email:vmd.data.email,
               estado:vmd.data.estado,
+              es_mae: vmd.data.es_mae || false,
               roles:roles,
               oficinas:oficinas,
               virtuales: vmd.data.virtuales

@@ -94,9 +94,25 @@
 
                 <h3>Roles</h3>
                 <md-input-container class="md-block" flex-gt-sm ng-show="rol" ng-repeat="rol in data.roles">
-                  <md-checkbox ng-model="rol.valor" aria-label="{{rol.nombre}}" ng-change="usuarioForm.$setDirty()">
-                    {{rol.nombre}}
-                  </md-checkbox>
+                  <div layout="row" layout-align="start center">
+                    <md-checkbox ng-model="rol.valor" aria-label="{{rol.nombre}}" ng-change="usuarioForm.$setDirty()">
+                      {{rol.nombre}}
+                    </md-checkbox>
+
+                    <!-- Opción Exclusiva MAE al lado de JEFE -->
+                    <md-checkbox ng-if="rol.nombre === 'JEFE' && rol.valor"
+                                 ng-model="data.es_mae"
+                                 ng-disabled="data.mae_ocupado_por_otro"
+                                 ng-change="usuarioForm.$setDirty()"
+                                 aria-label="Es MAE / Director"
+                                 style="margin-left: 20px; font-weight: bold; color: #1565C0;">
+                      <md-icon style="color: #FFB300; margin-right: 4px;">star</md-icon>
+                      Es MAE / Director General
+                      <md-tooltip ng-if="data.mae_ocupado_por_otro" class="info-virtual">
+                        El rol MAE ya está ocupado por: {{data.mae_titular_nombre}}
+                      </md-tooltip>
+                    </md-checkbox>
+                  </div>
                 </md-input-container>
 
               </md-card-content>
