@@ -44,6 +44,7 @@
                     if(toState.url==="/profile") rutaPermitida = true;
                     if(toState.url==="/vista_pdf") rutaPermitida = true;
                     if(toState.url==="/elegir") rutaPermitida = true;
+                    if(toState.url==="/archivo") rutaPermitida = true;
                     // rutaPermitida = true;
                     if(existeUsuario && !rutaPermitida){
                         for (var i = 0; i < menus.length; i++) {
@@ -108,6 +109,9 @@
                 },
                 "monitoreo": {
                     "/monitoreo": true
+                },
+                "archivo": {
+                    "/archivo": true
                 },
                 "contactos": {
                   "/contactos": true
