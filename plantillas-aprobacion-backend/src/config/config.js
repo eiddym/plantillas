@@ -1,0 +1,176 @@
+const params = require('./config.json');
+const logger = require('../lib/logger');
+
+const envBoolean = (value, fallback = false) => {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  return String(value).toLowerCase() === 'true';
+};
+
+module.exports = () => {
+  let env = process.env.NODE_ENV;
+
+  if (!env) {
+    env = 'development';
+  }
+
+  if (!params.hasOwnProperty(env)) {
+    env = 'development';
+  }
+  const config = {
+    database: {
+      name: process.env.DB_NOMBRE || params[env].database,
+      username: process.env.DB_USUARIO || params[env].username,
+      password: process.env.DB_PASSWORD || params[env].password,
+      timezone: process.env.TZ || '-04:00',
+      lang: process.env.DB_LANGUAGE || 'es',
+      params: {
+        dialect: params[env].dialect || 'postgres',
+        port: process.env.DB_PUERTO || params[env].port,
+        host: process.env.DB_HOST || params[env].host,
+        sync: {
+          force: process.env.FORCE || false,
+        },
+        logging: (sql) => {
+          if (env === 'development') {
+            // logger.log('info', `[${new Date()}] ${sql}`);
+          }
+        },
+        define: {
+          freezeTableName: true,
+        },
+      },
+    },
+    aprobacionCD: {
+      ruta_externos_aprobacion: process.env.RUTA_DOCUMENTOS_APROBACION || "./public/aprobacion", // ".public/aprobacion" Pdf por aprobar con ciudania digital
+      max_bytes_por_pdf: 20971520,
+      max_sum_bytes_pdfs_por_documento: 31457280, 
+      url_validar_documento: 'https://interoperabilidad.agetic.gob.bo/fake/aprobacion-documentos/v1/verificaciones',
+      url: 'https://interoperabilidad.agetic.gob.bo/fake/aprobacion-documentos/v1/aprobaciones',
+      token: 'Bearer  [token]'
+    }, 
+    ruta_externos: process.env.RUTA_ARCHIVOS_EXTERNOS || "./public/externos", // ".public/externos"
+    ruta_documentos: process.env.RUTA_DOCUMENTOS || "./public/documentos/",
+    host: process.env.HOST_BACKEND || 'localhost:8001', // Host backend sobre dominio
+    front: process.env.HOST_FRONTEND || 'localhost:3000', // Host frontend sobre dominio
+    urlVerificar: process.env.URL_VERIFICACION || 'http://192.168.1.7/verificar',
+
+    entidad: {
+      nombre: process.env.ENTIDAD_NOMBRE || '',
+      razon_social: process.env.ENTIDAD_RAZON_SOCIAL || process.env.ENTIDAD_NOMBRE || '',
+      personeria_juridica: process.env.ENTIDAD_PERSONERIA_JURIDICA || '',
+      afiliacion: process.env.ENTIDAD_AFILIACION || '',
+      direccion: process.env.ENTIDAD_DIRECCION || '',
+      nit: process.env.ENTIDAD_NIT || '',
+      telefono: process.env.ENTIDAD_TELEFONO || '',
+      correo: process.env.ENTIDAD_CORREO || '',
+      web: process.env.ENTIDAD_WEB || '',
+      sede: process.env.ENTIDAD_SEDE || ''
+    },
+    prefijo: 1, // Prefijo en los documentos para su verificación
+    tiempo_token: Number(process.env.TIEMPO_TOKEN || 60), // Tiempo de vida del token en minutos.
+    tiempo_inactividad: Number(process.env.TIEMPO_INACTIVIDAD || 15), // Inactividad máxima en minutos.
+    tiempo_sesion_absoluto: Number(process.env.TIEMPO_SESION_ABSOLUTO || 480), // Duración absoluta en minutos.
+    validacion: {},
+    sistema: {
+      // remover el [], dejar solamente el numero identificador.
+      director: process.env.IDENTIFICADOR_DIRECTOR || 1, // id_usuario del usuario con cargo de MAE
+      direccion: process.env.IDENTIFICADOR_DIRECTOR_UNIDAD || 1, // id_unidad de la unidad Dirección General Ejecutiva
+      cite_ceros: process.env.CITE_DIGITOS || 5, // Cantidad de digitos que posee el cite.
+      cite_principal: process.env.CITE_GUIA || 'PLANTILLAS', // Descripción guia del cite, miCiteGuia/IT/0001/2020
+    },
+    correo: {
+      port: parseInt(process.env.CORREO_PUERTO || process.env.SMTP_PORT || 25),
+      host: process.env.CORREO_HOST || process.env.SMTP_HOST || 'localhost',
+      remitente: process.env.CORREO_REMITENTE || process.env.SMTP_FROM_NAME || 'Sistema de plantillas',
+      origen: process.env.CORREO_ORIGEN || process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'plantillas@entidad.net',
+      user: process.env.CORREO_USUARIO || process.env.SMTP_USER || process.env.CORREO_ORIGEN || 'plantillas@entidad.net',
+      pass: process.env.CORREO_PASSWORD || process.env.SMTP_PASSWORD || '',
+      secure: envBoolean(process.env.CORREO_SECURE || process.env.SMTP_SECURE, false),
+      ignoreTLS: envBoolean(process.env.CORREO_IGNORETLS, false),
+      tls: {
+        rejectUnauthorized: envBoolean(
+          process.env.CORREO_TLS_RECHAZAR,
+          true
+        ),
+      },
+    },
+    notificacion: {
+      sms_url: process.env.NOTIFICACION_SMS_URL || 'http://localhost/miApiSms',
+      sms_token: process.env.NOTIFICACION_SMS_TOKEN || '[miTokenSms]',
+      correo_url: process.env.NOTIFICACION_CORREO_URL || 'http://localhost/miApiCorreo',
+      correo_token: process.env.NOTIFICACION_CORREO_TOKEN || '[miTokenCorreo]',
+    },
+    envio_notificacion: 'CORREO',//CORREO o ALERTIN
+    ldap: {
+      server: {
+        url: process.env.LDAP_URL || 'ldaps://ldap.example.abc:123',
+        bindDn: process.env.LDAP_BIND_DN || 'uid=usuarioLDAP...',
+        bindCredentials: process.env.LDAP_BIND_PASSWORD || 'pwdLDAP',
+        searchBase: process.env.LDAP_SEARCHBASE || 'ou=usuarios...',
+        searchFilter: process.env.LDAP_SEARCHFILTER || '(uid={{username}})',
+      },
+    },
+    // configuracion con jwt poner una palabra secreta segura
+    jwtSecret: process.env.JWT_SECRET || 'SECRET', //Se recomienda una llave alfanumerica generada min de 20 caracteres
+    jwtSession: {
+      session: process.env.JWT_SESSION || false,
+    },
+    puerto: process.env.BACKEND_PUERTO || 8001, // Puerto donde se expone el api
+    recaptcha: {
+      secretKey: '[token]',
+      url: 'https://www.google.com/recaptcha/api/siteverify',
+    },
+    almacen: {
+      url_estado: process.env.ALMACEN_ESTADO || 'http://localhost:3000/',
+      url_consulta: process.env.ALMACEN_CONSULTA || 'http://localhost:3000/api/v2/almacenes/articulos',
+      url_crear_solicitud: process.env.ALMACEN_CREAR_SOLICITUD || 'http://localhost:3000/api/v2/almacenes/solicitud',
+      url_recuperar: process.env.ALMACEN_RECUPERAR || 'http://localhost:3000/api/v2/almacenes/solicitud',
+      url_notificar: process.env.ALMACEN_NOTIFICAR || 'http://localhost:3000/api/v2/almacenes/solicitud',
+      url_proveedor: process.env.ALMACEN_PROVEEDOR || 'http://localhost:3000/api/v2/almacenes/proveedores',
+      url_ingreso: process.env.ALMACEN_INGRESO || 'http://localhost:3000/api/v2/almacenes/ingreso',
+      token: process.env.ALMACEN_TOKEN || 'Bearer TOKEN_ACCESSO',
+    },
+    activos: {
+      url_estado: process.env.ACTIVOS_ESTADO || 'http://localhost:3000/',
+      url_consulta: process.env.ACTIVOS_CONSULTA || 'http://localhost:3000/api/v2/activos/buscar',
+      url_asignacion: process.env.ACTIVOS_ASIGNACION || 'http://localhost:3000/api/v2/activos/asignacion',
+      url_devolucion: process.env.ACTIVOS_DEVOLUCION || 'http://localhost:3000/api/v2/activos/devolucion',
+      url_consulta_por_usuario: process.env.ACTIVOS_CONSULTA_POR_USUARIO || 'http://localhost:3000/api/v2/activos/usuario',
+      token: process.env.ACTIVOS_TOKEN || 'Bearer TOKEN_ACCESO',
+    },
+    // Configuracion de cliente SMTP,
+    mail: {
+      host: process.env.MAIL_HOST || 'smtp.gmail.com',
+      port: process.env.MAIL_PORT || 587,
+      secure: false, // true para 465, false para otros puertos
+      auth: {
+        user: process.env.MAIL_USER || 'tu-correo@dominio.com',
+        pass: process.env.MAIL_PASS || 'tu-password-o-token'
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    },
+    // Configuracion de cliente, para ciudadania digital
+    issuer: process.env.ISSUER || 'https://account-idetest.agetic.gob.bo/',
+    client: {
+      post_logout_redirect_uris: [
+        'http://localhost:3000/oauth/logout.html',
+      ],
+      client_id: 'IaaIMscMLSJZDoI9JQ7YK',
+      client_secret: '1xpviV31Fte0wvVW-LncpVF_J6KVNj73H-6E0XUxriNqGb8yL_iGVoaOxSVGZtAxm6GYCPP6Htft0oz2OJQTGA',
+      redirect_uris: [
+        'http://localhost:3000/oauth/login.html',
+      ],
+    },
+    // parameters registry client
+    client_params: {
+      scope: ['openid profile email fecha_nacimiento celular offline_access'],
+    },
+
+  };
+
+  return config;
+};
