@@ -93,13 +93,18 @@
 
             vm.getName = function () {
                 var user = SideNavFactory.getUser();
-                if (user.last_name && user.last_name.trim()) {
-                    if (user.first_name && user.username && user.first_name.trim().toLowerCase() === user.username.trim().toLowerCase()) {
-                        return user.last_name;
-                    }
-                    return (user.first_name ? user.first_name + ' ' : '') + user.last_name;
+                if (!user) return '';
+                var firstName = (user.first_name || '').trim();
+                var lastName = (user.last_name || '').trim();
+                var username = (user.username || '').trim();
+
+                if (firstName && firstName.toLowerCase() === username.toLowerCase()) {
+                    return lastName || firstName;
                 }
-                return user.first_name || user.username || '';
+                if (firstName && lastName && lastName.toLowerCase().indexOf(firstName.toLowerCase()) !== -1) {
+                    return lastName;
+                }
+                return (firstName + (lastName ? ' ' + lastName : '')).trim() || username;
             }
 
             vm.getEmail = function () {
@@ -108,7 +113,11 @@
 
             vm.getInitial = function () {
                 var name = vm.getName();
+<<<<<<< HEAD
                 return name && name.length ? name[0].toUpperCase() : '?';
+=======
+                return name.length ? name[0].toUpperCase() : '?';
+>>>>>>> e5071a6 (fix(ui): limpiar nombre de usuario en sidebar y respetar permisos de menu desmarcados en rol)
             }
 
             vm.getMenu = function () {

@@ -23,15 +23,27 @@ module.exports = app => {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
   const OPTS = cfg.ldap;
-  passport.use(new LdapStrategy(OPTS, (payload, done) =>
+  passport.use(new LdapStrategy(OPTS, (payload, done) => {
+    const uid = payload.sAMAccountName || payload.uid || payload.cn || 'usuario';
+    let given = payload.givenName || '';
+    let sn = (payload.sn && payload.sn !== payload.name && payload.sn !== payload.displayName) ? payload.sn : '';
+    let fullName = payload.displayName || payload.name || payload.cn || '';
+
+    if (given.toLowerCase() === uid.toLowerCase()) {
+      given = '';
+    }
+    if (!given && !sn && fullName) {
+      given = fullName;
+    }
+
     done(null, {
-      nombre: payload.displayName || payload.name || payload.givenName || payload.cn || 'Usuario',
-      apellido: (payload.sn && payload.sn !== payload.name && payload.sn !== payload.displayName) ? payload.sn : '',
-      email: payload.mail || payload.email || `${payload.sAMAccountName || payload.cn || payload.uid}@marabuntarl.com`,
-      uid: payload.sAMAccountName || payload.cn || payload.uid || 'usuario',
+      nombre: given || fullName || 'Usuario',
+      apellido: sn,
+      email: payload.mail || payload.email || `${uid}@marabuntarl.com`,
+      uid: uid,
       cargo: payload.title || 'Sin cargo',
-    })
-  ));
+    });
+  }));
 
   passport.initialize();
 
