@@ -5,60 +5,114 @@ const basename=path.basename(module.filename);
 const rutaParches=`${__dirname}`;
 const configuracion=require(`./config.parchar.json`);
 
-// Itera y verifica la existencia del directorio.
-configuracion.parches.forEach((parche) => {
-
-  // Verifica la existencia del directorio destino.
-  fs.exists(parche.ruta_destino,(resultadoLectura) => {
-    console.log(`verificando la existencia de la ruta destino >>>>  ${parche.ruta_destino}`, resultadoLectura);
-
-    // Si éxiste el directorio.
-    if(resultadoLectura){
-      // Ruta del archivo origen.
-      const rutaOrigen = `${rutaParches}/${parche.ruta_origen}`;
-
-      // Realiza la lectura del directorio origen, al cual le aplica un filtro.
-      fs.readdirSync(rutaOrigen).filter((archivo) =>
-      // Que sea un directorio && que no sea este mismo archivo && que no sea del tipo "json".
-      (archivo.indexOf('.')!==0) && (archivo!==basename) && (archivo.substr(archivo.lastIndexOf('.')+1,archivo.length)!='json')
-      )
-      // Itera los archivos obtenidos de la ruta origen.
-      .forEach((archivo) => {
-
-      // Realiza la lectura del archivo de origen.
-      fs.readFile(`${rutaOrigen}/${archivo}`,{flag:"r"},(errorLeer,dataLeer) => {
-        // Si no existe error en la lectura.
-        if(!errorLeer){
-          // Realiza la escritura del archivo destino, con la data obtenida en la lectura.
-          fs.writeFile(`${parche.ruta_destino}/${archivo}`,dataLeer,{flag:'w'},(errorEscritura) => {
-            // Si no existe error de escritura.
-            if(!errorEscritura)
-              console.log(`Archivo ${archivo} -- reemplazado correctamente `);
-            else
-              console.log(`Archivo ${archivo} -- Error en el remplazo.`, errorEscritura);
-          });
-        }
-        // Si existe error en la lectura.
-        else{
-          console.log("Error en la lectura del archivo >> ", archivo);
-        }
-      });
-    });
+// 1. Remueve versiones desactualizadas y anidadas incompatibles
+[
+  'passport-ldapauth/node_modules/ldapauth-fork/node_modules/ldapjs',
+  'passport-ldapauth/node_modules/ldapauth-fork',
+  'ldapauth-fork/node_modules/ldapjs',
+  'ad/node_modules/ldapjs'
+].forEach(relPath => {
+  try {
+    const nestedPath = path.join(__dirname, `../node_modules/${relPath}`);
+    if (fs.existsSync(nestedPath)) {
+      console.log(`[PARCHE] Eliminando módulo anidado en: ${nestedPath}`);
+      fs.rmdirSync(nestedPath, { recursive: true, force: true });
     }
-    // Si no existe el directorio destino.
-    else{
-      console.log(`La ruta destino no existe. <<< ${parche.ruta_destino} >>>`);
+  } catch(e) {}
+});
+
+// 2. Parchea sanitizeInput y _search en ldapauth-fork para evitar fugas de excepciones de ldap-filter
+try {
+  const ldapauthPath = path.join(__dirname, '../node_modules/ldapauth-fork/lib/ldapauth.js');
+  if (fs.existsSync(ldapauthPath)) {
+    let code = fs.readFileSync(ldapauthPath, 'utf8');
+
+    // Corregir orden de sanitizeInput (\ debe ir primero)
+    if (code.includes('var sanitizeInput = function')) {
+      code = code.replace(
+        /var sanitizeInput = function [\s\S]*?};/,
+        `var sanitizeInput = function (input) {
+  if (!input) return input;
+  return String(input)
+    .replace(/\\\\/g, '\\\\5c')
+    .replace(/\\*/g, '\\\\2a')
+    .replace(/\\(/g, '\\\\28')
+    .replace(/\\)/g, '\\\\29')
+    .replace(/\\0/g, '\\\\00')
+    .replace(/\\//g, '\\\\2f');
+};`
+      );
+    }
+
+    // Corregir _search para incluir try-catch sobre _adminClient.search
+    if (code.includes('LdapAuth.prototype._search = function')) {
+      code = code.replace(
+        /LdapAuth\.prototype\._search = function [\s\S]*?};/,
+        `LdapAuth.prototype._search = function (searchBase, options, callback) {
+  var self = this;
+
+  self._adminBind(function (bindErr) {
+    if (bindErr) {
+      return callback(bindErr);
+    }
+
+    try {
+      self._adminClient.search(searchBase, options, function (searchErr, searchResult) {
+        if (searchErr) {
+          return callback(searchErr);
+        }
+
+        var items = [];
+        searchResult.on('searchEntry', function (entry) {
+          items.push(entry.object);
+        });
+
+        searchResult.on('error', function (err) {
+          return callback(err);
+        });
+
+        searchResult.on('end', function (result) {
+          if (result.status !== 0) {
+            return callback(new Error('non-zero status from LDAP search: ' + result.status));
+          }
+          return callback(null, items);
+        });
+      });
+    } catch (errSearch) {
+      return callback(errSearch);
+    }
+  });
+};`
+      );
+    }
+
+    fs.writeFileSync(ldapauthPath, code, 'utf8');
+    console.log('[PARCHE] ldapauth-fork corregido exitosamente.');
+  }
+} catch(e) {
+  console.log('[PARCHE] Error al aplicar parche en ldapauth-fork:', e.message);
+}
+
+// 3. Itera y aplica parches del JSON de configuración
+configuracion.parches.forEach((parche) => {
+  fs.exists(parche.ruta_destino,(resultadoLectura) => {
+    if(resultadoLectura){
+      const rutaOrigen = `${rutaParches}/${parche.ruta_origen}`;
+      fs.readdirSync(rutaOrigen).filter((archivo) =>
+        (archivo.indexOf('.')!==0) && (archivo!==basename) && (archivo.substr(archivo.lastIndexOf('.')+1,archivo.length)!='json')
+      )
+      .forEach((archivo) => {
+        fs.readFile(`${rutaOrigen}/${archivo}`,{flag:"r"},(errorLeer,dataLeer) => {
+          if(!errorLeer){
+            fs.writeFile(`${parche.ruta_destino}/${archivo}`,dataLeer,{flag:'w'},(errorEscritura) => {
+              if(!errorEscritura)
+                console.log(`Archivo ${archivo} -- reemplazado correctamente `);
+              else
+                console.log(`Archivo ${archivo} -- Error en el remplazo.`, errorEscritura);
+            });
+          }
+        });
+      });
     }
   });
 });
-
-// Remueve la versión desactualizada e incompatible ldapjs 1.0.2 anidada en ldapauth-fork
-try {
-  const nestedLdapjs = path.join(__dirname, '../node_modules/ldapauth-fork/node_modules/ldapjs');
-  if (fs.existsSync(nestedLdapjs)) {
-    console.log(`[PARCHE] Eliminando ldapjs anidado incompatible en: ${nestedLdapjs}`);
-    fs.rmdirSync(nestedLdapjs, { recursive: true, force: true });
-  }
-} catch(e) {
-  console.log("[PARCHE] Error al remover ldapjs anidado:", e.message);
-}
