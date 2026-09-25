@@ -100,7 +100,7 @@ services:
       LDAP_BIND_DN: ${LDAP_BIND_DN:-}
       LDAP_BIND_PASSWORD: ${LDAP_BIND_PASSWORD:-}
       LDAP_SEARCHBASE: ${LDAP_SEARCHBASE:-}
-      LDAP_SEARCHFILTER: ${LDAP_SEARCHFILTER:-(uid={{username}})}
+      LDAP_SEARCHFILTER: ${LDAP_SEARCHFILTER}
     depends_on:
       db:
         condition: service_healthy
