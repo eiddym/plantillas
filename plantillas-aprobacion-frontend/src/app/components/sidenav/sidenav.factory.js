@@ -29,28 +29,6 @@
                 return this.visible;
             },
             setMenu: function (menu) {
-                if (angular.isArray(menu)) {
-                    menu.forEach(function (opcion) {
-                        if (opcion.label === 'DOCUMENTOS' || opcion.nombre === 'DOCUMENTOS') {
-                            if (angular.isArray(opcion.submenu)) {
-                                var tieneArchivo = opcion.submenu.some(function (sub) {
-                                    return sub.url === 'archivo' || sub.label === 'ARCHIVO' || sub.nombre === 'ARCHIVO';
-                                });
-                                if (!tieneArchivo) {
-                                    opcion.submenu.push({
-                                        id_menu: 999,
-                                        label: 'ARCHIVO',
-                                        nombre: 'ARCHIVO',
-                                        descripcion: 'Bandeja de archivo de documentos',
-                                        url: 'archivo',
-                                        ruta: 'archivo',
-                                        icono: 'archive'
-                                    });
-                                }
-                            }
-                        }
-                    });
-                }
                 this.menu = menu;
             },
             setUser: function (user) {
