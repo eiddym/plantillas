@@ -249,18 +249,24 @@ app.post("/autenticar", interceptar, (req,res) => {
 });
 
 function interceptar(req, res, next){
-  passport.authenticate("ldapauth", cfg.jwtSession, (err, user, info) => {
-    if(err || !user){
-      req.ldap=false;
-      req.user=null;
-      return next();
-    }
-    else{
-      req.ldap=true;
-      req.user = user;
-      next();
-    }
-  })(req,res,next);
+  try {
+    passport.authenticate("ldapauth", cfg.jwtSession, (err, user, info) => {
+      if(err || !user){
+        req.ldap=false;
+        req.user=null;
+        return next();
+      }
+      else{
+        req.ldap=true;
+        req.user = user;
+        next();
+      }
+    })(req,res,next);
+  } catch (e) {
+    req.ldap=false;
+    req.user=null;
+    next();
+  }
 }
 
 /**
