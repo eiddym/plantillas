@@ -25,11 +25,11 @@ module.exports = app => {
   const OPTS = cfg.ldap;
   passport.use(new LdapStrategy(OPTS, (payload, done) =>
     done(null, {
-      nombre: payload.givenName,
-      apellido: payload.sn,
-      email: payload.mail,
-      uid: payload.uid,
-      cargo: payload.title ||'Sin cargo',
+      nombre: payload.givenName || payload.cn || payload.name || 'Usuario',
+      apellido: payload.sn || '',
+      email: payload.mail || payload.email || `${payload.sAMAccountName || payload.cn || payload.uid}@marabuntarl.com`,
+      uid: payload.sAMAccountName || payload.cn || payload.uid || 'usuario',
+      cargo: payload.title || 'Sin cargo',
     })
   ));
 
@@ -232,16 +232,16 @@ function xautenticacion(req, res, usar_ldap=1){
 
 // La siguiente línea trabaja directamente con el sistema, es una autenticación directa con la base de datos del sistema. Funcionará si la línea app.post("/autenticar", interceptar, (req,res) => {
 // está comentada.
-app.post("/autenticar", (req,res) => {
+app.post("/autenticar", interceptar, (req,res) => {
    xautenticacion(req, res, 1);
 });
 
 function interceptar(req, res, next){
   passport.authenticate("ldapauth", cfg.jwtSession, (err, user, info) => {
-    if(err) return next(err);
-    if(!user){
+    if(err || !user){
       req.ldap=false;
-      res.status(412).send(util.formatearMensaje("ERROR","Verifique los datos ingresados."));
+      req.user=null;
+      return next();
     }
     else{
       req.ldap=true;

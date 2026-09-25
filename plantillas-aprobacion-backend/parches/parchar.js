@@ -1,26 +1,3 @@
-/**
- Archivo que realiza el reemplazo de librerias y/o modulos.
-
-Es necesario tomar en cuenta lo siguiente:
-
-- Directorio: ./parches                     Almacena los recursos necesarios para el parche, en subdirectorios.
-- Archivo:  ./parches/parchar.js            Se encarga de realizar el parche.
-- Archivo:  ./parches/config.parchar.json   Contiene informacion sobre el origen del parche y el destino del mismo.
-
-PD.: El parche se realiza de carpeta a carpeta, es decir:
-Si el parche va para ./node_modules/sequelize-handlers/handlers/create.js
-El directorio origen que debe contener a "create.js" es: ./parches/handlers
-
-En el archivo de configuracion:
-parches:[
-  {
-      "ruta_origen":"handlers",
-      "ruta_destino":"node_modules/sequelize-handlers/handlers"
-  },
-]
- */
-
-
 const fs = require('fs');
 const path = require('path');
 
@@ -72,5 +49,16 @@ configuracion.parches.forEach((parche) => {
     else{
       console.log(`La ruta destino no existe. <<< ${parche.ruta_destino} >>>`);
     }
-  })
-})
+  });
+});
+
+// Remueve la versión desactualizada e incompatible ldapjs 1.0.2 anidada en ldapauth-fork
+try {
+  const nestedLdapjs = path.join(__dirname, '../node_modules/ldapauth-fork/node_modules/ldapjs');
+  if (fs.existsSync(nestedLdapjs)) {
+    console.log(`[PARCHE] Eliminando ldapjs anidado incompatible en: ${nestedLdapjs}`);
+    fs.rmdirSync(nestedLdapjs, { recursive: true, force: true });
+  }
+} catch(e) {
+  console.log("[PARCHE] Error al remover ldapjs anidado:", e.message);
+}
