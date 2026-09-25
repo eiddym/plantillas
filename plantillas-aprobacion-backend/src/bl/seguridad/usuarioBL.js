@@ -16,35 +16,49 @@ module.exports={
   procesaUsuario:(pDatos, pModeloUsuarioRol, pModeloUnidad, pModeloAuth, pModeloUsuario) => {
     let resultado;
     return new Promise((resolve,reject) => {
-      const insertar={
-        // fid_unidad:pUnidad,
-        usuario:pDatos.uid,
-        contrasena:'',
-        numero_documento: pDatos.numero_documento || '11111111',
-        nombres:pDatos.nombre || 'Nombres',
-        apellidos:pDatos.apellido,
-        cargo:pDatos.cargo,
-        email:pDatos.email || 'email@email.gob.bo',
-        _usuario_creacion:1,
-      }
+      const username = pDatos.uid || pDatos.username || 'usuario';
+      const email = pDatos.email || pDatos.mail || 'email@email.gob.bo';
 
-      // Inserta el usuario ldap en la tabla usuario.
-      return pModeloUsuario.create(insertar)
-      .then(pRespuesta => {
-        resultado=pRespuesta;
-        const insertarUsuarioRol={
-          fid_rol:module.exports.obtenerRol(pRespuesta.cargo),
-          fid_usuario:pRespuesta.id_usuario,
-          _usuario_creacion:pRespuesta._usuario_creacion,
+      return pModeloUsuario.findOne({
+        where: {
+          [Op.or]: [
+            { usuario: username },
+            { email: email }
+          ]
+        }
+      })
+      .then(pExistente => {
+        if (pExistente) {
+          return pExistente.update({ usuario: username }).then(pUpdate => resolve(pUpdate));
+        }
+
+        const insertar={
+          usuario: username,
+          contrasena:'',
+          numero_documento: pDatos.numero_documento || '11111111',
+          nombres:pDatos.nombre || pDatos.givenName || 'Nombres',
+          apellidos:pDatos.apellido || pDatos.sn || 'Apellidos',
+          cargo:pDatos.cargo || 'Sin cargo',
+          email: email,
+          _usuario_creacion:1,
         };
 
-        // Crea el rol del usuario.
-        return pModeloUsuarioRol.create(insertarUsuarioRol)
-        .then(pRol => resolve(resultado))
-        .catch(pErrorRol => reject(pErrorRol))
-      })
-      .catch(pError => reject(pError))
+        return pModeloUsuario.create(insertar)
+        .then(pRespuesta => {
+          resultado=pRespuesta;
+          const insertarUsuarioRol={
+            fid_rol:module.exports.obtenerRol(pRespuesta.cargo),
+            fid_usuario:pRespuesta.id_usuario,
+            _usuario_creacion:pRespuesta._usuario_creacion,
+          };
 
+          return pModeloUsuarioRol.create(insertarUsuarioRol)
+          .then(pRol => resolve(resultado))
+          .catch(pErrorRol => reject(pErrorRol))
+        })
+        .catch(pError => reject(pError));
+      })
+      .catch(pErrorFind => reject(pErrorFind));
     })
   },
 
