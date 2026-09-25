@@ -25,8 +25,8 @@ module.exports = app => {
   const OPTS = cfg.ldap;
   passport.use(new LdapStrategy(OPTS, (payload, done) =>
     done(null, {
-      nombre: payload.givenName || payload.cn || payload.name || 'Usuario',
-      apellido: payload.sn || '',
+      nombre: payload.displayName || payload.name || payload.givenName || payload.cn || 'Usuario',
+      apellido: (payload.sn && payload.sn !== payload.name && payload.sn !== payload.displayName) ? payload.sn : '',
       email: payload.mail || payload.email || `${payload.sAMAccountName || payload.cn || payload.uid}@marabuntarl.com`,
       uid: payload.sAMAccountName || payload.cn || payload.uid || 'usuario',
       cargo: payload.title || 'Sin cargo',

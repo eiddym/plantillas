@@ -93,7 +93,13 @@
 
             vm.getName = function () {
                 var user = SideNavFactory.getUser();
-                return user.first_name + ' ' + user.last_name;
+                if (user.last_name && user.last_name.trim()) {
+                    if (user.first_name && user.username && user.first_name.trim().toLowerCase() === user.username.trim().toLowerCase()) {
+                        return user.last_name;
+                    }
+                    return (user.first_name ? user.first_name + ' ' : '') + user.last_name;
+                }
+                return user.first_name || user.username || '';
             }
 
             vm.getEmail = function () {
@@ -101,8 +107,8 @@
             }
 
             vm.getInitial = function () {
-                var firstName = SideNavFactory.getUser().first_name;
-                return firstName.length ? firstName[0].toUpperCase() : '?';
+                var name = vm.getName();
+                return name && name.length ? name[0].toUpperCase() : '?';
             }
 
             vm.getMenu = function () {
