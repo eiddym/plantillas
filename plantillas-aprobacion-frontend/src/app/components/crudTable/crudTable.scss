@@ -8,29 +8,62 @@
     color: $colorDanger;
 }
 
+md-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(15, 32, 39, 0.05);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+md-toolbar.md-table-toolbar {
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 100%) !important;
+    color: #ffffff !important;
+
+    span, md-icon {
+        color: #ffffff !important;
+    }
+
+    md-icon {
+        color: #00e5ff !important;
+    }
+}
+
+table[md-table] {
+    thead[md-head] tr th {
+        background-color: #0f2027;
+        color: #ffffff !important;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 12px 16px;
+    }
+
+    tbody[md-body] tr:hover {
+        background-color: #f8fafc !important;
+    }
+}
+
 .formly-column-1 {
     .formly-field-datepicker {
         margin-bottom: 20px;
     }
 }
 .seleccionado:hover{
-  background-color: lighten($colorSuccess,68%)
-  // background-color: lighten($colorPrimary,60%)
+  background-color: #f1f5f9;
 }
 
 .boton-extra:hover{
   md-icon{
-    color:$colorSuccess;
+    color: #0284c7;
   }
 }
 .boton-eliminar:hover{
   md-icon{
-    color:darken(lighten($colorDanger,7%),4%);
+    color: #ef4444;
   }
 }
 .icono-activo {
   md-icon{
-    color:$colorSuccess;
+    color: #10b981;
   }
 }
 
