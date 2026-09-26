@@ -791,6 +791,29 @@ module.exports = app => {
       });
   });
 
+  app.post('/api/v1/seguridad/usuario/sincronizar_authentik', (req, res) => {
+    const { id_usuario } = req.body;
+    if (!id_usuario) {
+      return res.status(412).send(util.formatearMensaje("ERROR", "Debe proporcionar id_usuario."));
+    }
+
+    Usuario.findOne({ where: { id_usuario } })
+    .then(u => {
+      if (!u) throw new Error("Usuario no encontrado.");
+      return u.update({ tipo_autenticacion: 'AUTHENTIK' }).then(uUpdated => {
+        const authentikService = require('../../lib/authentikService');
+        authentikService.sincronizarUsuarioAuthentik(uUpdated);
+        return uUpdated;
+      });
+    })
+    .then(uUpdated => {
+      res.status(200).send(util.formatearMensaje("EXITO", `Usuario ${uUpdated.usuario} sincronizado con Authentik correctamente.`, uUpdated));
+    })
+    .catch(err => {
+      res.status(412).send(util.formatearMensaje("ERROR", err.message || err));
+    });
+  });
+
   /**
   @apiVersion 1.0.0
   @apiGroup Usuario
@@ -1043,37 +1066,29 @@ module.exports = app => {
   {
   }
   */
-  app.delete('/api/v1/seguridad/usuario/:id',(req,res) => {
-    const idUsuario=req.params.id;
+  app.delete('/api/v1/seguridad/usuario/:id', (req, res) => {
+    const idUsuario = req.params.id;
 
-    UsuarioRol.findAll({ where:{ fid_usuario:idUsuario } })
-    .then(resultado => {
-      if(resultado.length>0){
-          res.status(405).send(util.formatearMensaje("ERROR","No se puede eliminar el usuario, por integridad."));
-      }
-
-      else{
-        Usuario.destroy({ where:{ id_usuario:idUsuario } })
+    sequelize.transaction().then(t => {
+      return UsuarioRol.destroy({ where: { fid_usuario: idUsuario }, transaction: t })
+        .then(() => Modelos.conf_notificacion.destroy({ where: { fid_usuario: idUsuario }, transaction: t }))
+        .then(() => Modelos.virtual.destroy({ where: { [Op.or]: [{ fid_usuario_titular: idUsuario }, { fid_usuario_virtual: idUsuario }] }, transaction: t }))
+        .then(() => Usuario.destroy({ where: { id_usuario: idUsuario }, transaction: t }))
         .then(resultadoEliminar => {
-          if(resultadoEliminar==0)
-            resultadoEliminar="0, El usuario a eliminar no existe."
-            res.status(200).send(util.formatearMensaje("EXITO",`Registros eliminados ${resultadoEliminar}`));
-
+          if (resultadoEliminar === 0) {
+            t.rollback();
+            return res.status(412).send(util.formatearMensaje("ERROR", "El usuario a eliminar no existe."));
+          }
+          return t.commit().then(() => {
+            res.status(200).send(util.formatearMensaje("EXITO", "Usuario eliminado correctamente."));
+          });
         })
         .catch(error => {
-          logger.error("Error al eliminar usuario.",error);
-            res.status(412).send(util.formatearMensaje("ERROR",error));
-
+          t.rollback();
+          logger.error("Error al eliminar usuario.", error);
+          res.status(412).send(util.formatearMensaje("ERROR", error.message || error));
         });
-      }
-    })
-    .catch(errorBusqueda => {
-      logger.error("Error en la busqueda de usuario-rol",errorBusqueda);
-      res.status(412).send(util.formatearMensaje("ERROR",error));
-
     });
-
-
   });
 
   /**

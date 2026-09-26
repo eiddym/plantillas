@@ -21,17 +21,29 @@
         vm.permission ={
           create:true,
           update:true,
-          delete:false
+          delete:true
         };
 
-        //vm.buttonAgregar = {
-            //tooltip: 'Syncronizar todos los datos con ldap',
-            //icon: 'cached',
-            //onclick: Syncronizar
-        //};
+        vm.buttons = [
+          {
+            multiple: true,
+            key_item: 'tipo_autenticacion',
+            opcion: {
+              'LOCAL': {
+                tooltip: 'Sincronizar usuario Local con Authentik / LDAP',
+                icon: 'sync',
+                onclick: sincronizarAuthentik
+              }
+            }
+          }
+        ];
 
-        function Syncronizar(ev) {
-            $log.log("Sin servicio", ev);
+        function sincronizarAuthentik(ev, item) {
+          DataService.post(restUrl + 'seguridad/usuario/sincronizar_authentik', { id_usuario: item.id_usuario })
+          .then(function(respuesta) {
+            Message.success(respuesta.mensaje || 'Usuario sincronizado con Authentik correctamente.');
+            angular.element('#btn-refresh-crudtable').click();
+          });
         }
 
         function DialogUsuarioController(data, Message, $scope,$mdConstant,$mdDialog,Modal,DataService,restUrl,$timeout){
