@@ -6,7 +6,7 @@
   .home-header-banner {
     background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     color: #ffffff;
-    padding: 26px 30px;
+    padding: 24px 28px;
     border-radius: 16px;
     box-shadow: 0 6px 25px rgba(15, 32, 39, 0.15);
     margin-bottom: 28px;
@@ -17,7 +17,7 @@
     .user-greeting-box {
       .greeting-title {
         margin: 0;
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 800;
         letter-spacing: -0.3px;
         color: #ffffff;
@@ -42,28 +42,50 @@
     gap: 32px;
 
     .dashboard-section {
-      .section-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #1e293b;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
+      .section-header-row {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin: 0 0 16px 0;
+        gap: 12px;
+        margin-bottom: 18px;
+        width: 100%;
 
-        .section-icon {
-          color: #00e5ff;
-          background: #0f2027;
-          border-radius: 8px;
-          padding: 4px;
-          font-size: 20px;
-          width: 28px;
-          height: 28px;
+        .section-title-badge {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+          md-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            color: #ffffff;
+          }
+
+          &.sec-badge--blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+          &.sec-badge--teal { background: linear-gradient(135deg, #0d9488, #0f766e); }
+          &.sec-badge--green { background: linear-gradient(135deg, #10b981, #047857); }
+          &.sec-badge--slate { background: linear-gradient(135deg, #0f3d3e, #0f2027); }
+        }
+
+        .section-title-text {
+          font-size: 17px;
+          font-weight: 800;
+          color: #0f172a;
+          text-transform: uppercase;
+          letter-spacing: 0.6px;
+          margin: 0;
+          white-space: nowrap;
+        }
+
+        .section-line-divider {
+          flex: 1;
+          height: 2px;
+          background: linear-gradient(to right, #e2e8f0 0%, rgba(226, 232, 240, 0.2) 100%);
+          border-radius: 2px;
         }
       }
 

@@ -30,11 +30,12 @@
         </li>
         <li ng-repeat="opcion in vm.getMenu()">
             <md-button type="button" class="md-button-toggle md-button md-button md-ink-ripple" ng-click="vm.send(opcion.url, opcion.submenu.length)">
-                <i class="md-icon md-icon-option">{{opcion.icon}}</i> <span class="md-icon-text">{{opcion.label}}</span> <i class="md-icon md-icon-arrow-down" ng-if="opcion.submenu.length">keyboard_arrow_down</i>
+                <i class="md-icon md-icon-option" ng-style="{ color: vm.getMenuIconColor(opcion.label, opcion.url) }">{{vm.getMenuIcon(opcion)}}</i> <span class="md-icon-text" style="font-weight: 600;">{{opcion.label}}</span> <i class="md-icon md-icon-arrow-down" ng-if="opcion.submenu.length">keyboard_arrow_down</i>
             </md-button>
             <ul class="sidenav-sublist" ng-if="opcion.submenu.length">
                 <li ng-repeat="sub in opcion.submenu">
                     <md-button type="button" class="md-button md-button md-ink-ripple md-button-href {{vm.active == sub.url ? 'active' : ''}}" data-url="{{sub.url}}" ng-click="vm.send(sub.url)">
+                        <i class="md-icon md-icon-option" style="font-size: 1.1rem; margin-right: 8px;" ng-style="{ color: vm.getMenuIconColor(sub.label, sub.url) }">{{vm.getMenuIcon(sub)}}</i>
                         <span class="md-icon-text">{{sub.label}}</span>
                     </md-button>
                 </li>
