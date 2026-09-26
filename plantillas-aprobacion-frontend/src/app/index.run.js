@@ -16,6 +16,20 @@
             return !path || path === '/' || path === '/inicio' || path === '';
         };
 
+        function updateBodyState() {
+            var path = $location.path();
+            var isHome = !path || path === '/' || path === '/inicio' || path === '';
+            if (isHome) {
+                angular.element('body').addClass('is-home-state').removeClass('is-module-state');
+            } else {
+                angular.element('body').removeClass('is-home-state').addClass('is-module-state');
+            }
+        }
+
+        $rootScope.$on('$locationChangeSuccess', updateBodyState);
+        $rootScope.$on('$stateChangeSuccess', updateBodyState);
+        updateBodyState();
+
         var $container = angular.element('#container-main');
         var $document = $window.document;
 

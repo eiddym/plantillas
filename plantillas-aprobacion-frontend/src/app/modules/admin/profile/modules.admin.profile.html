@@ -1,9 +1,12 @@
 <div class="profile">
 	<div class="profile-user-bg">
-		<div class="profile-user-photo bg-{{profile.getColor()}}-user">
-			<img src="" alt="" hidden>
-	    	<!-- <i class="md-icon">account_circle</i> -->
-	    	{{profile.getInitial()}}
+		<div class="profile-user-photo bg-{{profile.getColor()}}-user" style="position: relative;">
+			<img ng-src="{{profile.user.foto_url || profile.user.foto}}" ng-if="profile.user.foto_url || profile.user.foto" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; top:0; left:0;">
+	    	<span ng-if="!profile.user.foto_url && !profile.user.foto">{{profile.getInitial()}}</span>
+			<button class="btn-subir-foto-overlay" type="button" ng-click="profile.abrirSelectorFoto()" title="Cambiar foto de perfil" style="position: absolute; bottom: 0; right: 0; background: #00e5ff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10;">
+				<md-icon style="font-size: 18px; color: #0f2027; margin:0;">photo_camera</md-icon>
+			</button>
+			<input type="file" id="profile-photo-input" style="display: none;" accept="image/*" onchange="angular.element(this).scope().profile.subirFotoArchivo(this.files)">
 		</div>
 		<div class="profile-data">
 			<h2 class="profile-user-name">{{profile.getName()}}</h2>
