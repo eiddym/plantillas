@@ -57,6 +57,21 @@
                 $location.path("configuracion");
             }
 
+            vm.getUser = function() {
+                if (Storage.existUser()) return Storage.getUser();
+                return SideNavFactory.getUser() || {};
+            };
+
+            vm.getUserFirstName = function() {
+                var user = vm.getUser();
+                return user.first_name || user.nombres || user.username || user.usuario || 'Usuario';
+            };
+
+            vm.getUserCargo = function() {
+                var user = vm.getUser();
+                return user.cargo || user.email || 'Panel de Control';
+            };
+
             vm.getFirstName = function () {
                 if (Storage.existUser()) {
                     return Storage.getUser().first_name;

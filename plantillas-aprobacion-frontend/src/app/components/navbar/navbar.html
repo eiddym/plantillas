@@ -17,10 +17,17 @@
                 {{ vm.getModuleTitle() }}
             </span>
 
-            <!-- Home state: Brand Logo Title -->
-            <span class="navbar-brand-title" style="font-size: 1.15rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;" ng-if="$root.isHomeState()">
-                <md-icon style="color: #00e5ff !important; font-size: 22px;">description</md-icon> PLANTILLAS
-            </span>
+            <!-- Home state: User Greeting & Avatar Meta (Mockup Style) -->
+            <div class="topbar-left-meta" style="display: flex; align-items: center; gap: 12px;" ng-if="$root.isHomeState()">
+                <div class="avatar-circle" style="width: 38px; height: 38px; border-radius: 50%; background: #4fd1c5; color: #0b3a35; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid rgba(255,255,255,0.55); flex-shrink: 0;">
+                    <img ng-src="{{vm.getUser().foto_url || vm.getUser().foto}}" ng-if="vm.getUser().foto_url || vm.getUser().foto" style="width: 100%; height: 100%; object-fit: cover;">
+                    <span ng-if="!vm.getUser().foto_url && !vm.getUser().foto">{{ vm.getUserFirstName()[0].toUpperCase() }}</span>
+                </div>
+                <div class="user-meta" style="display: flex; flex-direction: column; line-height: 1.25;">
+                    <span class="name" style="font-size: 14px; font-weight: 700; color: #ffffff;">Buenos días, {{ vm.getUserFirstName() }}</span>
+                    <span class="role" style="font-size: 11.5px; color: rgba(255, 255, 255, 0.75);">{{ vm.getUserCargo() }} · panel de control</span>
+                </div>
+            </div>
         </div>
 
         <span flex></span>
