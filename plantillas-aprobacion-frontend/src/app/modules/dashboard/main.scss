@@ -42,13 +42,14 @@
             justify-content: center;
             color: #ffffff;
             flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
-            &.bg-blue, &.bg-sec-blue { background: #3b7ddd; }
-            &.bg-teal, &.bg-sec-teal { background: #12a892; }
-            &.bg-green, &.bg-sec-green { background: #10b981; }
-            &.bg-slate, &.bg-sec-slate { background: #17303f; }
-            &.bg-purple, &.bg-sec-purple { background: #7b5ee0; }
-            &.bg-orange, &.bg-sec-orange { background: #f0932b; }
+            &.bg-blue, &.bg-sec-blue { background: linear-gradient(135deg, #3b7ddd, #2563eb); }
+            &.bg-teal, &.bg-sec-teal { background: linear-gradient(135deg, #12a892, #0d9488); }
+            &.bg-green, &.bg-sec-green { background: linear-gradient(135deg, #10b981, #059669); }
+            &.bg-slate, &.bg-sec-slate { background: linear-gradient(135deg, #334155, #1e293b); }
+            &.bg-purple, &.bg-sec-purple { background: linear-gradient(135deg, #7b5ee0, #6d28d9); }
+            &.bg-orange, &.bg-sec-orange { background: linear-gradient(135deg, #f0932b, #ea580c); }
 
             md-icon {
               font-size: 16px;
@@ -79,34 +80,13 @@
             flex-direction: column;
             gap: 10px;
             cursor: pointer;
-            transition: background 0.15s ease;
+            transition: all 0.15s ease;
 
             &:hover {
-              background: #fdfdfd;
+              background: #f8fafc;
 
               .card-link {
                 color: #2563eb;
-              }
-            }
-
-            &.dim {
-              background: #fbfbfc;
-
-              .count {
-                color: #a4abb3;
-                font-weight: 600;
-              }
-
-              .card-sub {
-                color: #a4abb3;
-              }
-
-              .card-link {
-                color: #a4abb3;
-              }
-
-              &:hover {
-                background: #f9f9fb;
               }
             }
 
@@ -116,30 +96,30 @@
               justify-content: space-between;
 
               .icon-badge {
-                width: 32px;
-                height: 32px;
+                width: 34px;
+                height: 34px;
                 border-radius: 9px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 
                 md-icon {
-                  font-size: 16px;
-                  width: 16px;
-                  height: 16px;
+                  font-size: 18px;
+                  width: 18px;
+                  height: 18px;
                   color: #ffffff !important;
                 }
 
-                &.bg-blue { background: #3b7ddd; }
-                &.bg-orange { background: #f0932b; }
-                &.bg-purple { background: #7b5ee0; }
-                &.bg-teal { background: #12a892; }
-                &.bg-green { background: #10b981; }
-                &.bg-slate { background: #17303f; }
-                &.bg-indigo { background: #6366f1; }
-                &.bg-amber { background: #f59e0b; }
-                &.bg-gray { background: #c6ccd2; }
+                &.bg-blue { background: linear-gradient(135deg, #3b7ddd, #2563eb); }
+                &.bg-orange { background: linear-gradient(135deg, #f0932b, #ea580c); }
+                &.bg-purple { background: linear-gradient(135deg, #7b5ee0, #6d28d9); }
+                &.bg-teal { background: linear-gradient(135deg, #12a892, #0d9488); }
+                &.bg-green { background: linear-gradient(135deg, #10b981, #059669); }
+                &.bg-slate { background: linear-gradient(135deg, #334155, #1e293b); }
+                &.bg-indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+                &.bg-amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
               }
 
               .count {

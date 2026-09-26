@@ -23,27 +23,27 @@
     vm.irARuta = irARuta;
 
     var PARENT_COLOR_MAP = {
-      'DOCUMENTOS': { color: 'blue', icon: 'folder' },
+      'DOCUMENTOS': { color: 'blue', icon: 'description' },
       'CATALOGOS': { color: 'teal', icon: 'folder' },
       'ADMINISTRACIÓN': { color: 'green', icon: 'settings' },
-      'CONFIGURACIÓN': { color: 'slate', icon: 'build' }
+      'CONFIGURACIÓN': { color: 'purple', icon: 'build' }
     };
 
     var ICON_COLOR_MAP = {
       'documentos': { icon: 'description', color: 'blue', countKey: 'documentos', desc: 'Mis documentos redactados' },
-      'aprobacion': { icon: 'schedule', color: 'amber', countKey: 'pendientes', desc: 'Trámites en bandeja de derivación' },
-      'firmar': { icon: 'edit_note', color: 'violet', countKey: 'firmas', desc: 'Pendientes de firma digital' },
+      'aprobacion': { icon: 'access_time', color: 'orange', countKey: 'pendientes', desc: 'Trámites en bandeja de derivación' },
+      'firmar': { icon: 'edit', color: 'purple', countKey: 'firmas', desc: 'Pendientes de firma digital' },
       'aprobar_documento': { icon: 'fingerprint', color: 'indigo', countKey: 'firmas', desc: 'Aprobación con Ciudadanía' },
-      'impresion': { icon: 'print', color: 'slate', countKey: 'documentos', desc: 'Impresión oficial de documentos' },
-      'archivo': { icon: 'inventory_2', color: 'slate', countKey: 'documentos', desc: 'Archivo digital emitido' },
+      'impresion': { icon: 'print', color: 'blue', countKey: 'documentos', desc: 'Impresión oficial de documentos' },
+      'archivo': { icon: 'archive', color: 'slate', countKey: 'documentos', desc: 'Archivo digital emitido' },
       'catalogos': { icon: 'folder', color: 'teal', countKey: 'catalogos', desc: 'Tablas de datos y catálogos' },
       'compartidos': { icon: 'share', color: 'teal', countKey: 'compartidos', desc: 'Catálogos compartidos' },
-      'usuario': { icon: 'people', color: 'green', countKey: 'usuarios', desc: 'Gestión de usuarios' },
-      'rol': { icon: 'security', color: 'violet', countKey: 'roles', desc: 'Perfiles de permisos y roles' },
-      'menu': { icon: 'list_alt', color: 'amber', countKey: 'menus', desc: 'Administración de menús' },
+      'usuario': { icon: 'group', color: 'green', countKey: 'usuarios', desc: 'Gestión de usuarios' },
+      'rol': { icon: 'security', color: 'purple', countKey: 'roles', desc: 'Perfiles de permisos y roles' },
+      'menu': { icon: 'menu', color: 'orange', countKey: 'menus', desc: 'Administración de menús' },
       'unidad': { icon: 'business', color: 'blue', countKey: 'unidades', desc: 'Estructura organizacional' },
-      'plantillas': { icon: 'view_quilt', color: 'teal', countKey: 'plantillas', desc: 'Formularios y plantillas' },
-      'contactos': { icon: 'contacts', color: 'indigo', countKey: 'contactos', desc: 'Directorio de personal' }
+      'plantillas': { icon: 'layers', color: 'teal', countKey: 'plantillas', desc: 'Formularios y plantillas' },
+      'contactos': { icon: 'person', color: 'indigo', countKey: 'contactos', desc: 'Directorio de personal' }
     };
 
     // Cargar menú y resumen dinámico desde BD
