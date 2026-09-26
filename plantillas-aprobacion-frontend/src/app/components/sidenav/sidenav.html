@@ -6,14 +6,14 @@
         </h1>
     </md-toolbar>
     <div class="sidenav-user">
-        <figure class="sidenav-avatar-container" style="position: relative; display: inline-block;">
+        <div class="sidenav-avatar-container" style="position: relative; display: flex; justify-content: center; align-items: center; margin: 0 auto 12px auto; width: 100%;">
             <div class="sidenav-user-photo-box" ng-if="vm.user.foto_url || vm.user.foto">
                 <img class="sidenav-user-photo" ng-src="{{vm.user.foto_url || vm.user.foto}}" alt="Foto Usuario">
             </div>
             <div class="sidenav-user-default bg-{{vm.getColor()}}-user" ng-if="!vm.user.foto_url && !vm.user.foto">
                 {{vm.getInitial()}}
             </div>
-        </figure>
+        </div>
         <h2 class="sidenav-user-name">{{vm.getName()}}
             <md-tooltip md-direction="bottom">
                 {{vm.getName()}}
