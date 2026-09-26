@@ -601,7 +601,7 @@
                     template: {
                         type: "editorTexto",
                         templateOptions: {
-                            label: 'jojojo'
+                            label: ''
                         }
                     }
                 },

@@ -905,7 +905,7 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
   const urlConfigurada =
     (config && config.urlVerificar)
       ? String(config.urlVerificar).trim()
-      : 'http://192.168.1.7/verificar';
+      : (process.env.URL_VERIFICACION || 'https://docs.marabuntarl.com/#/verificar');
 
   const baseUrl = urlConfigurada
     .replace(/\/verificar\/?$/i, '')
