@@ -211,6 +211,7 @@
                     SideNavFactory.setUser(Storage.getUser());
                     SideNavFactory.setMenu(Storage.getSession('menu'));
                 }
+                vm.user = SideNavFactory.getUser() || {};
                 vm.menu = SideNavFactory.getMenu();
                 Storage.setSession('menu', vm.menu);
 

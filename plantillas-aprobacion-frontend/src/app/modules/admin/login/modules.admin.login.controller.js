@@ -49,6 +49,10 @@
                     path = ['documentos','aprobacion','aprobacion', 'impresion', 'documentos', 'documentos'][max];
                 }
 
+                // Ensure photo is reset to actual user value or null to prevent session leaks
+                user.foto = user.foto || null;
+                user.foto_url = user.foto_url || null;
+
                 // Set user
                 SideNavFactory.setUser(user);
                 Storage.setUser(user);
