@@ -19,7 +19,11 @@
         return directive
 
         function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl, $rootScope) {
-            var vm = this;
+            vm.isHomeState = function() {
+                var path = ($location.path() || '').trim();
+                var stateName = ($rootScope.$state && $rootScope.$state.current) ? $rootScope.$state.current.name : '';
+                return !path || path === '/' || path === '/inicio' || path === '' || path === '/home' || stateName === 'home' || stateName === 'inicio';
+            };
 
             vm.goHome = function() {
                 $location.path('/');
