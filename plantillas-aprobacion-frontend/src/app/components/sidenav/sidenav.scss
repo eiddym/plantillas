@@ -1,7 +1,7 @@
 acme-sidenav {
 
 	md-toolbar {
-		background-color: $colorPrimary !important;
+		background: linear-gradient(135deg, #0f2027 0%, #203a43 100%) !important;
 		color: #ffffff !important;
 
 		h1, span, md-icon, i {
@@ -13,9 +13,12 @@ acme-sidenav {
 		.sidenav-title-icon {
 			font-size: 2.2rem;
 			margin-right: 10px;
+			color: #00e5ff !important;
 		}
 		.sidenav-title-text {
 			font-size: 1.1rem;
+			font-weight: 700;
+			letter-spacing: 0.5px;
 		}
 	}
 
@@ -62,7 +65,7 @@ acme-sidenav {
 		    border-radius: 0;
 		    .md-icon-option {
 		    	font-size: 1.2rem;
-		    	color: darken($colorSecondary, 2%);
+		    	color: #0f2027;
 		    	float: left;
 		    	margin: 7px 10px 0 0;
 		    	transition: all ease 0.3s;
@@ -83,7 +86,7 @@ acme-sidenav {
 			position: relative;
 
 			&::before {
-				background-color: $colorWarning;
+				background-color: #00e5ff;
 				bottom: 0;
 				content: "";
 				left: 0;
@@ -117,50 +120,49 @@ acme-sidenav {
 				margin-left: 29px;
 			}
 			&.active {
-				background-color: #eee;
-				border-left: 4px solid $colorSecondary;
-				color: #333;
-				font-weight: 500;
+				background-color: #f1f5f9;
+				border-left: 4px solid #00e5ff;
+				color: #0f2027;
+				font-weight: 600;
 				padding-left: 11px;
 			}
 		}
 	}
 
 	.sidenav-user {
-		background-color: darken($colorPrimary, 7%);
-        background-image: url("../assets/images/14.jpg");
-        background-size: cover;
-		padding: 10px;
+		background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+		padding: 14px 10px;
 		height: 190px;
 		transition: height ease .3s;
 
 		.sidenav-user-name {
 			color: white;
 			font-size: 1rem;
-			font-weight: 400;
-			margin: 0;
+			font-weight: 600;
+			margin: 8px 0 0 0;
 			text-align: center;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
 		}
 		.sidenav-user-item {
-			color: white;
-			font-size: .9rem;
+			color: rgba(255, 255, 255, 0.8);
+			font-size: .85rem;
 			text-align: center;
 		}
 
 		.sidenav-user-default {
-			border: 3px solid white;
+			border: 3px solid #00e5ff;
 			border-radius: 50%;
 			color: white;
 			font-size: 3.4rem;
 			height: 90px;
-			line-height: 94px;
+			line-height: 86px;
 			margin: 0 auto;
 			text-align: center;
 			text-transform: uppercase;
 			width: 90px;
+			box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2);
 
 			.md-icon {
 				font-size: 5.6rem;
