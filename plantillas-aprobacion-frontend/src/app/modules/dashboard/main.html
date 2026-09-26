@@ -1,54 +1,35 @@
 <div class="home-shell-container">
-  <!-- Saludo Header Banner (Idéntico a Imagen 2) -->
-  <div class="home-header-banner">
-    <div class="home-user-card">
-      <div class="home-user-avatar">
-        <img ng-src="{{main.usuario.foto_url || main.usuario.foto}}" ng-if="main.usuario.foto_url || main.usuario.foto" alt="Avatar">
-        <span ng-if="!main.usuario.foto_url && !main.usuario.foto">{{ (main.usuario.nombres || main.usuario.usuario || 'U')[0].toUpperCase() }}</span>
-      </div>
-      <span class="home-user-email">{{ main.usuario.email || main.usuario.usuario || 'user@default.net' }}</span>
-    </div>
-
-    <div class="user-greeting-box">
-      <h1 class="greeting-title">{{ main.saludo }}, bienvenido a tu panel de control</h1>
-      <p class="greeting-subtitle">Panel de control y accesos rápidos del sistema según tu rol asignado.</p>
-    </div>
-  </div>
-
   <!-- Loader -->
   <div class="home-loading" ng-if="main.cargando" layout="column" layout-align="center center">
     <md-progress-circular md-mode="indeterminate" md-diameter="45"></md-progress-circular>
-    <p style="margin-top: 15px; color: #64748b; font-weight: 500;">Cargando tus accesos directos...</p>
+    <p style="margin-top: 15px; color: #64748b; font-weight: 500;">Cargando accesos directos...</p>
   </div>
 
-  <!-- Secciones Dinámicas Derivadas del Menú (Idéntico a Imagen 2) -->
+  <!-- Secciones Dinámicas Derivadas del Menú de Base de Datos -->
   <div class="home-dynamic-sections" ng-if="!main.cargando">
 
-    <div class="section-block" ng-repeat="seccion in main.secciones">
-      <!-- Encabezado de Categoría Fuera del Contenedor con Línea -->
-      <div class="category-header">
-        <span class="dot" ng-class="'bg-' + seccion.color">
-          <md-icon>{{ seccion.icon }}</md-icon>
-        </span>
-        <h2 class="category-title">{{ seccion.label }}</h2>
-        <div class="category-line"></div>
-      </div>
+    <div class="section" ng-repeat="seccion in main.secciones">
+      <div class="section-panel">
+        <div class="section-header">
+          <span class="dot" ng-class="'bg-' + seccion.color">
+            <md-icon style="font-size: 16px; width: 16px; height: 16px; color: #ffffff;">{{ seccion.icon }}</md-icon>
+          </span>
+          <h2>{{ seccion.label }}</h2>
+        </div>
 
-      <!-- Grid de Tarjetas Blancas Independientes -->
-      <div class="cards-grid">
-        <div class="card-box" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
-          <div class="card-top">
-            <span class="icon-badge" ng-class="'bg-' + item.color">
-              <md-icon>{{ item.icon }}</md-icon>
-            </span>
-            <span class="count">{{ item.valor || 0 }}</span>
-          </div>
-          <div class="card-content">
-            <h3 class="card-title">{{ item.label }}</h3>
-            <p class="card-sub">{{ item.desc }}</p>
-          </div>
-          <div class="card-footer">
-            <span class="card-link">Ir a {{ item.label }} &rarr;</span>
+        <div class="grid">
+          <div class="card" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
+            <div class="card-top">
+              <span class="icon-badge" ng-class="'bg-' + item.color">
+                <md-icon style="font-size: 18px; width: 18px; height: 18px; color: #ffffff;">{{ item.icon }}</md-icon>
+              </span>
+              <span class="count">{{ item.valor || 0 }}</span>
+            </div>
+            <div>
+              <p class="card-title">{{ item.label }}</p>
+              <p class="card-sub">{{ item.desc }}</p>
+            </div>
+            <div class="card-link">Ir a {{ item.label }} &rarr;</div>
           </div>
         </div>
       </div>
