@@ -14,6 +14,12 @@
         controller: 'MainController',
         controllerAs: 'main'
       })
+      .state('inicio', {
+        url: '/inicio',
+        templateUrl: 'app/modules/dashboard/main.html',
+        controller: 'MainController',
+        controllerAs: 'main'
+      })
       .state('usuario', {
         url: '/usuario',
         templateUrl: 'app/modules/admin/usuarios/modules.admin.usuarios.html',
