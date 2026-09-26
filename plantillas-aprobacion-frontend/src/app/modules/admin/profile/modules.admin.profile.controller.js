@@ -68,7 +68,13 @@
 					}
 					$rootScope.$broadcast('user:updated');
 
-					var userId = vm.user.id || vm.user.id_usuario || vm.getData('id') || 1;
+					var storedUser = Storage.getUser() || {};
+					var userId = storedUser.id || storedUser.id_usuario || vm.user.id || vm.user.id_usuario || vm.getData('id');
+					if (!userId) {
+						Message.error('No se pudo determinar el ID del usuario en sesión.');
+						return;
+					}
+
 					$http.post(restUrl + 'usuarios/' + userId + '/foto', {
 						fotoBase64: webpDataUrl
 					}).then(function() {
