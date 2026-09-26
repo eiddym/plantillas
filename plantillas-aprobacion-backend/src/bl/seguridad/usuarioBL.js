@@ -28,17 +28,27 @@ module.exports={
         }
       })
       .then(pExistente => {
+        const nombres = pDatos.nombre || pDatos.nombres || pDatos.givenName || 'Nombres';
+        const apellidos = pDatos.apellido || pDatos.apellidos || pDatos.sn || 'Apellidos';
+        const cargo = pDatos.cargo || 'Sin cargo';
+
         if (pExistente) {
-          return pExistente.update({ usuario: username }).then(pUpdate => resolve(pUpdate));
+          return pExistente.update({
+            usuario: username,
+            nombres: nombres,
+            apellidos: apellidos,
+            cargo: cargo,
+            email: email
+          }).then(pUpdate => resolve(pUpdate));
         }
 
         const insertar={
           usuario: username,
           contrasena:'',
           numero_documento: pDatos.numero_documento || '11111111',
-          nombres:pDatos.nombre || pDatos.givenName || 'Nombres',
-          apellidos:pDatos.apellido || pDatos.sn || 'Apellidos',
-          cargo:pDatos.cargo || 'Sin cargo',
+          nombres: nombres,
+          apellidos: apellidos,
+          cargo: cargo,
           email: email,
           _usuario_creacion:1,
         };
