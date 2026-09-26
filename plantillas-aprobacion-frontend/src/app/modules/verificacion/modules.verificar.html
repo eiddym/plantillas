@@ -3,8 +3,8 @@
   <!-- Header Bar Corporativa de Verificación -->
   <div class="verificar-header-bar" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); padding: 18px 28px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 6px 20px rgba(15, 32, 39, 0.15); display: flex; align-items: center; justify-content: space-between;">
     <div style="display: flex; align-items: center; gap: 14px;">
-      <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.3); display: flex; align-items: center; justify-content: center;">
-        <md-icon style="color: #00e5ff !important; font-size: 26px;">verified</md-icon>
+      <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px;">
+        <img src="assets/images/logo.png" alt="Logo Institucional" style="max-width: 100%; max-height: 100%; object-fit: contain;">
       </div>
       <div>
         <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: 0.3px;">Verificación Oficial de Documentos</h1>
@@ -19,28 +19,30 @@
 
   <!-- Tarjeta Formulario de Búsqueda -->
   <md-card style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; background: #ffffff; margin-bottom: 24px; overflow: hidden;">
-    <div style="background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
+    <div style="background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%;">
       <md-icon style="color: #0284c7;">find_in_page</md-icon>
       <span style="font-weight: 700; font-size: 15px; color: #0f172a;">Ingresa los datos del documento a verificar</span>
     </div>
 
-    <form name="form" id="verificarForm" ng-submit="verificar.verificarDocumento($event)" style="padding: 24px;">
-      <div layout="row" layout-xs="column" layout-align="center center" style="gap: 20px; flex-wrap: wrap;">
+    <form name="form" id="verificarForm" ng-submit="verificar.verificarDocumento($event)" style="padding: 28px 32px;">
+      <div layout="row" layout-xs="column" style="gap: 24px; margin-bottom: 20px;">
         <md-input-container flex flex-xs="100" style="margin: 0;">
-          <label>CITE del Documento</label>
-          <input ng-model="verificar.datos.cite" required style="font-weight: 600;">
+          <label style="font-size: 14px; font-weight: 600; color: #0284c7;">CITE del Documento *</label>
+          <input ng-model="verificar.datos.cite" required style="font-weight: 600; font-size: 15px; color: #1e293b;">
         </md-input-container>
 
         <md-input-container flex flex-xs="100" style="margin: 0;">
-          <label>Código de Seguridad</label>
-          <input ng-model="verificar.datos.codigo" required style="font-weight: 600;">
+          <label style="font-size: 14px; font-weight: 600; color: #0284c7;">Código de Seguridad *</label>
+          <input ng-model="verificar.datos.codigo" required style="font-weight: 600; font-size: 15px; color: #1e293b;">
         </md-input-container>
+      </div>
 
-        <div class="recaptcha" id="recaptcha" style="display: flex; justify-content: center;"></div>
+      <div layout="column" layout-align="center center" style="gap: 20px; margin-top: 10px;">
+        <div class="recaptcha" id="recaptcha" style="display: flex; justify-content: center; min-height: 78px;"></div>
 
         <div>
-          <md-button type="submit" class="md-raised md-primary" ng-disabled="form.$invalid" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; font-weight: 700; padding: 6px 24px; border-radius: 10px; height: 44px; margin: 0;">
-            <md-icon style="margin-right: 6px; font-size: 18px;">search</md-icon> Validar documento
+          <md-button type="submit" class="md-raised md-primary" ng-disabled="form.$invalid" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; font-weight: 700; font-size: 15px; padding: 8px 36px; border-radius: 12px; height: 48px; margin: 0; min-width: 240px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);">
+            <md-icon style="margin-right: 8px; font-size: 20px;">search</md-icon> Validar documento
           </md-button>
         </div>
       </div>

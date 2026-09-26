@@ -109,7 +109,7 @@ module.exports = () => {
         bindDn: process.env.LDAP_BIND_DN || 'uid=usuarioLDAP...',
         bindCredentials: process.env.LDAP_BIND_PASSWORD || 'pwdLDAP',
         searchBase: process.env.LDAP_SEARCHBASE || 'ou=usuarios...',
-        searchFilter: process.env.LDAP_SEARCHFILTER || '(uid={{username}})',
+        searchFilter: process.env.LDAP_SEARCHFILTER || '(|(cn={{username}})(sAMAccountName={{username}})(uid={{username}}))',
       },
     },
     // configuracion con jwt poner una palabra secreta segura
