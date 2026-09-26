@@ -13,12 +13,14 @@
 
         $rootScope.isHomeState = function() {
             var path = $location.path();
-            return !path || path === '/' || path === '/inicio' || path === '';
+            var stateName = $rootScope.currentStateName || '';
+            return !path || path === '/' || path === '/inicio' || path === '' || stateName === 'home' || stateName === 'inicio';
         };
 
         function updateBodyState() {
             var path = $location.path();
-            var isHome = !path || path === '/' || path === '/inicio' || path === '';
+            var stateName = $rootScope.currentStateName || '';
+            var isHome = !path || path === '/' || path === '/inicio' || path === '' || stateName === 'home' || stateName === 'inicio';
             if (isHome) {
                 angular.element('body').addClass('is-home-state').removeClass('is-module-state');
             } else {
@@ -26,8 +28,11 @@
             }
         }
 
+        $rootScope.$on('$stateChangeSuccess', function(event, toState) {
+            $rootScope.currentStateName = toState ? toState.name : '';
+            updateBodyState();
+        });
         $rootScope.$on('$locationChangeSuccess', updateBodyState);
-        $rootScope.$on('$stateChangeSuccess', updateBodyState);
         updateBodyState();
 
         var $container = angular.element('#container-main');
