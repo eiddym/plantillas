@@ -70,6 +70,11 @@ module.exports = (sequelize, DataType) => {
             xlabel: 'Es MAE / Director',
             defaultValue: false,
         },
+        tipo_autenticacion: {
+            type: DataType.ENUM('AUTHENTIK', 'LOCAL', 'CIUDADANIA'),
+            defaultValue: 'AUTHENTIK',
+            xlabel: 'Tipo de autenticación',
+        },
         estado: {
             type: DataType.ENUM('ACTIVO', 'INACTIVO'),
             defaultValue: 'ACTIVO',

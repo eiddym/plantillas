@@ -290,23 +290,41 @@ app.post("/autenticar", interceptar, (req,res) => {
 });
 
 function interceptar(req, res, next){
-  try {
-    passport.authenticate("ldapauth", cfg.jwtSession, (err, user, info) => {
-      if(err || !user){
-        req.ldap=false;
-        req.user=null;
+  const username = req.body.username;
+  if (username) {
+    usuarios.findOne({ where: { usuario: username } })
+    .then(u => {
+      if (u && u.tipo_autenticacion === 'LOCAL') {
+        req.ldap = false;
+        req.user = null;
         return next();
       }
-      else{
-        req.ldap=true;
-        req.user = user;
-        next();
-      }
-    })(req,res,next);
-  } catch (e) {
-    req.ldap=false;
-    req.user=null;
-    next();
+      ejecutarLdapAuth();
+    })
+    .catch(() => ejecutarLdapAuth());
+  } else {
+    ejecutarLdapAuth();
+  }
+
+  function ejecutarLdapAuth() {
+    try {
+      passport.authenticate("ldapauth", cfg.jwtSession, (err, user, info) => {
+        if(err || !user){
+          req.ldap=false;
+          req.user=null;
+          return next();
+        }
+        else{
+          req.ldap=true;
+          req.user = user;
+          next();
+        }
+      })(req,res,next);
+    } catch (e) {
+      req.ldap=false;
+      req.user=null;
+      next();
+    }
   }
 }
 
