@@ -3,12 +3,17 @@
         <h1 class="md-toolbar-tools"><i class="md-icon sidenav-title-icon">description</i> <span class="sidenav-title-text">PLANTILLAS</span></h1>
     </md-toolbar>
     <div class="sidenav-user">
-        <figure>
-            <img class="sidenav-user-photo" src="" alt="Image User" hidden>
-            <div class="sidenav-user-default bg-{{vm.getColor()}}-user">
-                <!-- <i class="md-icon">account_circle</i> -->
+        <figure class="sidenav-avatar-container" style="position: relative; display: inline-block;">
+            <div class="sidenav-user-photo-box" ng-if="vm.user.foto_url || vm.user.foto">
+                <img class="sidenav-user-photo" ng-src="{{vm.user.foto_url || vm.user.foto}}" alt="Foto Usuario">
+            </div>
+            <div class="sidenav-user-default bg-{{vm.getColor()}}-user" ng-if="!vm.user.foto_url && !vm.user.foto">
                 {{vm.getInitial()}}
             </div>
+            <button class="btn-subir-foto-overlay" type="button" ng-click="vm.abrirSelectorFoto()" title="Cambiar foto de perfil">
+                <md-icon style="font-size: 15px; color: #ffffff;">photo_camera</md-icon>
+            </button>
+            <input type="file" id="sidenav-photo-input" style="display: none;" accept="image/*" onchange="angular.element(this).scope().vm.subirFotoArchivo(this.files)">
         </figure>
         <h2 class="sidenav-user-name">{{vm.getName()}}
             <md-tooltip md-direction="bottom">
@@ -18,6 +23,11 @@
         <div class="sidenav-user-item">{{vm.getEmail()}}</div>
     </div>
     <ul class="sidenav-list">
+        <li>
+            <md-button type="button" class="md-button md-button-toggle md-ink-ripple" ng-click="vm.send('/', 0)">
+                <i class="md-icon md-icon-option" style="color: #00e5ff !important;">home</i> <span class="md-icon-text" style="font-weight: 700;">Inicio / Panel</span>
+            </md-button>
+        </li>
         <li ng-repeat="opcion in vm.getMenu()">
             <md-button type="button" class="md-button-toggle md-button md-button md-ink-ripple" ng-click="vm.send(opcion.url, opcion.submenu.length)">
                 <i class="md-icon md-icon-option">{{opcion.icon}}</i> <span class="md-icon-text">{{opcion.label}}</span> <i class="md-icon md-icon-arrow-down" ng-if="opcion.submenu.length">keyboard_arrow_down</i>

@@ -11,7 +11,7 @@
             restrict: 'E',
             templateUrl: 'app/components/sidenav/sidenav.html',
             scope: {},
-            controller: ['$timeout', '$mdSidenav', 'SideNavFactory', '$location', 'Storage', 'Util', 'BreadcrumbFactory', '$log', SidenavController],
+            controller: ['$timeout', '$mdSidenav', 'SideNavFactory', '$location', 'Storage', 'Util', 'BreadcrumbFactory', '$log', '$window', '$http', 'restUrl', '$rootScope', SidenavController],
             controllerAs: 'vm',
             bindToController: true,
             link: function(scope, elem) {
@@ -42,12 +42,50 @@
         return directive
 
         /** @ngInject */
-        function SidenavController($timeout, $mdSidenav, SideNavFactory, $location, Storage, Util, BreadcrumbFactory, $log) {
+        function SidenavController($timeout, $mdSidenav, SideNavFactory, $location, Storage, Util, BreadcrumbFactory, $log, $window, $http, restUrl, $rootScope) {
             var vm = this;
             var color = ['info', 'success', 'danger', 'warning', 'primary'];
 
-            vm.user = {};
+            vm.user = Storage.existUser() ? Storage.getUser() : {};
             vm.menu = [];
+
+            vm.abrirSelectorFoto = function() {
+                angular.element('#sidenav-photo-input').click();
+            };
+
+            vm.subirFotoArchivo = function(files) {
+                if (!files || !files.length) return;
+                var file = files[0];
+                var formData = new FormData();
+                formData.append('foto', file);
+
+                var userId = vm.user.id || vm.user.id_usuario || 1;
+                $http.post(restUrl + 'usuarios/' + userId + '/foto', formData, {
+                    transformRequest: angular.identity,
+                    headers: { 'Content-Type': undefined }
+                }).then(function(res) {
+                    if (res.data && res.data.datos && res.data.datos.foto) {
+                        var fotoUrl = res.data.datos.foto;
+                        vm.user.foto = fotoUrl;
+                        vm.user.foto_url = fotoUrl;
+                        
+                        var storedUser = Storage.getUser() || {};
+                        storedUser.foto = fotoUrl;
+                        storedUser.foto_url = fotoUrl;
+                        Storage.setUser(storedUser);
+                        if ($rootScope.currentUser) {
+                            $rootScope.currentUser.foto = fotoUrl;
+                        }
+                        if (Util && Util.mensajeExito) {
+                            Util.mensajeExito('Foto de perfil actualizada correctamente');
+                        }
+                    }
+                }).catch(function(err) {
+                    if (Util && Util.mensajeError) {
+                        Util.mensajeError('Error al subir la foto de perfil');
+                    }
+                });
+            };
 
             vm.toggleLeft = buildDelayedToggler('left');
 

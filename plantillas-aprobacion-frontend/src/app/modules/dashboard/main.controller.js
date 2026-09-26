@@ -13,37 +13,83 @@
     vm.usuario = Storage.getUser() || {};
     vm.saludo = obtenerSaludo();
 
-    vm.kpis = [];
-    vm.documentosRecientes = [];
-    vm.catalogos = [];
-
+    vm.secciones = [];
     vm.vistaPrevia = vistaPrevia;
     vm.verProgreso = verProgreso;
     vm.irARuta = irARuta;
 
-    // Cargar datos del dashboard
-    cargarResumen();
+    var ICON_COLOR_MAP = {
+      'documentos': { icon: 'description', color: 'blue', countKey: 'documentos', desc: 'Mis documentos redactados' },
+      'aprobacion': { icon: 'schedule', color: 'amber', countKey: 'pendientes', desc: 'Trámites en bandeja de derivación' },
+      'firmar': { icon: 'edit_note', color: 'violet', countKey: 'firmas', desc: 'Pendientes de firma digital' },
+      'aprobar_documento': { icon: 'fingerprint', color: 'indigo', countKey: 'firmas', desc: 'Aprobación con Ciudadanía' },
+      'impresion': { icon: 'print', color: 'slate', countKey: 'documentos', desc: 'Impresión oficial de documentos' },
+      'archivo': { icon: 'inventory_2', color: 'slate', countKey: 'documentos', desc: 'Archivo digital emitido' },
+      'catalogos': { icon: 'folder', color: 'teal', countKey: 'catalogos', desc: 'Tablas de datos y catálogos' },
+      'compartidos': { icon: 'share', color: 'teal', countKey: 'compartidos', desc: 'Catálogos compartidos' },
+      'usuario': { icon: 'people', color: 'green', countKey: 'usuarios', desc: 'Gestión de usuarios' },
+      'rol': { icon: 'security', color: 'violet', countKey: 'roles', desc: 'Perfiles de permisos y roles' },
+      'menu': { icon: 'list_alt', color: 'amber', countKey: 'menus', desc: 'Administración de menús' },
+      'unidad': { icon: 'business', color: 'blue', countKey: 'unidades', desc: 'Estructura organizacional' },
+      'plantillas': { icon: 'view_quilt', color: 'teal', countKey: 'plantillas', desc: 'Formularios y plantillas' },
+      'contactos': { icon: 'contacts', color: 'indigo', countKey: 'contactos', desc: 'Directorio de personal' }
+    };
 
-    function cargarResumen() {
+    // Cargar menú y resumen dinámico desde BD
+    cargarDashboard();
+
+    function cargarDashboard() {
       vm.cargando = true;
+      var menuTree = Storage.getSession('menu') || [];
 
       DashboardService.getResumen()
-        .then(function(resumen) {
+        .then(function(contadores) {
           vm.cargando = false;
-
-          vm.kpis = [
-            { icon: 'description',      color: 'blue',   valor: resumen.documentos,  label: 'Documentos Oficiales', ruta: 'archivo' },
-            { icon: 'schedule',         color: 'amber',  valor: resumen.pendientes,  label: 'Trámites Pendientes',  ruta: 'aprobacion' },
-            { icon: 'edit_note',        color: 'violet', valor: resumen.porFirmar,   label: 'Pendientes de Firma',  ruta: 'firmar' },
-            { icon: 'folder_special',   color: 'indigo', valor: resumen.expedientes, label: 'Expedientes Vinculados', ruta: 'archivo' }
-          ];
-
-          vm.documentosRecientes = resumen.documentosRecientes || [];
-          vm.catalogos = resumen.catalogos || [];
+          vm.secciones = construirSecciones(menuTree, contadores || {});
         })
         .catch(function() {
           vm.cargando = false;
+          vm.secciones = construirSecciones(menuTree, {});
         });
+    }
+
+    function construirSecciones(menuTree, contadores) {
+      var secciones = [];
+      if (!menuTree || !menuTree.length) return secciones;
+
+      angular.forEach(menuTree, function(padre) {
+        if (padre.submenu && padre.submenu.length) {
+          var secItems = [];
+          angular.forEach(padre.submenu, function(sub) {
+            var meta = ICON_COLOR_MAP[sub.url] || { 
+              icon: sub.icono || 'extension', 
+              color: 'blue', 
+              countKey: null, 
+              desc: sub.label 
+            };
+            var val = (meta.countKey && contadores[meta.countKey] !== undefined) ? contadores[meta.countKey] : 0;
+
+            secItems.push({
+              label: sub.label,
+              url: sub.url,
+              icon: meta.icon,
+              color: meta.color,
+              valor: val,
+              desc: meta.desc
+            });
+          });
+
+          if (secItems.length > 0) {
+            secciones.push({
+              label: padre.label,
+              icon: padre.icon || 'folder',
+              items: secItems
+            });
+          }
+        }
+      });
+
+      return secciones;
     }
 
     function obtenerSaludo() {

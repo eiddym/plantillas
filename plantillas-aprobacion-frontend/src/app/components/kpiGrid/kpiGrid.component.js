@@ -8,7 +8,7 @@
       bindings: {
         kpis: '<'
       },
-      controller: [' $state', KpiGridController]
+      controller: ['$state', KpiGridController]
     });
 
   /** @ngInject */
