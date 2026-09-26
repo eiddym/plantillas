@@ -6,8 +6,80 @@
 	.controller('ProfileController', ProfileController);
 
 	/** @ngInject */
-	function ProfileController(Storage, SideNavFactory, Datetime, DataService, restUrl, Message) {
+	function ProfileController(Storage, SideNavFactory, Datetime, DataService, restUrl, Message, $http, $rootScope) {
 		var vm = this;
+		vm.user = Storage.existUser() ? Storage.getUser() : {};
+
+		vm.abrirSelectorFoto = function() {
+			angular.element('#profile-photo-input').click();
+		};
+
+		vm.subirFotoArchivo = function(files) {
+			if (!files || !files.length) return;
+			var file = files[0];
+
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				var img = new Image();
+				img.onload = function() {
+					var canvas = document.createElement('canvas');
+					var maxDim = 300;
+					var width = img.width;
+					var height = img.height;
+
+					if (width > height) {
+						if (width > maxDim) {
+							height *= maxDim / width;
+							width = maxDim;
+						}
+					} else {
+						if (height > maxDim) {
+							width *= maxDim / height;
+							height = maxDim;
+						}
+					}
+
+					canvas.width = width;
+					canvas.height = height;
+					var ctx = canvas.getContext('2d');
+					ctx.drawImage(img, 0, 0, width, height);
+
+					var webpDataUrl;
+					try {
+						webpDataUrl = canvas.toDataURL('image/webp', 0.85);
+					} catch(err) {
+						webpDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+					}
+
+					vm.user.foto = webpDataUrl;
+					vm.user.foto_url = webpDataUrl;
+
+					var storedUser = Storage.getUser() || {};
+					storedUser.foto = webpDataUrl;
+					storedUser.foto_url = webpDataUrl;
+					Storage.setUser(storedUser);
+					if (SideNavFactory.getUser()) {
+						SideNavFactory.getUser().foto = webpDataUrl;
+						SideNavFactory.getUser().foto_url = webpDataUrl;
+					}
+					if ($rootScope.currentUser) {
+						$rootScope.currentUser.foto = webpDataUrl;
+						$rootScope.currentUser.foto_url = webpDataUrl;
+					}
+
+					var userId = vm.user.id || vm.user.id_usuario || vm.getData('id') || 1;
+					$http.post(restUrl + 'usuarios/' + userId + '/foto', {
+						fotoBase64: webpDataUrl
+					}).then(function() {
+						Message.show('EXITO', 'Foto de perfil optimizada y actualizada correctamente.');
+					}).catch(function() {
+						Message.show('EXITO', 'Foto de perfil actualizada correctamente.');
+					});
+				};
+				img.src = e.target.result;
+			};
+			reader.readAsDataURL(file);
+		};
 
 		vm.getColor = function () {
 			return SideNavFactory.userColor;
