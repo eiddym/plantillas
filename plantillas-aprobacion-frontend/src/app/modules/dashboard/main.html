@@ -2,7 +2,7 @@
   <!-- Loader -->
   <div class="home-loading" ng-if="main.cargando" layout="column" layout-align="center center">
     <md-progress-circular md-mode="indeterminate" md-diameter="45"></md-progress-circular>
-    <p style="margin-top: 15px; color: #64748b; font-weight: 500;">Cargando tus accesos directos...</p>
+    <p style="margin-top: 15px; color: #64748b; font-weight: 500;">Cargando accesos directos...</p>
   </div>
 
   <!-- Secciones Dinámicas Derivadas del Menú de Base de Datos -->
@@ -18,10 +18,10 @@
         </div>
 
         <div class="grid">
-          <div class="card" ng-class="{'dim': !item.valor || item.valor === 0 || item.valor === '0'}" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
+          <div class="card" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
             <div class="card-top">
-              <span class="icon-badge" ng-class="(item.valor > 0) ? ('bg-' + item.color) : 'bg-gray'">
-                <md-icon style="font-size: 16px; width: 16px; height: 16px; color: #ffffff;">{{ item.icon }}</md-icon>
+              <span class="icon-badge" ng-class="'bg-' + item.color">
+                <md-icon style="font-size: 18px; width: 18px; height: 18px; color: #ffffff;">{{ item.icon }}</md-icon>
               </span>
               <span class="count">{{ item.valor || 0 }}</span>
             </div>
@@ -39,6 +39,6 @@
 
   <!-- Footer de Inicio -->
   <div class="home-shell-footer">
-    <span>ARMOTECH 2026 &middot; Versión 1.0.0</span>
+    <span>COOPERATIVA MINERA MARABUNTA R.L. &middot; Sistema de Plantillas 2026</span>
   </div>
 </div>
