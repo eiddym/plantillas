@@ -87,6 +87,52 @@
                 });
             };
 
+            vm.getMenuIconColor = function(label, url) {
+                var key = (label || '').toUpperCase();
+                var u = (url || '').toLowerCase();
+                if (u === 'documentos') return '#2563eb';
+                if (u === 'aprobacion') return '#f59e0b';
+                if (u === 'firmar') return '#8b5cf6';
+                if (u === 'archivo') return '#64748b';
+                if (u === 'catalogos') return '#0d9488';
+                if (u === 'compartidos') return '#0d9488';
+                if (u === 'usuario') return '#10b981';
+                if (u === 'rol') return '#8b5cf6';
+                if (u === 'menu') return '#f59e0b';
+                if (u === 'unidad') return '#2563eb';
+                if (key.indexOf('DOC') !== -1) return '#2563eb';
+                if (key.indexOf('CAT') !== -1) return '#0d9488';
+                if (key.indexOf('ADM') !== -1) return '#10b981';
+                if (key.indexOf('CONF') !== -1) return '#64748b';
+                return '#00e5ff';
+            };
+
+            vm.getMenuIcon = function(opcion) {
+                var url = (opcion.url || '').toLowerCase();
+                var label = (opcion.label || '').toUpperCase();
+                var icons = {
+                    'documentos': 'description',
+                    'aprobacion': 'schedule',
+                    'firmar': 'edit_note',
+                    'aprobar_documento': 'fingerprint',
+                    'archivo': 'inventory_2',
+                    'catalogos': 'folder',
+                    'compartidos': 'share',
+                    'usuario': 'people',
+                    'rol': 'security',
+                    'menu': 'list_alt',
+                    'unidad': 'business',
+                    'plantillas': 'view_quilt',
+                    'contactos': 'contacts'
+                };
+                if (icons[url]) return icons[url];
+                if (label.indexOf('DOC') !== -1) return 'folder';
+                if (label.indexOf('CAT') !== -1) return 'folder_special';
+                if (label.indexOf('ADM') !== -1) return 'settings';
+                if (label.indexOf('CONF') !== -1) return 'build';
+                return opcion.icon || 'folder';
+            };
+
             vm.toggleLeft = buildDelayedToggler('left');
 
             vm.send = function (url, submenu) {

@@ -18,6 +18,13 @@
     vm.verProgreso = verProgreso;
     vm.irARuta = irARuta;
 
+    var PARENT_COLOR_MAP = {
+      'DOCUMENTOS': { color: 'blue', icon: 'folder' },
+      'CATALOGOS': { color: 'teal', icon: 'folder' },
+      'ADMINISTRACIÓN': { color: 'green', icon: 'settings' },
+      'CONFIGURACIÓN': { color: 'slate', icon: 'build' }
+    };
+
     var ICON_COLOR_MAP = {
       'documentos': { icon: 'description', color: 'blue', countKey: 'documentos', desc: 'Mis documentos redactados' },
       'aprobacion': { icon: 'schedule', color: 'amber', countKey: 'pendientes', desc: 'Trámites en bandeja de derivación' },
@@ -80,9 +87,11 @@
           });
 
           if (secItems.length > 0) {
+            var parentMeta = PARENT_COLOR_MAP[padre.label] || { color: 'blue', icon: padre.icon || 'folder' };
             secciones.push({
               label: padre.label,
-              icon: padre.icon || 'folder',
+              icon: parentMeta.icon,
+              color: parentMeta.color,
               items: secItems
             });
           }

@@ -1,24 +1,20 @@
 <md-toolbar class="app-navbar-toolbar">
     <div class="md-toolbar-tools">
-        <!-- MODO INICIO: Sin sidebar toggle, muestra Marca / Logo ejecutable a Inicio -->
-        <div ng-if="$root.isHomeState" class="navbar-brand-box" ng-click="vm.goHome()" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <md-icon style="color: #00e5ff !important; font-size: 24px;">description</md-icon>
-            <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; color: #ffffff;">PLANTILLAS</span>
-        </div>
-
-        <!-- MODO MÓDULO: Muestra Botón Hamburguesa ☰ + Botón Inicio + Título del Módulo -->
-        <div ng-if="!$root.isHomeState" layout="row" layout-align="start center" style="gap: 8px;">
+        <!-- Contenedor Principal Izquierda: Botón Hamburguesa ☰ + Título del Contexto Actual -->
+        <div layout="row" layout-align="start center" style="gap: 10px;">
             <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú">
-                <md-tooltip>Mostrar / Ocultar menú</md-tooltip>
-                <i class="md-icon">menu</i>
+                <md-tooltip>Colapsar / Ocultar menú lateral</md-tooltip>
+                <i class="md-icon" style="font-size: 24px; color: #00e5ff !important;">menu</i>
             </md-button>
 
-            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio">
+            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio" ng-if="!$root.isHomeState">
                 <md-tooltip>Volver a Inicio</md-tooltip>
-                <md-icon style="color: #00e5ff !important;">home</md-icon>
+                <md-icon style="color: #ffffff !important;">home</md-icon>
             </md-button>
 
-            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 600; color: #ffffff; margin-left: 6px;">{{ vm.getModuleTitle() }}</span>
+            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px;">
+                {{ vm.getModuleTitle() }}
+            </span>
         </div>
 
         <span flex></span>

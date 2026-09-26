@@ -17,10 +17,17 @@
   <div class="home-dynamic-sections" ng-if="!main.cargando">
 
     <section class="dashboard-section" ng-repeat="seccion in main.secciones">
-      <h2 class="section-title">
-        <md-icon class="section-icon">{{ seccion.icon }}</md-icon> {{ seccion.label }}
-      </h2>
+      
+      <!-- Header de Sección Limpio (Alineado a la Izquierda con Línea Divisoria) -->
+      <div class="section-header-row">
+        <div class="section-title-badge" ng-class="'sec-badge--' + seccion.color">
+          <md-icon>{{ seccion.icon }}</md-icon>
+        </div>
+        <h2 class="section-title-text">{{ seccion.label }}</h2>
+        <div class="section-line-divider"></div>
+      </div>
 
+      <!-- Grid de Tarjetas KPI del Módulo -->
       <div class="kpi-grid-container">
         <div class="kpi-card-item" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
           
