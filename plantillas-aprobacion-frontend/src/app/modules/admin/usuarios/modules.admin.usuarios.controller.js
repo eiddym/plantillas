@@ -12,7 +12,7 @@
 
         vm.title = 'Usuarios';
         vm.url = restUrl + 'seguridad/usuario/';
-        vm.fields = ['id_usuario','usuario','numero_documento','nombres','apellidos','cargo','email','estado','_fecha_creacion','_fecha_modificacion'];
+        vm.fields = ['id_usuario','usuario','numero_documento','nombres','apellidos','cargo','email','tipo_autenticacion','estado','_fecha_creacion','_fecha_modificacion'];
         vm.dialogController = [ 'data', 'Message', '$scope', '$mdConstant', '$mdDialog', 'Modal', 'DataService', 'restUrl', '$timeout', DialogUsuarioController];
         vm.template = 'app/modules/admin/usuarios/dialog.usuario.html';
         var cuenta=Storage.getUser();
@@ -39,6 +39,7 @@
           var vmd=$scope;
 
           vmd.data = data;
+          vmd.data.tipo_autenticacion = vmd.data.tipo_autenticacion || 'AUTHENTIK';
           // funciones
           vmd.cerrar = cerrar;
           vmd.registrarUsuario = registrarUsuario;
@@ -193,6 +194,7 @@
               apellidos:vmd.data.apellidos,
               cargo:vmd.data.cargo,
               email:vmd.data.email,
+              tipo_autenticacion: vmd.data.tipo_autenticacion || 'AUTHENTIK',
               estado:vmd.data.estado,
               es_mae: vmd.data.es_mae || false,
               roles:roles,

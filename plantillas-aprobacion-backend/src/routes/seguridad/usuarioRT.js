@@ -777,7 +777,13 @@ module.exports = app => {
           });
         })
         .then(() => t.commit())
-        .then(() => res.status(201).send(util.formatearMensaje("EXITO","Creación de usuario correcto.",usuarioDevolver)))
+        .then(() => {
+          if (usuarioCrear.tipo_autenticacion === 'AUTHENTIK' || !usuarioCrear.tipo_autenticacion) {
+            const authentikService = require('../../lib/authentikService');
+            authentikService.sincronizarUsuarioAuthentik(usuarioDevolver);
+          }
+          res.status(201).send(util.formatearMensaje("EXITO","Creación de usuario correcto.",usuarioDevolver));
+        })
         .catch(error  =>  {
           t.rollback();
           res.status(412).send(util.formatearMensaje("ERROR",error));

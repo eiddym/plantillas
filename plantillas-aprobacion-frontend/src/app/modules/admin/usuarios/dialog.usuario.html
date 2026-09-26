@@ -75,6 +75,18 @@
                 </md-input-container>
                 
                 <md-input-container class="md-block" flex-gt-sm>
+                    <label>Tipo de Autenticación</label>
+                    <md-select ng-model="data.tipo_autenticacion" name="tipo_autenticacion" required>
+                      <md-option ng-value="'AUTHENTIK'">Authentik (LDAP / OIDC)</md-option>
+                      <md-option ng-value="'LOCAL'">Local (Base de Datos)</md-option>
+                      <md-option ng-value="'CIUDADANIA'">Ciudadanía Digital</md-option>
+                    </md-select>
+                    <div ng-messages="usuarioForm.tipo_autenticacion.$error" ng-show="usuarioForm.tipo_autenticacion.$dirty">
+                        <div ng-message="required">Debe seleccionar un tipo de autenticación</div>
+                    </div>
+                </md-input-container>
+
+                <md-input-container class="md-block" flex-gt-sm>
                     <label>Estado</label>
                     <md-select ng-model="data.estado" name="estado" required>
                       <md-option ng-value="'ACTIVO'">ACTIVO</md-option>
