@@ -328,17 +328,6 @@
         }
 
     function loadCanvas(url, idCanvasContainer) {
-    console.log("===> EJECUTANDO VISOR VERSION FINAL 2026 <====");
-    console.log("PDF MOBILE DEBUG", {
-        selector: idCanvasContainer,
-        hasBuffer: !!url,
-        bufferType: Object.prototype.toString.call(url),
-        bufferBytes: url && (url.byteLength || url.length || 0),
-        pdfjsLoaded: !!(window.pdfjsLib || window.PDFJS),
-        worker: window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions
-            ? window.pdfjsLib.GlobalWorkerOptions.workerSrc
-            : null
-    });
 
     var container = document.querySelector(idCanvasContainer);
     if (!container) {

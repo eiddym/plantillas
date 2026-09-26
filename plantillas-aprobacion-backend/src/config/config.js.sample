@@ -54,7 +54,7 @@ module.exports = () => {
     ruta_documentos: process.env.RUTA_DOCUMENTOS || "./public/documentos/",
     host: process.env.HOST_BACKEND || 'localhost:8001', // Host backend sobre dominio
     front: process.env.HOST_FRONTEND || 'localhost:3000', // Host frontend sobre dominio
-    urlVerificar: process.env.URL_VERIFICACION || 'http://192.168.1.7/verificar',
+    urlVerificar: process.env.URL_VERIFICACION || 'https://docs.marabuntarl.com/#/verificar',
 
     entidad: {
       nombre: process.env.ENTIDAD_NOMBRE || '',
