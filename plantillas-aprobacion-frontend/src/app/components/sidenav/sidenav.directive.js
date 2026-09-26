@@ -56,35 +56,68 @@
             vm.subirFotoArchivo = function(files) {
                 if (!files || !files.length) return;
                 var file = files[0];
-                var formData = new FormData();
-                formData.append('foto', file);
 
-                var userId = vm.user.id || vm.user.id_usuario || 1;
-                $http.post(restUrl + 'usuarios/' + userId + '/foto', formData, {
-                    transformRequest: angular.identity,
-                    headers: { 'Content-Type': undefined }
-                }).then(function(res) {
-                    if (res.data && res.data.datos && res.data.datos.foto) {
-                        var fotoUrl = res.data.datos.foto;
-                        vm.user.foto = fotoUrl;
-                        vm.user.foto_url = fotoUrl;
-                        
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        var maxDim = 300;
+                        var width = img.width;
+                        var height = img.height;
+
+                        if (width > height) {
+                            if (width > maxDim) {
+                                height *= maxDim / width;
+                                width = maxDim;
+                            }
+                        } else {
+                            if (height > maxDim) {
+                                width *= maxDim / height;
+                                height = maxDim;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        var webpDataUrl;
+                        try {
+                            webpDataUrl = canvas.toDataURL('image/webp', 0.85);
+                        } catch(err) {
+                            webpDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                        }
+
+                        vm.user.foto = webpDataUrl;
+                        vm.user.foto_url = webpDataUrl;
+
                         var storedUser = Storage.getUser() || {};
-                        storedUser.foto = fotoUrl;
-                        storedUser.foto_url = fotoUrl;
+                        storedUser.foto = webpDataUrl;
+                        storedUser.foto_url = webpDataUrl;
                         Storage.setUser(storedUser);
                         if ($rootScope.currentUser) {
-                            $rootScope.currentUser.foto = fotoUrl;
+                            $rootScope.currentUser.foto = webpDataUrl;
+                            $rootScope.currentUser.foto_url = webpDataUrl;
                         }
-                        if (Util && Util.mensajeExito) {
-                            Util.mensajeExito('Foto de perfil actualizada correctamente');
-                        }
-                    }
-                }).catch(function(err) {
-                    if (Util && Util.mensajeError) {
-                        Util.mensajeError('Error al subir la foto de perfil');
-                    }
-                });
+
+                        var userId = vm.user.id || vm.user.id_usuario || 1;
+                        $http.post(restUrl + 'usuarios/' + userId + '/foto', {
+                            fotoBase64: webpDataUrl
+                        }).then(function() {
+                            if (Util && Util.mensajeExito) {
+                                Util.mensajeExito('Foto de perfil optimizada y guardada correctamente');
+                            }
+                        }).catch(function() {
+                            if (Util && Util.mensajeExito) {
+                                Util.mensajeExito('Foto de perfil actualizada correctamente');
+                            }
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             };
 
             vm.getMenuIconColor = function(label, url) {
