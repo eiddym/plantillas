@@ -113,17 +113,20 @@ acme-sidenav {
 		.md-button {
 			color: $colorSecondary;
 			line-height: 18px;
-			padding: 15px;
+			padding: 10px 15px;
 			white-space: normal;
+			display: flex !important;
+			align-items: center !important;
 
 			.nav-subicon-badge {
-				width: 26px;
-				height: 26px;
+				width: 28px;
+				height: 28px;
 				border-radius: 8px;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				margin-right: 10px;
+				display: inline-flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				margin-right: 10px !important;
+				float: none !important;
 				font-size: 1rem;
 				flex-shrink: 0;
 				
@@ -134,7 +137,9 @@ acme-sidenav {
 				}
 			}
 			.md-icon-text {
-				margin-left: 0;
+				margin-left: 0 !important;
+				float: none !important;
+				display: inline-block !important;
 			}
 			&.active {
 				background-color: #f1f5f9;
@@ -148,15 +153,22 @@ acme-sidenav {
 
 	.sidenav-user {
 		background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-		padding: 14px 10px;
-		height: 190px;
+		padding: 16px 12px;
+		height: 195px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
 		transition: height ease .3s;
 
 		.sidenav-avatar-container {
 			margin: 0 auto;
 			display: flex;
 			justify-content: center;
+			align-items: center;
 			position: relative;
+			width: 100%;
 
 			.sidenav-user-photo-box {
 				width: 84px;
