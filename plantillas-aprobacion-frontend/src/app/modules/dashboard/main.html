@@ -1,3 +1,107 @@
-<div class="container">
-  Mi dashboard
+<div class="home-shell-container">
+  <!-- Saludo Header Banner -->
+  <div class="home-header-banner">
+    <div class="user-greeting-box">
+      <h1 class="greeting-title">{{ main.saludo }}, {{ main.usuario.nombres || main.usuario.nombre || main.usuario.usuario }}</h1>
+      <p class="greeting-subtitle">Bienvenido a tu panel de control de documentos, solicitudes y trámites oficiales.</p>
+    </div>
+  </div>
+
+  <!-- KPI Grid Cards -->
+  <kpi-grid kpis="main.kpis"></kpi-grid>
+
+  <!-- Grid de Dos Columnas (Documentos Recientes & Catálogos) -->
+  <div class="home-section-grid" layout="row" layout-xs="column" layout-sm="column">
+    
+    <!-- Columna 1: Documentos Recientes -->
+    <div class="home-card-col" flex-gt-sm="60" flex="100">
+      <md-card class="home-content-card">
+        <md-card-header class="home-card-header">
+          <md-card-header-text>
+            <span class="md-title">
+              <md-icon class="icon-header blue">description</md-icon> Documentos Recientes
+            </span>
+            <span class="md-subhead">Últimos documentos oficiales con CITE asignado</span>
+          </md-card-header-text>
+          <md-button class="md-icon-button" ng-click="main.irARuta('archivo')">
+            <md-tooltip>Ver todos los documentos en Archivo</md-tooltip>
+            <md-icon>arrow_forward</md-icon>
+          </md-button>
+        </md-card-header>
+
+        <md-card-content>
+          <!-- Loader -->
+          <div class="home-loading" ng-if="main.cargando" layout="column" layout-align="center center">
+            <md-progress-circular md-mode="indeterminate" md-diameter="40"></md-progress-circular>
+            <p>Cargando documentos recientes...</p>
+          </div>
+
+          <!-- Listado de Documentos -->
+          <div class="recent-doc-list" ng-if="!main.cargando && main.documentosRecientes.length > 0">
+            <div class="recent-doc-item" ng-repeat="doc in main.documentosRecientes" ng-click="main.vistaPrevia($event, doc.id_documento)">
+              <div class="doc-icon-box">
+                <md-icon>description</md-icon>
+              </div>
+              <div class="doc-info-meta">
+                <span class="doc-cite-title">{{ doc.nombre }}</span>
+                <span class="doc-sub-text">{{ doc.nombre_plantilla }} &bull; {{ doc._fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="doc-status-badge" ng-class="doc.estado">{{ doc.estado }}</div>
+              <div class="doc-actions">
+                <md-button class="md-icon-button md-accent" ng-click="main.vistaPrevia($event, doc.id_documento)">
+                  <md-tooltip>Ver PDF</md-tooltip>
+                  <md-icon>remove_red_eye</md-icon>
+                </md-button>
+                <md-button class="md-icon-button" ng-click="main.verProgreso($event, doc.id_documento)">
+                  <md-tooltip>Historial de Flujo</md-tooltip>
+                  <md-icon>timeline</md-icon>
+                </md-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="home-empty-box" ng-if="!main.cargando && main.documentosRecientes.length === 0" layout="column" layout-align="center center">
+            <md-icon class="empty-icon">inventory_2</md-icon>
+            <p>No tienes documentos recientes asignados</p>
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+
+    <!-- Columna 2: Mis Catálogos y Accesos Rápidos -->
+    <div class="home-card-col" flex-gt-sm="40" flex="100">
+      <md-card class="home-content-card">
+        <md-card-header class="home-card-header">
+          <md-card-header-text>
+            <span class="md-title">
+              <md-icon class="icon-header teal">folder</md-icon> Mis Catálogos & Plantillas
+            </span>
+            <span class="md-subhead">Módulos de trabajo y archivos frecuentes</span>
+          </md-card-header-text>
+        </md-card-header>
+
+        <md-card-content>
+          <div class="catalogos-grid-container">
+            <div class="catalog-card-item" ng-repeat="cat in main.catalogos" ng-click="main.irARuta(cat.state)">
+              <div class="cat-icon-box" ng-class="'cat-icon--' + cat.color">
+                <md-icon>{{ cat.icon }}</md-icon>
+              </div>
+              <div class="cat-details">
+                <span class="cat-name">{{ cat.nombre }}</span>
+                <span class="cat-count">{{ cat.total }} elemento(s)</span>
+              </div>
+              <md-icon class="cat-arrow">chevron_right</md-icon>
+            </div>
+          </div>
+        </md-card-content>
+      </md-card>
+    </div>
+
+  </div>
+
+  <!-- Footer de Inicio -->
+  <div class="home-shell-footer">
+    <span>ARMOTECH 2026 &middot; Versión 1.0.0</span>
+  </div>
 </div>

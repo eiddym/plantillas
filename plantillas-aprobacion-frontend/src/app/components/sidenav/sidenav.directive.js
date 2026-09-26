@@ -59,7 +59,10 @@
                         BreadcrumbFactory.setCurrent(page[1]);
                     }
                     Storage.setSession('last_route', url);
-                    // vm.toggleLeft();
+                    
+                    if ($window.innerWidth <= 768) {
+                        $mdSidenav('left').close();
+                    }
                     $location.path(url);
                 }
                 vm.reset();
