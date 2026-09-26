@@ -11,16 +11,35 @@
             restrict: 'E',
             templateUrl: 'app/components/navbar/navbar.html',
             scope: {},
-            controller: ['ExpirationTime', '$location', 'Storage', 'SideNavFactory', 'Util', 'DataService', '$window', 'restUrl', NavbarController],
+            controller: ['ExpirationTime', '$location', 'Storage', 'SideNavFactory', 'Util', 'DataService', '$window', 'restUrl', '$rootScope', NavbarController],
             controllerAs: 'vm',
             bindToController: true
         }
 
         return directive
 
-        /** @ngInject */
-        function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl) {
+        function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl, $rootScope) {
             var vm = this;
+
+            vm.goHome = function() {
+                $location.path('/');
+            };
+
+            vm.getModuleTitle = function() {
+                var path = $location.path().replace('/', '');
+                var titles = {
+                    'documentos': 'Documentos',
+                    'aprobacion': 'Documentos Pendientes',
+                    'firmar': 'Pendientes de Firma',
+                    'archivo': 'Archivo General',
+                    'catalogos': 'Catálogos Generales',
+                    'usuario': 'Gestión de Usuarios',
+                    'unidad': 'Unidades Organizacionales',
+                    'monitoreo': 'Monitoreo de Flujos',
+                    'contactos': 'Directorio de Contactos'
+                };
+                return titles[path] || (path ? path.charAt(0).toUpperCase() + path.slice(1) : 'Módulo');
+            };
 
             vm.toggle = function () {
                 angular.element('#sidenav-main').toggleClass('collapsed');

@@ -1,28 +1,56 @@
-<md-toolbar>
+<md-toolbar class="app-navbar-toolbar">
     <div class="md-toolbar-tools">
-        <md-button class="md-icon-button" ng-click="vm.toggle()" aria-label="Menu collapse" show-gt-md>
-            <md-tooltip>Mostrar/ocultar menú</md-tooltip>
-            <i class="md-icon">menu</i>
-        </md-button>        
-        <!-- <span class="navbar-user-name" flex>{{vm.getFirstName()}}</span> -->
+        <!-- MODO INICIO: Sin sidebar toggle, muestra Marca / Logo ejecutable a Inicio -->
+        <div ng-if="$root.isHomeState" class="navbar-brand-box" ng-click="vm.goHome()" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <md-icon style="color: #00e5ff !important; font-size: 24px;">description</md-icon>
+            <span style="font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; color: #ffffff;">PLANTILLAS</span>
+        </div>
+
+        <!-- MODO MÓDULO: Muestra Botón Hamburguesa ☰ + Botón Inicio + Título del Módulo -->
+        <div ng-if="!$root.isHomeState" layout="row" layout-align="start center" style="gap: 8px;">
+            <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú">
+                <md-tooltip>Mostrar / Ocultar menú</md-tooltip>
+                <i class="md-icon">menu</i>
+            </md-button>
+
+            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio">
+                <md-tooltip>Volver a Inicio</md-tooltip>
+                <md-icon style="color: #00e5ff !important;">home</md-icon>
+            </md-button>
+
+            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 600; color: #ffffff; margin-left: 6px;">{{ vm.getModuleTitle() }}</span>
+        </div>
+
         <span flex></span>
-        <md-button class="margin-0 md-icon-button btn-fullscreen" ng-click="vm.fullscreen()" aria-label="Fullscreen" show-gt-md id="btn-fullscreen">
+
+        <!-- Botón Pantalla Completa -->
+        <md-button class="margin-0 md-icon-button btn-fullscreen" ng-click="vm.fullscreen()" aria-label="Fullscreen" id="btn-fullscreen">
             <md-icon>fullscreen</md-icon>
             <md-icon>fullscreen_exit</md-icon>
             <md-tooltip class="tooltip-fullscreen"><span class="exit">Salir </span>Pantalla completa</md-tooltip>
         </md-button>
+
+        <!-- Botón Notificaciones -->
+        <md-button class="margin-0 md-icon-button" aria-label="Notificaciones">
+            <md-tooltip>Notificaciones</md-tooltip>
+            <md-icon style="color: #f59e0b !important;">notifications</md-icon>
+        </md-button>
+
+        <!-- Menú de Opciones Usuario -->
         <md-menu>
-            <!-- <md-button aria-label="interactions menu" class="md-icon-button navbar-user-icon bg-{{vm.getColor()}}-user" ng-click="vm.openMenu($mdOpenMenu, $event)">
-                {{vm.getInitial()}}
-            </md-button> -->            
             <md-button class="margin-0 md-icon-button" aria-label="Más" ng-click="vm.openMenu($mdOpenMenu, $event)">
-                <md-tooltip>Más opciones</md-tooltip>
+                <md-tooltip>Opciones de usuario</md-tooltip>
                 <md-icon>more_vert</md-icon>
             </md-button>
             <md-menu-content class="navbar-options">
                 <md-menu-item>
+                    <md-button ng-click="vm.goHome()">
+                        <i class="md-icon">home</i> Ir a Inicio
+                    </md-button>
+                </md-menu-item>
+                <md-menu-item>
                     <md-button ng-click="vm.profile()">
-                        <i class="md-icon">account_circle</i> Mi cuenta
+                        <i class="md-icon">account_circle</i> Mi cuenta / Perfil
                     </md-button>
                 </md-menu-item>
                 <md-menu-item>
@@ -30,7 +58,6 @@
                         <i class="md-icon">refresh</i> Cambio de usuario
                     </md-button>
                 </md-menu-item>
-                <!-- <md-menu-divider></md-menu-divider> -->
                 <md-menu-item style="width: 200px;">
                     <md-button ng-click="vm.logout()">
                         <i class="md-icon">power_setting_new</i> Salir
@@ -38,8 +65,5 @@
                 </md-menu-item>
             </md-menu-content>
         </md-menu>
-        <md-button class="md-icon-button" aria-label="More" style="display: none">
-            <i class="md-icon">more_vert</i>
-        </md-button>
     </div>
 </md-toolbar>

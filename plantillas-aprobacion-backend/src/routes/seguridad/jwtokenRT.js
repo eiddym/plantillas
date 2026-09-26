@@ -177,6 +177,7 @@ function xautenticacion(req, res, usar_ldap=1){
         cargo: usuario.cargo,
         doc: usuario.numero_documento,
         email: usuario.email,
+        foto: usuario.foto,
         date_joined: usuario._fecha_creacion,
         ldap:req.ldap,
         id_unidad: usuario.fid_unidad,

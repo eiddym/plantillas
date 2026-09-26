@@ -75,6 +75,11 @@ module.exports = (sequelize, DataType) => {
             defaultValue: 'AUTHENTIK',
             xlabel: 'Tipo de autenticación',
         },
+        foto: {
+            type: DataType.STRING,
+            allowNull: true,
+            xlabel: 'Foto de perfil',
+        },
         estado: {
             type: DataType.ENUM('ACTIVO', 'INACTIVO'),
             defaultValue: 'ACTIVO',

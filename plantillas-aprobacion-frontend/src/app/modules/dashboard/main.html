@@ -3,100 +3,48 @@
   <div class="home-header-banner">
     <div class="user-greeting-box">
       <h1 class="greeting-title">{{ main.saludo }}, {{ main.usuario.nombres || main.usuario.nombre || main.usuario.usuario }}</h1>
-      <p class="greeting-subtitle">Bienvenido a tu panel de control de documentos, solicitudes y trámites oficiales.</p>
+      <p class="greeting-subtitle">Panel de control y accesos rápidos del sistema según tu rol asignado.</p>
     </div>
   </div>
 
-  <!-- KPI Grid Cards -->
-  <kpi-grid kpis="main.kpis"></kpi-grid>
+  <!-- Loader -->
+  <div class="home-loading" ng-if="main.cargando" layout="column" layout-align="center center">
+    <md-progress-circular md-mode="indeterminate" md-diameter="45"></md-progress-circular>
+    <p style="margin-top: 15px; color: #64748b; font-weight: 500;">Cargando tus accesos directos...</p>
+  </div>
 
-  <!-- Grid de Dos Columnas (Documentos Recientes & Catálogos) -->
-  <div class="home-section-grid" layout="row" layout-xs="column" layout-sm="column">
-    
-    <!-- Columna 1: Documentos Recientes -->
-    <div class="home-card-col" flex-gt-sm="60" flex="100">
-      <md-card class="home-content-card">
-        <md-card-header class="home-card-header">
-          <md-card-header-text>
-            <span class="md-title">
-              <md-icon class="icon-header blue">description</md-icon> Documentos Recientes
-            </span>
-            <span class="md-subhead">Últimos documentos oficiales con CITE asignado</span>
-          </md-card-header-text>
-          <md-button class="md-icon-button" ng-click="main.irARuta('archivo')">
-            <md-tooltip>Ver todos los documentos en Archivo</md-tooltip>
-            <md-icon>arrow_forward</md-icon>
-          </md-button>
-        </md-card-header>
+  <!-- Secciones Dinámicas Derivadas del Menú de Base de Datos -->
+  <div class="home-dynamic-sections" ng-if="!main.cargando">
 
-        <md-card-content>
-          <!-- Loader -->
-          <div class="home-loading" ng-if="main.cargando" layout="column" layout-align="center center">
-            <md-progress-circular md-mode="indeterminate" md-diameter="40"></md-progress-circular>
-            <p>Cargando documentos recientes...</p>
-          </div>
+    <section class="dashboard-section" ng-repeat="seccion in main.secciones">
+      <h2 class="section-title">
+        <md-icon class="section-icon">{{ seccion.icon }}</md-icon> {{ seccion.label }}
+      </h2>
 
-          <!-- Listado de Documentos -->
-          <div class="recent-doc-list" ng-if="!main.cargando && main.documentosRecientes.length > 0">
-            <div class="recent-doc-item" ng-repeat="doc in main.documentosRecientes" ng-click="main.vistaPrevia($event, doc.id_documento)">
-              <div class="doc-icon-box">
-                <md-icon>description</md-icon>
-              </div>
-              <div class="doc-info-meta">
-                <span class="doc-cite-title">{{ doc.nombre }}</span>
-                <span class="doc-sub-text">{{ doc.nombre_plantilla }} &bull; {{ doc._fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
-              </div>
-              <div class="doc-status-badge" ng-class="doc.estado">{{ doc.estado }}</div>
-              <div class="doc-actions">
-                <md-button class="md-icon-button md-accent" ng-click="main.vistaPrevia($event, doc.id_documento)">
-                  <md-tooltip>Ver PDF</md-tooltip>
-                  <md-icon>remove_red_eye</md-icon>
-                </md-button>
-                <md-button class="md-icon-button" ng-click="main.verProgreso($event, doc.id_documento)">
-                  <md-tooltip>Historial de Flujo</md-tooltip>
-                  <md-icon>timeline</md-icon>
-                </md-button>
-              </div>
+      <div class="kpi-grid-container">
+        <div class="kpi-card-item" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
+          
+          <div class="kpi-card-top">
+            <div class="kpi-icon-box" ng-class="'kpi-icon--' + item.color">
+              <md-icon>{{ item.icon }}</md-icon>
+            </div>
+            <div class="kpi-card-value" ng-if="item.valor !== undefined && item.valor !== null">
+              {{ item.valor }}
             </div>
           </div>
 
-          <!-- Empty State -->
-          <div class="home-empty-box" ng-if="!main.cargando && main.documentosRecientes.length === 0" layout="column" layout-align="center center">
-            <md-icon class="empty-icon">inventory_2</md-icon>
-            <p>No tienes documentos recientes asignados</p>
+          <div class="kpi-card-body">
+            <h3 class="kpi-card-label">{{ item.label }}</h3>
+            <p class="kpi-card-desc">{{ item.desc }}</p>
           </div>
-        </md-card-content>
-      </md-card>
-    </div>
 
-    <!-- Columna 2: Mis Catálogos y Accesos Rápidos -->
-    <div class="home-card-col" flex-gt-sm="40" flex="100">
-      <md-card class="home-content-card">
-        <md-card-header class="home-card-header">
-          <md-card-header-text>
-            <span class="md-title">
-              <md-icon class="icon-header teal">folder</md-icon> Mis Catálogos & Plantillas
-            </span>
-            <span class="md-subhead">Módulos de trabajo y archivos frecuentes</span>
-          </md-card-header-text>
-        </md-card-header>
-
-        <md-card-content>
-          <div class="catalogos-grid-container">
-            <div class="catalog-card-item" ng-repeat="cat in main.catalogos" ng-click="main.irARuta(cat.state)">
-              <div class="cat-icon-box" ng-class="'cat-icon--' + cat.color">
-                <md-icon>{{ cat.icon }}</md-icon>
-              </div>
-              <div class="cat-details">
-                <span class="cat-name">{{ cat.nombre }}</span>
-                <span class="cat-count">{{ cat.total }} elemento(s)</span>
-              </div>
-              <md-icon class="cat-arrow">chevron_right</md-icon>
-            </div>
+          <div class="kpi-card-footer">
+            <span class="kpi-card-action">Ir a {{ item.label }} &rarr;</span>
           </div>
-        </md-card-content>
-      </md-card>
-    </div>
+
+        </div>
+      </div>
+    </section>
 
   </div>
 
