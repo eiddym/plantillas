@@ -119,7 +119,7 @@ module.exports = () => {
     },
     puerto: process.env.BACKEND_PUERTO || 8001, // Puerto donde se expone el api
     recaptcha: {
-      secretKey: '[token]',
+      secretKey: process.env.RECAPTCHA_SECRET_KEY || '6LdpTNAtAAAAADLJK8fQ8CYZifzA-bhMoSxsdswc',
       url: 'https://www.google.com/recaptcha/api/siteverify',
     },
     almacen: {
