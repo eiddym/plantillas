@@ -1,9 +1,13 @@
 <div class="home-shell-container">
-  <!-- Saludo Header Banner Limpio -->
-  <div class="home-header-banner">
+  <!-- Saludo Header Limpio y Unificado -->
+  <div class="home-welcome-card" style="background: #ffffff; padding: 20px 24px; border-radius: 14px; border: 1px solid #e2e8f0; border-left: 5px solid #00e5ff; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 24px;">
     <div class="user-greeting-box">
-      <h1 class="greeting-title">{{ main.saludo }} {{ main.usuario.nombres || main.usuario.nombre || main.usuario.usuario }}, bienvenido a tu panel de control</h1>
-      <p class="greeting-subtitle">Panel de control y accesos rápidos del sistema según tu rol asignado.</p>
+      <h1 class="greeting-title" style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">
+        {{ main.saludo }} {{ main.usuario.nombres || main.usuario.nombre || main.usuario.usuario }}, bienvenido a tu panel de control
+      </h1>
+      <p class="greeting-subtitle" style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">
+        Panel de control y accesos rápidos del sistema según tu rol asignado.
+      </p>
     </div>
   </div>
 
