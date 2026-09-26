@@ -12,13 +12,13 @@
         MyFormlyConfig.init(formlyConfig);
 
         $rootScope.isHomeState = function() {
-            var path = $location.path();
-            return !path || path === '/' || path === '/inicio' || path === '';
+            var path = ($location.path() || '').trim();
+            var stateName = ($rootScope.$state && $rootScope.$state.current) ? $rootScope.$state.current.name : '';
+            return !path || path === '/' || path === '/inicio' || path === '' || path === '/home' || stateName === 'home' || stateName === 'inicio';
         };
 
         function updateBodyState() {
-            var path = $location.path();
-            var isHome = !path || path === '/' || path === '/inicio' || path === '';
+            var isHome = $rootScope.isHomeState();
             if (isHome) {
                 angular.element('body').addClass('is-home-state').removeClass('is-module-state');
             } else {

@@ -36,9 +36,9 @@
                     'usuario': 'Gestión de Usuarios',
                     'unidad': 'Unidades Organizacionales',
                     'monitoreo': 'Monitoreo de Flujos',
-                    'contactos': 'Directorio de Contactos'
                 };
-                return titles[path] || (path ? path.charAt(0).toUpperCase() + path.slice(1) : 'Módulo');
+                if (!path || path === 'inicio' || path === 'home') return '';
+                return titles[path] || (path ? path.charAt(0).toUpperCase() + path.slice(1) : '');
             };
 
             vm.toggle = function () {
