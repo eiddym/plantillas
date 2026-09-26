@@ -35,7 +35,8 @@ COPY . .
 RUN ./node_modules/.bin/gulp build && \
     sed -i -e 's/src=maps\//src=/g' dist/index.html && \
     sed -i -e 's/.js.map/.js/g' dist/index.html && \
-    sed -i -E "s#(src=)([^ >]+\.js)([ >])#\1\2?v=$(date +%s)\3#g" dist/index.html
+    sed -i -E "s#(src=)([^ >]+\.js)([ >])#\1\2?v=$(date +%s)\3#g" dist/index.html && \
+    sed -i -E "s#(href=)([^ >]+\.css)([ >])#\1\2?v=$(date +%s)\3#g" dist/index.html
 
 # --- ETAPA 2: Servidor de Producción (Nginx) ---
 FROM nginx:1.15.12-alpine
