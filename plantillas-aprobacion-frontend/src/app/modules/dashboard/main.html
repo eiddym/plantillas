@@ -1,16 +1,4 @@
 <div class="home-shell-container">
-  <!-- Saludo Header Limpio y Unificado -->
-  <div class="home-welcome-card" style="background: #ffffff; padding: 20px 24px; border-radius: 14px; border: 1px solid #e2e8f0; border-left: 5px solid #00e5ff; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 24px;">
-    <div class="user-greeting-box">
-      <h1 class="greeting-title" style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">
-        {{ main.saludo }} {{ main.usuario.nombres || main.usuario.nombre || main.usuario.usuario }}, bienvenido a tu panel de control
-      </h1>
-      <p class="greeting-subtitle" style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">
-        Panel de control y accesos rápidos del sistema según tu rol asignado.
-      </p>
-    </div>
-  </div>
-
   <!-- Loader -->
   <div class="home-loading" ng-if="main.cargando" layout="column" layout-align="center center">
     <md-progress-circular md-mode="indeterminate" md-diameter="45"></md-progress-circular>
@@ -20,42 +8,32 @@
   <!-- Secciones Dinámicas Derivadas del Menú de Base de Datos -->
   <div class="home-dynamic-sections" ng-if="!main.cargando">
 
-    <section class="dashboard-section" ng-repeat="seccion in main.secciones">
-      
-      <!-- Header de Sección Limpio (Alineado a la Izquierda con Línea Divisoria) -->
-      <div class="section-header-row">
-        <div class="section-title-badge" ng-class="'sec-badge--' + seccion.color">
-          <md-icon>{{ seccion.icon }}</md-icon>
+    <div class="section" ng-repeat="seccion in main.secciones">
+      <div class="section-panel">
+        <div class="section-header">
+          <span class="dot" ng-class="'bg-' + seccion.color">
+            <md-icon style="font-size: 16px; width: 16px; height: 16px; color: #ffffff;">{{ seccion.icon }}</md-icon>
+          </span>
+          <h2>{{ seccion.label }}</h2>
         </div>
-        <h2 class="section-title-text">{{ seccion.label }}</h2>
-        <div class="section-line-divider"></div>
-      </div>
 
-      <!-- Grid de Tarjetas KPI del Módulo -->
-      <div class="kpi-grid-container">
-        <div class="kpi-card-item" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
-          
-          <div class="kpi-card-top">
-            <div class="kpi-icon-box" ng-class="'kpi-icon--' + item.color">
-              <md-icon>{{ item.icon }}</md-icon>
+        <div class="grid">
+          <div class="card" ng-class="{'dim': !item.valor || item.valor === 0 || item.valor === '0'}" ng-repeat="item in seccion.items" ng-click="main.irARuta(item.url)">
+            <div class="card-top">
+              <span class="icon-badge" ng-class="(item.valor > 0) ? ('bg-' + item.color) : 'bg-gray'">
+                <md-icon style="font-size: 16px; width: 16px; height: 16px; color: #ffffff;">{{ item.icon }}</md-icon>
+              </span>
+              <span class="count">{{ item.valor || 0 }}</span>
             </div>
-            <div class="kpi-card-value" ng-if="item.valor !== undefined && item.valor !== null">
-              {{ item.valor }}
+            <div>
+              <p class="card-title">{{ item.label }}</p>
+              <p class="card-sub">{{ item.desc }}</p>
             </div>
+            <div class="card-link">Ir a {{ item.label }} &rarr;</div>
           </div>
-
-          <div class="kpi-card-body">
-            <h3 class="kpi-card-label">{{ item.label }}</h3>
-            <p class="kpi-card-desc">{{ item.desc }}</p>
-          </div>
-
-          <div class="kpi-card-footer">
-            <span class="kpi-card-action">Ir a {{ item.label }} &rarr;</span>
-          </div>
-
         </div>
       </div>
-    </section>
+    </div>
 
   </div>
 
