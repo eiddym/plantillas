@@ -2,18 +2,24 @@
     <div class="md-toolbar-tools">
         <!-- Contenedor Principal Izquierda: Botón Hamburguesa ☰ + Título del Contexto Actual -->
         <div layout="row" layout-align="start center" style="gap: 10px;">
-            <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú">
+            <!-- Módulo state: Hamburger + Home icon + Module Title -->
+            <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú" ng-if="!$root.isHomeState()">
                 <md-tooltip>Colapsar / Ocultar menú lateral</md-tooltip>
                 <i class="md-icon" style="font-size: 24px; color: #00e5ff !important;">menu</i>
             </md-button>
 
-            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio" ng-if="!$root.isHomeState">
+            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio" ng-if="!$root.isHomeState()">
                 <md-tooltip>Volver a Inicio</md-tooltip>
                 <md-icon style="color: #ffffff !important;">home</md-icon>
             </md-button>
 
-            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px;">
+            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px;" ng-if="!$root.isHomeState()">
                 {{ vm.getModuleTitle() }}
+            </span>
+
+            <!-- Home state: Brand Logo Title -->
+            <span class="navbar-brand-title" style="font-size: 1.15rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;" ng-if="$root.isHomeState()">
+                <md-icon style="color: #00e5ff !important; font-size: 22px;">description</md-icon> PLANTILLAS
             </span>
         </div>
 

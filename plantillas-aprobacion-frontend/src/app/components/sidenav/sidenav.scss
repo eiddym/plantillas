@@ -116,8 +116,25 @@ acme-sidenav {
 			padding: 15px;
 			white-space: normal;
 
+			.nav-subicon-badge {
+				width: 26px;
+				height: 26px;
+				border-radius: 8px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				margin-right: 10px;
+				font-size: 1rem;
+				flex-shrink: 0;
+				
+				.md-icon {
+					font-size: 16px !important;
+					margin: 0 !important;
+					float: none !important;
+				}
+			}
 			.md-icon-text {
-				margin-left: 29px;
+				margin-left: 0;
 			}
 			&.active {
 				background-color: #f1f5f9;
