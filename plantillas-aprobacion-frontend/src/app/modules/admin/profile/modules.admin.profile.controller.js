@@ -68,13 +68,12 @@
 					}
 					$rootScope.$broadcast('user:updated');
 
-					var storedUser = Storage.getUser() || {};
-					var userId = storedUser.id || storedUser.id_usuario || vm.user.id || vm.user.id_usuario || vm.getData('id');
+					var stored = Storage.getUser() || {};
+					var userId = stored.id || stored.id_usuario || vm.user.id || vm.user.id_usuario || vm.getData('id');
 					if (!userId) {
-						Message.error('No se pudo determinar el ID del usuario en sesión.');
+						Message.show('ERROR', 'No se pudo identificar al usuario autenticado.');
 						return;
 					}
-
 					$http.post(restUrl + 'usuarios/' + userId + '/foto', {
 						fotoBase64: webpDataUrl
 					}).then(function() {
