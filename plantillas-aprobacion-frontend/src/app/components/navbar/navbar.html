@@ -3,22 +3,22 @@
         <!-- Contenedor Principal Izquierda: Botón Hamburguesa ☰ + Título del Contexto Actual -->
         <div layout="row" layout-align="start center" style="gap: 10px;">
             <!-- Módulo state: Hamburger + Home icon + Module Title -->
-            <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú" ng-if="!$root.isHomeState()">
+            <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú" ng-if="!vm.isHomeState()">
                 <md-tooltip>Colapsar / Ocultar menú lateral</md-tooltip>
                 <i class="md-icon" style="font-size: 24px; color: #00e5ff !important;">menu</i>
             </md-button>
 
-            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio" ng-if="!$root.isHomeState()">
+            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio" ng-if="!vm.isHomeState()">
                 <md-tooltip>Volver a Inicio</md-tooltip>
                 <md-icon style="color: #ffffff !important;">home</md-icon>
             </md-button>
 
-            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px;" ng-if="!$root.isHomeState()">
+            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px;" ng-if="!vm.isHomeState()">
                 {{ vm.getModuleTitle() }}
             </span>
 
             <!-- Home state: User Greeting & Avatar Meta (Mockup Style) -->
-            <div class="topbar-left-meta" style="display: flex; align-items: center; gap: 12px;" ng-if="$root.isHomeState()">
+            <div class="topbar-left-meta" style="display: flex; align-items: center; gap: 12px;" ng-if="vm.isHomeState()">
                 <div class="avatar-circle" style="width: 38px; height: 38px; border-radius: 50%; background: #4fd1c5; color: #0b3a35; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid rgba(255,255,255,0.55); flex-shrink: 0;">
                     <img ng-src="{{vm.getUser().foto_url || vm.getUser().foto}}" ng-if="vm.getUser().foto_url || vm.getUser().foto" style="width: 100%; height: 100%; object-fit: cover;">
                     <span ng-if="!vm.getUser().foto_url && !vm.getUser().foto">{{ vm.getUserFirstName()[0].toUpperCase() }}</span>
