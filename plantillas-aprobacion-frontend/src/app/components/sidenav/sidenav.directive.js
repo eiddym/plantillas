@@ -113,11 +113,7 @@
 
             vm.getInitial = function () {
                 var name = vm.getName();
-<<<<<<< HEAD
                 return name && name.length ? name[0].toUpperCase() : '?';
-=======
-                return name.length ? name[0].toUpperCase() : '?';
->>>>>>> e5071a6 (fix(ui): limpiar nombre de usuario en sidebar y respetar permisos de menu desmarcados en rol)
             }
 
             vm.getMenu = function () {

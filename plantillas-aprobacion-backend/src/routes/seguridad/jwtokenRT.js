@@ -22,26 +22,67 @@ module.exports = app => {
 
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
+  function parseNombreCompleto(fullName, username, givenName, sn) {
+    fullName = (fullName || "").trim();
+    username = (username || "").trim();
+
+    if (givenName && sn && givenName.toLowerCase() !== username.toLowerCase() && sn !== fullName && sn !== givenName) {
+      return { nombres: givenName.trim(), apellidos: sn.trim() };
+    }
+
+    if (!fullName) {
+      return { nombres: username, apellidos: "" };
+    }
+
+    const words = fullName.split(/\s+/);
+    if (words.length === 1) {
+      return { nombres: words[0], apellidos: "" };
+    }
+
+    const uParts = username.toLowerCase().split(".");
+    const uFirst = uParts[0] || "";
+    const uLast = uParts[1] || "";
+
+    if (uFirst && uLast) {
+      const normWords = words.map(w => w.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+      const normFirst = uFirst.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normLast = uLast.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      const idxFirst = normWords.findIndex(w => w === normFirst);
+      const idxLast = normWords.findIndex(w => w === normLast);
+
+      if (idxFirst !== -1 && idxLast !== -1) {
+        if (idxFirst < idxLast) {
+          const nombres = words.slice(0, idxLast).join(" ");
+          const apellidos = words.slice(idxLast).join(" ");
+          return { nombres, apellidos };
+        } else {
+          const apellidos = words.slice(0, idxFirst).join(" ");
+          const nombres = words.slice(idxFirst).join(" ");
+          return { nombres, apellidos };
+        }
+      }
+    }
+
+    const mid = Math.floor(words.length / 2);
+    return {
+      nombres: words.slice(0, mid).join(" "),
+      apellidos: words.slice(mid).join(" ")
+    };
+  }
+
   const OPTS = cfg.ldap;
   passport.use(new LdapStrategy(OPTS, (payload, done) => {
     const uid = payload.sAMAccountName || payload.uid || payload.cn || 'usuario';
-    let given = payload.givenName || '';
-    let sn = (payload.sn && payload.sn !== payload.name && payload.sn !== payload.displayName) ? payload.sn : '';
-    let fullName = payload.displayName || payload.name || payload.cn || '';
-
-    if (given.toLowerCase() === uid.toLowerCase()) {
-      given = '';
-    }
-    if (!given && !sn && fullName) {
-      given = fullName;
-    }
+    const fullName = payload.displayName || payload.name || payload.cn || '';
+    const parsed = parseNombreCompleto(fullName, uid, payload.givenName, payload.sn);
 
     done(null, {
-      nombre: given || fullName || 'Usuario',
-      apellido: sn,
+      nombre: parsed.nombres,
+      apellido: parsed.apellidos,
       email: payload.mail || payload.email || `${uid}@marabuntarl.com`,
       uid: uid,
-      cargo: payload.title || 'Sin cargo',
+      cargo: payload.title || payload.cargo || 'Sin cargo',
     });
   }));
 
