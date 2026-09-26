@@ -66,6 +66,7 @@
 						$rootScope.currentUser.foto = webpDataUrl;
 						$rootScope.currentUser.foto_url = webpDataUrl;
 					}
+					$rootScope.$broadcast('user:updated');
 
 					var userId = vm.user.id || vm.user.id_usuario || vm.getData('id') || 1;
 					$http.post(restUrl + 'usuarios/' + userId + '/foto', {

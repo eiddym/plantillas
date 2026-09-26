@@ -120,6 +120,21 @@
                 reader.readAsDataURL(file);
             };
 
+            vm.getMenuIconBgColor = function(label, url) {
+                var c = vm.getMenuIconColor(label, url);
+                if (c === '#2563eb') return '#eff6ff';
+                if (c === '#f59e0b') return '#fffbeb';
+                if (c === '#8b5cf6') return '#f5f3ff';
+                if (c === '#64748b') return '#f8fafc';
+                if (c === '#0d9488') return '#f0fdf4';
+                if (c === '#10b981') return '#ecfdf5';
+                return '#e0f2fe';
+            };
+
+            $rootScope.$on('user:updated', function() {
+                vm.user = Storage.getUser() || {};
+            });
+
             vm.getMenuIconColor = function(label, url) {
                 var key = (label || '').toUpperCase();
                 var u = (url || '').toLowerCase();

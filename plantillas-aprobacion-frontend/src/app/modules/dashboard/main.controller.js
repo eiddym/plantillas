@@ -6,12 +6,16 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController(DashboardService, Storage, Documento, $state) {
+  function MainController(DashboardService, Storage, Documento, $state, $rootScope) {
     var vm = this;
 
     vm.cargando = true;
     vm.usuario = Storage.getUser() || {};
     vm.saludo = obtenerSaludo();
+
+    $rootScope.$on('user:updated', function() {
+      vm.usuario = Storage.getUser() || {};
+    });
 
     vm.secciones = [];
     vm.vistaPrevia = vistaPrevia;

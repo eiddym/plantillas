@@ -1,6 +1,9 @@
-<md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" id="sidenav" >
-    <md-toolbar class="sidenav-title">
-        <h1 class="md-toolbar-tools"><i class="md-icon sidenav-title-icon">description</i> <span class="sidenav-title-text">PLANTILLAS</span></h1>
+<md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" id="sidenav">
+    <md-toolbar class="sidenav-title" ng-click="vm.send('/')" style="cursor: pointer;">
+        <h1 class="md-toolbar-tools">
+            <i class="md-icon sidenav-title-icon" style="color: #00e5ff !important; margin-right: 8px;">home</i> 
+            <span class="sidenav-title-text" style="font-weight: 800; letter-spacing: 0.5px;">PLANTILLAS</span>
+        </h1>
     </md-toolbar>
     <div class="sidenav-user">
         <figure class="sidenav-avatar-container" style="position: relative; display: inline-block;">
@@ -10,10 +13,6 @@
             <div class="sidenav-user-default bg-{{vm.getColor()}}-user" ng-if="!vm.user.foto_url && !vm.user.foto">
                 {{vm.getInitial()}}
             </div>
-            <button class="btn-subir-foto-overlay" type="button" ng-click="vm.abrirSelectorFoto()" title="Cambiar foto de perfil">
-                <md-icon style="font-size: 15px; color: #ffffff;">photo_camera</md-icon>
-            </button>
-            <input type="file" id="sidenav-photo-input" style="display: none;" accept="image/*" onchange="angular.element(this).scope().vm.subirFotoArchivo(this.files)">
         </figure>
         <h2 class="sidenav-user-name">{{vm.getName()}}
             <md-tooltip md-direction="bottom">
@@ -23,20 +22,19 @@
         <div class="sidenav-user-item">{{vm.getEmail()}}</div>
     </div>
     <ul class="sidenav-list">
-        <li>
-            <md-button type="button" class="md-button md-button-toggle md-ink-ripple" ng-click="vm.send('/', 0)">
-                <i class="md-icon md-icon-option" style="color: #00e5ff !important;">home</i> <span class="md-icon-text" style="font-weight: 700;">Inicio / Panel</span>
-            </md-button>
-        </li>
         <li ng-repeat="opcion in vm.getMenu()">
             <md-button type="button" class="md-button-toggle md-button md-button md-ink-ripple" ng-click="vm.send(opcion.url, opcion.submenu.length)">
-                <i class="md-icon md-icon-option" ng-style="{ color: vm.getMenuIconColor(opcion.label, opcion.url) }">{{vm.getMenuIcon(opcion)}}</i> <span class="md-icon-text" style="font-weight: 600;">{{opcion.label}}</span> <i class="md-icon md-icon-arrow-down" ng-if="opcion.submenu.length">keyboard_arrow_down</i>
+                <i class="md-icon md-icon-option" ng-style="{ color: vm.getMenuIconColor(opcion.label, opcion.url) }">{{vm.getMenuIcon(opcion)}}</i> 
+                <span class="md-icon-text" style="font-weight: 600;">{{opcion.label}}</span> 
+                <i class="md-icon md-icon-arrow-down" ng-if="opcion.submenu.length">keyboard_arrow_down</i>
             </md-button>
             <ul class="sidenav-sublist" ng-if="opcion.submenu.length">
                 <li ng-repeat="sub in opcion.submenu">
-                    <md-button type="button" class="md-button md-button md-ink-ripple md-button-href {{vm.active == sub.url ? 'active' : ''}}" data-url="{{sub.url}}" ng-click="vm.send(sub.url)">
-                        <i class="md-icon md-icon-option" style="font-size: 1.1rem; margin-right: 8px;" ng-style="{ color: vm.getMenuIconColor(sub.label, sub.url) }">{{vm.getMenuIcon(sub)}}</i>
-                        <span class="md-icon-text">{{sub.label}}</span>
+                    <md-button type="button" class="md-button md-button md-ink-ripple md-button-href {{vm.active == sub.url ? 'active' : ''}}" data-url="{{sub.url}}" ng-click="vm.send(sub.url)" style="display: flex; align-items: center;">
+                        <span class="nav-subicon-badge" ng-style="{ background: vm.getMenuIconBgColor(sub.label, sub.url), color: vm.getMenuIconColor(sub.label, sub.url) }">
+                            <i class="md-icon">{{vm.getMenuIcon(sub)}}</i>
+                        </span>
+                        <span class="md-icon-text" style="font-weight: 500;">{{sub.label}}</span>
                     </md-button>
                 </li>
             </ul>
