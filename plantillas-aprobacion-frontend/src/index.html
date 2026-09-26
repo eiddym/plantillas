@@ -35,7 +35,7 @@
 
     <div layout="column">
       <section layout="row" flex>
-        <acme-sidenav id="sidenav-main"></acme-sidenav>
+        <acme-sidenav id="sidenav-main" ng-if="!$root.isHomeState()"></acme-sidenav>
         <md-content flex layout-padding class="main">
           <div layout="column" layout-fill>
             <acme-navbar></acme-navbar>

@@ -7,9 +7,15 @@
     .run(runBlock);
 
   /** @ngInject */
-    function runBlock(Storage, $location, $log, PageNoLogin, $window, Datetime, $mdDialog, RouteValidator, formlyConfig, MyFormlyConfig, ExpirationTime) {
+    function runBlock(Storage, $location, $log, PageNoLogin, $window, Datetime, $mdDialog, RouteValidator, formlyConfig, MyFormlyConfig, ExpirationTime, $rootScope) {
         RouteValidator.init();
         MyFormlyConfig.init(formlyConfig);
+
+        $rootScope.isHomeState = function() {
+            var path = $location.path();
+            return !path || path === '/' || path === '/inicio' || path === '';
+        };
+
         var $container = angular.element('#container-main');
         var $document = $window.document;
 
