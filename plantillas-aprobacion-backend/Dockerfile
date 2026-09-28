@@ -11,6 +11,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
       bzip2 \
       ca-certificates \
+      chromium \
       curl \
       openjdk-8-jre-headless \
       python && \

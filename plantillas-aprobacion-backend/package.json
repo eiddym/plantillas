@@ -61,6 +61,7 @@
     "passport-ldapauth": "^0.5.0",
     "pg": "^7.17.0",
     "prompts": "^2.4.2",
+    "puppeteer-core": "^13.7.0",
     "q": "^1.4.1",
     "qrcode": "^1.5.4",
     "sequelize": "^6.19.1",

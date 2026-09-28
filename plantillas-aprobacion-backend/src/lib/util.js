@@ -19,6 +19,64 @@ const dirInformes = `${raiz}public/informes/`;
 const dirDocumento = config.ruta_documentos;
 const dirAdjuntosAprobacion = config.aprobacionCD.ruta_externos_aprobacion;
 
+const puppeteer = require('puppeteer-core');
+
+let puppeteerBrowser = null;
+async function getPuppeteerBrowser() {
+  if (puppeteerBrowser && puppeteerBrowser.isConnected()) {
+    return puppeteerBrowser;
+  }
+  const executablePath = process.env.CHROMIUM_PATH || process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
+  puppeteerBrowser = await puppeteer.launch({
+    executablePath,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--font-render-hinting=none'
+    ],
+    headless: true
+  });
+  return puppeteerBrowser;
+}
+
+async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, outputPath }) {
+  const browser = await getPuppeteerBrowser();
+  const page = await browser.newPage();
+
+  try {
+    await page.setContent(html, { waitUntil: ['load', 'networkidle0'], timeout: 30000 });
+
+    const hasHeaderFooter = !!(headerHtml || footerHtml);
+    const formattedHeader = headerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${headerHtml}` : '<div></div>';
+    const formattedFooter = footerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${footerHtml}` : '<div></div>';
+
+    const pdfOptions = {
+      format: format || 'Letter',
+      printBackground: true,
+      displayHeaderFooter: hasHeaderFooter,
+      headerTemplate: formattedHeader,
+      footerTemplate: formattedFooter,
+      margin: {
+        top: headerHtml ? '2.8cm' : '1.5cm',
+        bottom: footerHtml ? '2.0cm' : '1.5cm',
+        left: '2cm',
+        right: '2cm'
+      }
+    };
+
+    if (outputPath) {
+      pdfOptions.path = outputPath;
+    }
+
+    const pdfBuffer = await page.pdf(pdfOptions);
+    return pdfBuffer;
+  } finally {
+    await page.close();
+  }
+}
+
 const crearPdfConPartes = (
   pHtml,
   pDatos,
@@ -30,7 +88,6 @@ const crearPdfConPartes = (
   const path = require('path');
   const os = require('os');
 
-  // === Generar archivos temporales para logo y QR ===
   const tmpDir = os.tmpdir();
   let logoFile = null;
   let qrFile = null;
@@ -41,64 +98,44 @@ const crearPdfConPartes = (
       logoFile = path.join(tmpDir, `logo-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
       fs.writeFileSync(logoFile, Buffer.from(base64Data, 'base64'));
       pDatos.logo_file_url = 'file://' + logoFile;
-      console.log('[PDF TMP] Logo temporal creado:', logoFile);
     }
     if (pDatos.qr_base64 && typeof pDatos.qr_base64 === 'string' && pDatos.qr_base64.startsWith('data:image')) {
       const base64Data = pDatos.qr_base64.replace(/^data:image\/\w+;base64,/, '');
       qrFile = path.join(tmpDir, `qr-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
       fs.writeFileSync(qrFile, Buffer.from(base64Data, 'base64'));
       pDatos.qr_file_url = 'file://' + qrFile;
-      console.log('[PDF TMP] QR temporal creado:', qrFile);
     }
   } catch (err) {
     console.warn('[PDF TMP] Error creando archivos temporales:', err.message);
   }
 
   ejs.renderFile(rutaHeader, pDatos, (headerError, headerHtml) => {
-    if (headerError) {
-      return reject(headerError);
-    }
+    if (headerError) return reject(headerError);
     ejs.renderFile(rutaFooter, pDatos, (footerError, footerHtml) => {
-      if (footerError) {
-        return reject(footerError);
-      }
+      if (footerError) return reject(footerError);
 
-      const configuracion = {
-        border: {
-          top: '0.5cm',
-          right: '2cm',
-          bottom: '1cm',
-          left: '2cm'
-        },
+      renderPdfPuppeteer({
+        html: pHtml,
+        headerHtml: headerHtml,
+        footerHtml: footerHtml,
         format: pDatos.tipoHoja || 'Letter',
-        type: 'pdf',
-        timeout: 30000,
-        localUrlAccess: true,
-        header: {
-          height: '1mm',
-          contents: headerHtml
-        },
-        footer: {
-          height: '16mm',
-          contents: footerHtml
-        }
-      };
-
-      html_pdf.create(pHtml, configuracion).toFile(
-        rutaDocumento,
-        (pErrorCrear, pStream) => {
-          // Limpiar archivos temporales
-          try {
-            if (logoFile && fs.existsSync(logoFile)) fs.unlinkSync(logoFile);
-            if (qrFile && fs.existsSync(qrFile)) fs.unlinkSync(qrFile);
-          } catch (e) {}
-
-          if (pErrorCrear) {
-            return reject(pErrorCrear);
-          }
-          return resolve(pStream);
-        }
-      );
+        outputPath: rutaDocumento
+      })
+      .then((pdfBuffer) => {
+        try {
+          if (logoFile && fs.existsSync(logoFile)) fs.unlinkSync(logoFile);
+          if (qrFile && fs.existsSync(qrFile)) fs.unlinkSync(qrFile);
+        } catch (e) {}
+        resolve(pdfBuffer);
+      })
+      .catch((pErrorCrear) => {
+        try {
+          if (logoFile && fs.existsSync(logoFile)) fs.unlinkSync(logoFile);
+          if (qrFile && fs.existsSync(qrFile)) fs.unlinkSync(qrFile);
+        } catch (e) {}
+        console.error('[PUPPETEER PDF ERROR]', pErrorCrear);
+        reject(pErrorCrear);
+      });
     });
   });
 });
@@ -1209,14 +1246,11 @@ const generarAnulador = (pDatos) => new Promise((resolve, reject) => {
         quality: "100",
       };
 
-      return html_pdf.create(pHtml, configuracion)
-        .toBuffer((pErrorCrear, pBuffer) => {
-          if (!pErrorCrear)
-            return resolve(pBuffer);
-          else {
-            console.log('Error en la generacion del buffer', pErrorCrear);
-            return reject((process.env.NODE_ENV == 'production') ? "No se pudo crear el buffer del anulador" : pErrorCrear);
-          }
+      return renderPdfPuppeteer({ html: pHtml, format: 'Letter' })
+        .then((pBuffer) => resolve(pBuffer))
+        .catch((pErrorCrear) => {
+          console.log('Error en la generacion del buffer', pErrorCrear);
+          return reject((process.env.NODE_ENV == 'production') ? "No se pudo crear el buffer del anulador" : pErrorCrear);
         });
     } else
       reject((process.env.NODE_ENV == 'production') ? "No se pudo generar el anulador del documento" : pError);
@@ -1508,12 +1542,9 @@ const generarPresupuestoPDF = (pDatos) => new Promise((resolve, reject) => {
         quality: "100",
       };
 
-      html_pdf.create(pHtml, configuracion).toFile(rutaDocumento, (pErrorCrear, pStream) => {
-        if (pErrorCrear)
-          reject((process.env.NODE_ENV == 'production') ? "No se pudo crear el pdf del documento" : pError);
-        else
-          resolve(pDatos);
-      });
+      renderPdfPuppeteer({ html: pHtml, format: 'Letter', outputPath: rutaDocumento })
+        .then(() => resolve(pDatos))
+        .catch((pErrorCrear) => reject((process.env.NODE_ENV == 'production') ? "No se pudo crear el pdf del documento" : pErrorCrear));
     }
     else
       reject((process.env.NODE_ENV == 'production') ? "No se pudo generar el pdf del documento" : pError);
