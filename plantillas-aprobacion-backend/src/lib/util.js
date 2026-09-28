@@ -66,11 +66,10 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
       }
     };
 
-    if (outputPath) {
-      pdfOptions.path = outputPath;
-    }
-
     const pdfBuffer = await page.pdf(pdfOptions);
+    if (outputPath) {
+      fs.writeFileSync(outputPath, pdfBuffer);
+    }
     return pdfBuffer;
   } finally {
     await page.close();
