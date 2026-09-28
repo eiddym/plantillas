@@ -41,6 +41,23 @@ async function getPuppeteerBrowser() {
   return puppeteerBrowser;
 }
 
+function marginToInches(val, defaultInches = 0) {
+  if (typeof val === 'number') return val;
+  if (!val || typeof val !== 'string') return defaultInches;
+  const match = val.trim().match(/^([0-9.]+)\s*(cm|mm|in|px|pt)?$/i);
+  if (!match) return defaultInches;
+  const num = parseFloat(match[1]);
+  const unit = (match[2] || 'in').toLowerCase();
+  switch (unit) {
+    case 'cm': return num / 2.54;
+    case 'mm': return num / 25.4;
+    case 'in': return num;
+    case 'pt': return num / 72;
+    case 'px': return num / 96;
+    default: return num;
+  }
+}
+
 async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, outputPath }) {
   const browser = await getPuppeteerBrowser();
   const page = await browser.newPage();
@@ -52,21 +69,55 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
     const formattedHeader = headerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${headerHtml}` : '<div></div>';
     const formattedFooter = footerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${footerHtml}` : '<div></div>';
 
-    const pdfOptions = {
-      format: format || 'Letter',
-      printBackground: true,
-      displayHeaderFooter: hasHeaderFooter,
-      headerTemplate: formattedHeader,
-      footerTemplate: formattedFooter,
-      margin: {
-        top: headerHtml ? '2.8cm' : '1.5cm',
-        bottom: footerHtml ? '2.0cm' : '1.5cm',
-        left: '2cm',
-        right: '2cm'
-      }
-    };
+    let paperWidth = 8.5;
+    let paperHeight = 11;
+    const fmt = String(format || 'Letter').toLowerCase();
+    if (fmt === 'legal' || fmt === 'oficio') {
+      paperWidth = 8.5; paperHeight = 13;
+    } else if (fmt === 'a4') {
+      paperWidth = 8.27; paperHeight = 11.69;
+    } else if (fmt === 'a3') {
+      paperWidth = 11.69; paperHeight = 16.54;
+    }
 
-    const pdfBuffer = await page.pdf(pdfOptions);
+    const marginTop = marginToInches(headerHtml ? '2.8cm' : '1.5cm', 0.8);
+    const marginBottom = marginToInches(footerHtml ? '2.0cm' : '1.5cm', 0.8);
+    const marginLeft = marginToInches('2cm', 0.8);
+    const marginRight = marginToInches('2cm', 0.8);
+
+    let pdfBuffer;
+    const client = page._client || (typeof page.target === 'function' ? await page.target().createCDPSession() : null);
+    if (client && typeof client.send === 'function') {
+      const cdpParams = {
+        printBackground: true,
+        displayHeaderFooter: hasHeaderFooter,
+        headerTemplate: formattedHeader,
+        footerTemplate: formattedFooter,
+        paperWidth,
+        paperHeight,
+        marginTop,
+        marginBottom,
+        marginLeft,
+        marginRight
+      };
+      const result = await client.send('Page.printToPDF', cdpParams);
+      pdfBuffer = Buffer.from(result.data, 'base64');
+    } else {
+      pdfBuffer = await page.pdf({
+        format: format || 'Letter',
+        printBackground: true,
+        displayHeaderFooter: hasHeaderFooter,
+        headerTemplate: formattedHeader,
+        footerTemplate: formattedFooter,
+        margin: {
+          top: headerHtml ? '2.8cm' : '1.5cm',
+          bottom: footerHtml ? '2.0cm' : '1.5cm',
+          left: '2cm',
+          right: '2cm'
+        }
+      });
+    }
+
     if (outputPath) {
       fs.writeFileSync(outputPath, pdfBuffer);
     }
