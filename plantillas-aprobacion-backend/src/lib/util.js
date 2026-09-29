@@ -80,10 +80,10 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
       paperWidth = 11.69; paperHeight = 16.54;
     }
 
-    const marginTop = marginToInches(headerHtml ? '2.8cm' : '1.5cm', 0.8);
-    const marginBottom = marginToInches(footerHtml ? '2.0cm' : '1.5cm', 0.8);
-    const marginLeft = marginToInches('2cm', 0.8);
-    const marginRight = marginToInches('2cm', 0.8);
+    const marginTop = marginToInches('0.45in', 0.45);
+    const marginBottom = marginToInches('0.55in', 0.55);
+    const marginLeft = marginToInches('0.90in', 0.90);
+    const marginRight = marginToInches('0.90in', 0.90);
 
     let pdfBuffer;
     const client = page._client || (typeof page.target === 'function' ? await page.target().createCDPSession() : null);
