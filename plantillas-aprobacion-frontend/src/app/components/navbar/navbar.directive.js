@@ -62,35 +62,48 @@
             }
 
             vm.getUser = function() {
-                if (Storage.existUser()) return Storage.getUser();
-                return SideNavFactory.getUser() || {};
+                if (Storage.existUser()) return Storage.getUser() || {};
+                try {
+                    return SideNavFactory.getUser() || {};
+                } catch(e) {
+                    return {};
+                }
             };
 
-            vm.getUserFirstName = function() {
+            vm.getGreeting = function() {
+                var hour = new Date().getHours();
+                if (hour >= 6 && hour < 12) return 'Buenos días';
+                if (hour >= 12 && hour < 19) return 'Buenas tardes';
+                return 'Buenas noches';
+            };
+
+            vm.getUserFullName = function() {
                 var user = vm.getUser();
-                return user.first_name || user.nombres || user.username || user.usuario || 'Usuario';
+                if (user.nombres) {
+                    return (user.nombres + ' ' + (user.apellidos || '')).trim();
+                }
+                if (user.persona && user.persona.nombres) {
+                    return (user.persona.nombres + ' ' + (user.persona.apellidos || '')).trim();
+                }
+                return user.first_name || user.username || user.usuario || 'Usuario';
             };
 
             vm.getUserCargo = function() {
                 var user = vm.getUser();
-                return user.cargo || user.email || 'Panel de Control';
+                if (user.cargo && user.cargo.trim()) return user.cargo;
+                if (user.persona && user.persona.cargo) return user.persona.cargo;
+                return 'Sin cargo';
             };
 
-            vm.getFirstName = function () {
-                if (Storage.existUser()) {
-                    return Storage.getUser().first_name;
-                }
-                return SideNavFactory.getUser().first_name;
-            }
+            vm.getUserPhoto = function() {
+                var user = vm.getUser();
+                return user.foto_url || user.foto || (user.persona && user.persona.foto) || '';
+            };
 
-            vm.getColor = function () {
-                return SideNavFactory.userColor;
-            }
-
-            vm.getInitial = function () {
-                var firstName = SideNavFactory.getUser().first_name;
-                return firstName.length ? firstName[0].toUpperCase() : '?';
-            }
+            vm.getUserInitial = function() {
+                var name = vm.getUserFullName();
+                return name && name.length ? name[0].toUpperCase() : 'U';
+            };
 
             vm.logout = function () {
               var codigo = $window.localStorage.getItem('oauth2_state');
