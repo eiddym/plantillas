@@ -95,7 +95,7 @@
           <md-button class="ap md-raised bt-bg-success" ng-click="openSelect($event)">
               <md-icon>error</md-icon> Crear documento
           </md-button>
-          <md-input-container style="position: fixed; top: -9999px; left: -9999px; opacity: 0;" ng-show="data.show_select">
+          <md-input-container ng-if="data.show_select">
             <md-select name="plantilla" ng-model="data._plantilla_seleccionada" required ng-change="crear()" md-on-close="data.show_select=false;">
               <md-option ng-repeat="pla in data.plantillas_disponibles" ng-value="pla"> {{pla.nombre}} ({{pla.abreviacion}}) </md-option>
             </md-select>
@@ -106,7 +106,7 @@
           <md-button class="ap md-raised" ng-class="{'bt-bg-success': data.es_para}" ng-click="openSelect($event)" ng-if="data.es_para && data.accion=='crear'">
               <md-icon>error</md-icon> Crear documento
           </md-button>
-          <md-input-container style="position: fixed; top: -9999px; left: -9999px; opacity: 0;" ng-show="data.show_select">
+          <md-input-container ng-if="data.show_select">
             <md-select name="plantilla" ng-model="data._plantilla_seleccionada" required ng-change="crear(true)" md-on-close="data.show_select=false;">
               <md-option ng-repeat="pla in data.plantillas_disponibles" ng-value="pla"> {{pla.nombre}} ({{pla.abreviacion}}) </md-option>
             </md-select>
