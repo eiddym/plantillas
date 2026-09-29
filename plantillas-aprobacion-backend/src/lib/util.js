@@ -63,7 +63,7 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
   const page = await browser.newPage();
 
   try {
-    await page.setContent(html, { waitUntil: ['load', 'networkidle0'], timeout: 30000 });
+    await page.setContent(html, { waitUntil: 'load', timeout: 30000 });
 
     const hasHeaderFooter = !!(headerHtml || footerHtml);
     const formattedHeader = headerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${headerHtml}` : '<div></div>';

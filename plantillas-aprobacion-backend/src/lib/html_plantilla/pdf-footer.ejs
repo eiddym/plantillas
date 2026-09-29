@@ -2,28 +2,32 @@
   .pdf-footer {
     width: 100%;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 6pt;
-    color: #333;
+    font-size: 7pt;
+    color: #444;
     position: relative;
+    box-sizing: border-box;
   }
   .pdf-footer-line {
     width: 100%;
     height: 1.6px;
     background-color: #c4a484;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
   .pdf-footer-datos {
     width: 100%;
     text-align: center;
     line-height: 1.3;
-    font-size: 6pt;
-    padding-right: 40px; /* deja espacio para que no se solape con la paginación */
+    font-size: 7pt;
+    color: #444;
+    padding-right: 45px;
   }
   .pdf-footer-pagina {
     position: absolute;
     right: 0;
     bottom: 0;
-    font-size: 8pt;
+    font-size: 9pt;
+    font-weight: bold;
+    color: #333;
     text-align: right;
     white-space: nowrap;
   }
@@ -35,19 +39,12 @@
 <div class="pdf-footer">
   <div class="pdf-footer-line"></div>
   <div class="pdf-footer-datos">
-    <%= footerEntidad.direccion || '' %><br>
-    <%= footerEntidad.nit || '' %>
-    <% if (footerEntidad.telefono) { %>
-      &nbsp;|&nbsp; <%= footerEntidad.telefono %>
-    <% } %>
-    <% if (footerEntidad.correo) { %>
-      &nbsp;|&nbsp; <%= footerEntidad.correo %>
-    <% } %><br>
-    <% if (footerEntidad.web) { %>
-      <%= footerEntidad.web %>
-    <% } %>
+    ZONA PROGRESO, CALLE RAVELO S/N, ENTRE BOLIVAR Y ABAROA, UYUNI - BOLIVIA<br>
+    M.C./NIT: 484874028 | TELEFONO: 71617875 | CORREO: contacto@marabuntarl.com<br>
+    marabuntarl.com
   </div>
   <div class="pdf-footer-pagina">
-    {{page}}/{{pages}}
+    <span class="pageNumber"></span>/<span class="totalPages"></span>
   </div>
 </div>
+
