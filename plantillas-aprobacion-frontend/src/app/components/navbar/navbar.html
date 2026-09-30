@@ -59,7 +59,7 @@
 
             <!-- Menú de Opciones Usuario -->
             <md-menu md-position-mode="target-right target">
-                <md-button class="margin-0 md-icon-button" aria-label="Opciones de usuario" ng-click="vm.openMenu($mdOpenMenu, $event)">
+                <md-button class="margin-0 md-icon-button" aria-label="Opciones de usuario" md-menu-origin ng-click="$mdOpenMenu($event)">
                     <md-tooltip>Opciones de usuario</md-tooltip>
                     <md-icon style="color: #ffffff !important;">more_vert</md-icon>
                 </md-button>
