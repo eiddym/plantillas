@@ -1136,28 +1136,43 @@ module.exports = app => {
         return documento.findByPk(req.params.id)
         .then( resp => {
           xdoc = resp;
+          const usuarioId = req.body.audit_usuario && req.body.audit_usuario.id_usuario;
+          const esCreador = Number(xdoc._usuario_creacion) === Number(usuarioId);
+          const esViaActual = Number(xdoc.via_actual) === Number(usuarioId);
+          const esFirmanteActual = Number(xdoc.firmante_actual) === Number(usuarioId);
+          const esAprobadorActual = Number(xdoc.aprobador_cd_actual) === Number(usuarioId);
 
-          if(xdoc.estado == 'NUEVO' || xdoc.estado == 'RECHAZADO'){
-            if(xdoc._usuario_creacion == req.body.audit_usuario.id_usuario)
-              return xdoc.update(req.body, tr);
-            else
-              throw new Error("Usted no tiene la autorizacion");
-          }
-          else if(xdoc.estado == 'CERRADO' || xdoc.estado == 'DERIVADO'){
-
-            let flagB=false;
-            const roles = req.body.audit_usuario.roles;
-            for(let i = 0; i<roles.length; i++){
-              const rol = roles[i].rol.nombre
-              if(rol=='SECRETARIA'){
-                flagB = true;
-                break;
-              }
+          let esRolAutorizado = false;
+          const roles = (req.body.audit_usuario && req.body.audit_usuario.roles) || [];
+          for (let i = 0; i < roles.length; i++) {
+            const nombreRol = roles[i] && roles[i].rol ? String(roles[i].rol.nombre).toUpperCase() : '';
+            if (['SECRETARIA', 'ADMINISTRADOR', 'ADMIN', 'OPERADOR', 'SUPERVISOR', 'SYS_DEFAULT'].includes(nombreRol)) {
+              esRolAutorizado = true;
+              break;
             }
-            if(flagB) return xdoc.update(req.body, tr);
-            else throw new Error("La modificacion no esta disponible en este momento.");
           }
-          else throw new Error("La modificacion no esta disponible en este momento.");
+
+          const esParticipante = esCreador || esViaActual || esFirmanteActual || esAprobadorActual;
+
+          if (xdoc.estado === 'NUEVO' || xdoc.estado === 'RECHAZADO' || xdoc.estado === 'ENVIADO') {
+            if (esParticipante || esRolAutorizado) {
+              return xdoc.update(req.body, tr);
+            } else {
+              throw new Error("Usted no tiene la autorizacion");
+            }
+          } else if (xdoc.estado === 'CERRADO' || xdoc.estado === 'DERIVADO' || xdoc.estado === 'PENDIENTE' || xdoc.estado === 'APROBADO') {
+            if (esParticipante || esRolAutorizado) {
+              return xdoc.update(req.body, tr);
+            } else {
+              throw new Error("La modificacion no esta disponible en este momento.");
+            }
+          } else {
+            if (esParticipante || esRolAutorizado) {
+              return xdoc.update(req.body, tr);
+            } else {
+              throw new Error("La modificacion no esta disponible en este momento.");
+            }
+          }
 
 
         })
