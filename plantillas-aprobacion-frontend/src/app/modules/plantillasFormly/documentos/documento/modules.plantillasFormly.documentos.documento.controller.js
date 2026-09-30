@@ -271,17 +271,17 @@
 
       return DataService.save(restUrl + 'plantillasFormly/documento/', documento)
       .then(function (respuesta) {
-        if (!respuesta || !respuesta.datos) {
-          throw new Error('El servidor no devolvió los datos del documento guardado.');
+        if (!respuesta) {
+          throw new Error('El servidor no devolvió respuesta al guardar.');
         }
 
         // Cuando el borrador era nuevo, desde este momento ya existe en BD.
-        if (vm.id_documento == 0 && respuesta.datos.id_documento) {
+        if (vm.id_documento == 0 && respuesta.datos && respuesta.datos.id_documento) {
           vm.id_documento = respuesta.datos.id_documento;
         }
 
         if (!sw_location) {
-          Message.show(respuesta.tipoMensaje, respuesta.mensaje);
+          Message.show(respuesta.tipoMensaje || 'EXITO', respuesta.mensaje || 'Documento procesado correctamente.');
           $location.path('documentos');
           Storage.removeSession('pl');
         } else if (vm.id_documento && vm.id_documento != 0) {
