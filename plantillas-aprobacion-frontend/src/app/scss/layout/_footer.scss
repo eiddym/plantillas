@@ -2,20 +2,11 @@
 
 .no-login {
     footer {
-        position: fixed;
-        bottom: 15px;
-        left: 0;
-        right: 0;
+        color: #eee;
         text-align: center;
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 0.8rem;
-        z-index: 100;
-        margin: 0;
 
         a {
-            color: #4fd1c5;
-            text-decoration: none;
-            font-weight: 600;
+            color: #eee;
         }
         span {
             padding: 3px 5px;
