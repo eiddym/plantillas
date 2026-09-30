@@ -3,6 +3,7 @@
 .container {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -250,10 +251,10 @@
                 <md-tooltip md-direction="top">Ir a verificación</md-tooltip>
             </div>
 
-            <div style="text-align: center; margin-top: 30px; font-size: 10px; color: #777;">
-   
-            </div>
-
         </div>
+    </div>
+
+    <div style="margin-top: 24px; color: rgba(255, 255, 255, 0.85); font-size: 13px; text-align: center; letter-spacing: 0.3px;">
+        Desarrollado por ARMOTECH {{ 'year' | datetime:'year' }}. <a href="//www.armotech.org" target="_blank" style="color: #4fd1c5; text-decoration: none; font-weight: 600;">armotech.org</a>
     </div>
 </div>

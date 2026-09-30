@@ -44,8 +44,9 @@ $colorLogin: lighten($colorPrimary, 3%);
 
 	acme-sidenav,
 	acme-navbar,
-	.breadcrumb {
-    	display: none;
+	.breadcrumb,
+	body > footer {
+    	display: none !important;
 	}
 
 	.main {

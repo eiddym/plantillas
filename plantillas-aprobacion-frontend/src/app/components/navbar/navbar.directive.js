@@ -24,6 +24,7 @@
                 var stateName = ($rootScope.$state && $rootScope.$state.current) ? $rootScope.$state.current.name : '';
                 return !path || path === '/' || path === '/inicio' || path === '' || path === '/home' || stateName === 'home' || stateName === 'inicio';
             };
+            vm.isHome = vm.isHomeState;
 
             vm.goHome = function() {
                 $location.path('/');
