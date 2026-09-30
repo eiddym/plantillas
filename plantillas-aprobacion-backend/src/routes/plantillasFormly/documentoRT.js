@@ -1214,7 +1214,7 @@ module.exports = app => {
       .then( resp => {
         if(!flag) return t.commit();
       })
-      .then( resp => res.send(util.formatearMensaje("EXITO", msg)))
+      .then( resp => res.send(util.formatearMensaje("EXITO", msg, xdoc)))
       .catch(e => {
         console.log('Revisando el error en la modificacion del documento', e);
         t.rollback();
