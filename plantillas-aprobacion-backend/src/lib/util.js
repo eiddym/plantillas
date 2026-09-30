@@ -80,8 +80,8 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
       paperWidth = 11.69; paperHeight = 16.54;
     }
 
-    const marginTop = marginToInches('0.45in', 0.45);
-    const marginBottom = marginToInches('0.55in', 0.55);
+    const marginTop = marginToInches('0.60in', 0.60);
+    const marginBottom = marginToInches('0.90in', 0.90);
     const marginLeft = marginToInches('0.90in', 0.90);
     const marginRight = marginToInches('0.90in', 0.90);
 
@@ -110,10 +110,10 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
         headerTemplate: formattedHeader,
         footerTemplate: formattedFooter,
         margin: {
-          top: headerHtml ? '2.8cm' : '1.5cm',
-          bottom: footerHtml ? '2.0cm' : '1.5cm',
-          left: '2cm',
-          right: '2cm'
+          top: '1.6cm',
+          bottom: '2.3cm',
+          left: '2.28cm',
+          right: '2.28cm'
         }
       });
     }
