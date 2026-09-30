@@ -1069,35 +1069,13 @@
             <%  }
             var pes = datos[pItem.key];
             if(datos[pItem.key]) pes = datos[pItem.key].split('\n');
-            if(pNumeracion && pRuta) {
-              if(datos[pItem.key]){
-                if(interlineado){ %>
-                  <p>
-                    <% for(var s = 0 ; s < pes.length; s++ ){ %>
-                      <div style="text-align: justify"> <% if(pes[s]==''){ %> <div style="height: 10px;"></div> <% }else{ %> <%= pes[s] %> <% } %> </div>
-                    <%} %>
-                  </p>
-                <%} else {
-                  for(var s = 0 ; s < pes.length; s++ ){ %>
-                    <p style="text-align: justify"><%= pes[s] %></p>
-                  <%}
-                }
-              }
-            }
-            else {
-              if(datos[pItem.key]){
-                if(interlineado){ %>
-                  <p>
-                    <%for(var s = 0 ; s < pes.length; s++ ){ %>
-                      <div style="text-align: justify;margin-top:<%= (pRuta)?'10px':'0px'%>;"><% if(pes[s]==''){ %> <div style="height: 10px;"></div> <% }else{ %> <%= pes[s] %> <% } %></div>
-                    <%}%>
-                  </p>
-                <%}
-                else {
-                  for(var s = 0 ; s < pes.length; s++ ){ %>
-                    <p style="text-align: justify;margin-top:<%= (pRuta)?'10px':'0px'%>;"><%= pes[s] %></p>
-                  <%}
-                }
+            if(datos[pItem.key]){
+              for(var s = 0 ; s < pes.length; s++ ){
+                if(pes[s].trim() === ''){ %>
+                  <div style="height: 10px;"></div>
+                <% } else { %>
+                  <p style="text-align: justify; margin: 0 0 6px 0; <%= (pRuta && s > 0)? 'margin-top: 6px;' : '' %>"><%= pes[s] %></p>
+                <% }
               }
             }
             break;
