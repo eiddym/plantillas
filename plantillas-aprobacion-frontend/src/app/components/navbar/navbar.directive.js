@@ -11,7 +11,7 @@
             restrict: 'E',
             templateUrl: 'app/components/navbar/navbar.html',
             scope: {},
-            controller: ['ExpirationTime', '$location', 'Storage', 'SideNavFactory', 'Util', 'DataService', '$window', 'restUrl', NavbarController],
+            controller: ['ExpirationTime', '$location', 'Storage', 'SideNavFactory', 'Util', 'DataService', '$window', 'restUrl', '$rootScope', NavbarController],
             controllerAs: 'vm',
             bindToController: true
         }
@@ -19,15 +19,30 @@
         return directive
 
         /** @ngInject */
-        function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl) {
+        function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl, $rootScope) {
             var vm = this;
+
+            vm.isHomeState = function() {
+                try {
+                    if ($rootScope && angular.isFunction($rootScope.isHomeState)) {
+                        return $rootScope.isHomeState();
+                    }
+                    var path = ($location.path() || '').trim();
+                    var stateName = ($rootScope && $rootScope.$state && $rootScope.$state.current) ? $rootScope.$state.current.name : '';
+                    return !path || path === '/' || path === '/inicio' || path === '' || path === '/home' || stateName === 'home' || stateName === 'inicio';
+                } catch(e) {
+                    return true;
+                }
+            };
 
             vm.toggle = function () {
                 angular.element('#sidenav-main').toggleClass('collapsed');
             }
 
             vm.openMenu = function ($mdOpenMenu, ev) {
-                $mdOpenMenu(ev);
+                if (angular.isFunction($mdOpenMenu)) {
+                    $mdOpenMenu(ev);
+                }
             }
 
             vm.profile = function () {
@@ -38,20 +53,66 @@
                 $location.path("configuracion");
             }
 
-            vm.getFirstName = function () {
-                if (Storage.existUser()) {
-                    return Storage.getUser().first_name;
+            vm.getUser = function() {
+                try {
+                    if (Storage && Storage.existUser()) {
+                        var u = Storage.getUser();
+                        if (u) return u;
+                    }
+                    if (SideNavFactory && SideNavFactory.getUser) {
+                        var su = SideNavFactory.getUser();
+                        if (su) return su;
+                    }
+                } catch(e) {}
+                return {};
+            };
+
+            vm.getGreeting = function() {
+                var hour = new Date().getHours();
+                if (hour >= 6 && hour < 12) return 'Buenos días';
+                if (hour >= 12 && hour < 19) return 'Buenas tardes';
+                return 'Buenas noches';
+            };
+
+            vm.getUserFullName = function() {
+                var user = vm.getUser();
+                if (user.nombres) {
+                    return (user.nombres + ' ' + (user.apellidos || '')).trim();
                 }
-                return SideNavFactory.getUser().first_name;
+                if (user.persona && user.persona.nombres) {
+                    return (user.persona.nombres + ' ' + (user.persona.apellidos || '')).trim();
+                }
+                return user.first_name || user.username || user.usuario || 'system';
+            };
+
+            vm.getUserCargo = function() {
+                var user = vm.getUser();
+                if (user.cargo && typeof user.cargo === 'string' && user.cargo.trim()) return user.cargo;
+                if (user.persona && user.persona.cargo) return user.persona.cargo;
+                return 'Default system user';
+            };
+
+            vm.getUserPhoto = function() {
+                var user = vm.getUser();
+                return user.foto_url || user.foto || (user.persona && user.persona.foto) || '';
+            };
+
+            vm.getUserInitial = function() {
+                var name = vm.getUserFullName();
+                return (name && name.length) ? name[0].toUpperCase() : 'S';
+            };
+
+            vm.getFirstName = function () {
+                var user = vm.getUser();
+                return user.first_name || user.nombres || user.usuario || 'system';
             }
 
             vm.getColor = function () {
-                return SideNavFactory.userColor;
+                return (SideNavFactory && SideNavFactory.userColor) ? SideNavFactory.userColor : 'primary';
             }
 
             vm.getInitial = function () {
-                var firstName = SideNavFactory.getUser().first_name;
-                return (firstName && firstName.length) ? firstName[0].toUpperCase() : '?';
+                return vm.getUserInitial();
             }
 
             vm.logout = function () {
@@ -79,4 +140,5 @@
     }
 
 })();
+
 
