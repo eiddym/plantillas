@@ -1,17 +1,14 @@
 acme-navbar {
 
 	md-toolbar {
-		background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%) !important;
-		box-shadow: 0 4px 15px rgba(15, 32, 39, 0.15);
+		background-color: $colorPrimary !important;
 
 		.navbar-user-name {
 			font-size: 1rem;
 			text-align: right;
-			color: #ffffff;
-			font-weight: 500;
 		}
 		.md-button.navbar-user-icon {
-			border: 2px solid #00e5ff;
+			border: 2px solid white;
 			font-size: 1.8rem;
 			height: 48px;
 			line-height: 32px;
@@ -20,7 +17,6 @@ acme-navbar {
 			width: 48px;
 			.md-icon {
 				font-size: 2.6rem;
-				color: #00e5ff !important;
 			}
 		}
 
@@ -33,6 +29,12 @@ acme-navbar {
 	}
 }
 
+.md-open-menu-container:not(.md-active) {
+	display: none !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
 @media (min-width: $minWidth) {
 	acme-navbar {
 	    left: 0;
@@ -41,9 +43,6 @@ acme-navbar {
 	    right: 0;
 	    top: 0;
 	    z-index: 89;
-	}
-	body.is-home-state acme-navbar {
-	    padding-left: 0 !important;
 	}
 }
 
@@ -72,3 +71,4 @@ acme-navbar {
 		display: none;
 	}
 }
+
