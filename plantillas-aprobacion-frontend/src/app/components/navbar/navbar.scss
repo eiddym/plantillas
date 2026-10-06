@@ -44,7 +44,11 @@ acme-navbar {
 	    top: 0;
 	    z-index: 89;
 	}
+	body.is-home-state acme-navbar {
+	    padding-left: 0 !important;
+	}
 }
+
 
 .fullscreen {
 	.tooltip-fullscreen {
