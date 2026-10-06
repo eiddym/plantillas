@@ -52,7 +52,7 @@
             <!-- Menú de Opciones Usuario -->
             <md-menu md-position-mode="target-right target">
                 <md-button class="margin-0 md-icon-button" aria-label="Más opciones" ng-click="vm.openMenu($mdOpenMenu, $event)">
-                    <md-tooltip>Más opciones</md-tooltip>
+                    <md-tooltip>Opciones de usuario</md-tooltip>
                     <md-icon style="color: #ffffff !important;">more_vert</md-icon>
                 </md-button>
                 <md-menu-content class="navbar-options">
@@ -63,7 +63,7 @@
                     </md-menu-item>
                     <md-menu-item>
                         <md-button ng-click="vm.profile()">
-                            <md-icon>account_circle</md-icon> Mi cuenta
+                            <md-icon>account_circle</md-icon> Mi cuenta / Perfil
                         </md-button>
                     </md-menu-item>
                     <md-menu-item>
@@ -71,13 +71,14 @@
                             <md-icon>refresh</md-icon> Cambio de usuario
                         </md-button>
                     </md-menu-item>
-                    <md-menu-item style="width: 200px;">
+                    <md-menu-item>
                         <md-button ng-click="vm.logout()">
                             <md-icon>power_setting_new</md-icon> Salir
                         </md-button>
                     </md-menu-item>
                 </md-menu-content>
             </md-menu>
+
         </div>
     </div>
 </md-toolbar>

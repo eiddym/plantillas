@@ -23,17 +23,30 @@ acme-navbar {
 	}
 }
 .navbar-options {
-	.md-icon {
-		float: left;
-		margin: 5px 10px 0 0;
+	min-width: 210px;
+	padding: 6px 0;
+	md-menu-item {
+		min-height: 40px;
+		height: 40px;
+		.md-button {
+			display: flex !important;
+			align-items: center !important;
+			font-size: 13.5px !important;
+			font-weight: 500 !important;
+			color: #2c3e50 !important;
+			width: 100% !important;
+			text-transform: none !important;
+			padding: 0 16px !important;
+			md-icon {
+				float: none !important;
+				margin: 0 12px 0 0 !important;
+				font-size: 20px !important;
+				color: #475569 !important;
+			}
+		}
 	}
 }
 
-.md-open-menu-container:not(.md-active) {
-	display: none !important;
-	opacity: 0 !important;
-	pointer-events: none !important;
-}
 
 @media (min-width: $minWidth) {
 	acme-navbar {
