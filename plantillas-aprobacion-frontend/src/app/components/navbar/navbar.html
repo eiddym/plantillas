@@ -1,12 +1,23 @@
 <md-toolbar class="app-navbar-toolbar">
     <div class="md-toolbar-tools">
-        <!-- Contenedor Izquierda: Hamburguesa en Subpáginas OR Avatar + Saludo en Home -->
-        <div layout="row" layout-align="start center" style="gap: 10px;">
+        <!-- Contenedor Izquierda: Hamburguesa + Casita Inicio + Nombre del Módulo (Subpáginas) OR Avatar + Saludo (Home) -->
+        <div layout="row" layout-align="start center" style="gap: 6px;">
             <!-- Módulo Subpáginas: Botón Hamburguesa ☰ -->
             <md-button class="md-icon-button navbar-hamburger" ng-click="vm.toggle()" aria-label="Mostrar/ocultar menú" ng-if="!vm.isHomeState()">
                 <md-tooltip>Mostrar/ocultar menú</md-tooltip>
                 <md-icon style="font-size: 24px; color: #ffffff !important;">menu</md-icon>
             </md-button>
+
+            <!-- Módulo Subpáginas: Icono Casita (Volver a Inicio) -->
+            <md-button class="md-icon-button navbar-home-btn" ng-click="vm.goHome()" aria-label="Volver a Inicio" ng-if="!vm.isHomeState()" style="margin-left: -4px;">
+                <md-tooltip>Volver a Inicio</md-tooltip>
+                <md-icon style="font-size: 22px; color: #ffffff !important;">home</md-icon>
+            </md-button>
+
+            <!-- Módulo Subpáginas: Nombre del Menú / Módulo -->
+            <span class="navbar-module-title" style="font-size: 1.05rem; font-weight: 700; color: #ffffff; letter-spacing: 0.3px; margin-left: 4px;" ng-if="!vm.isHomeState()">
+                {{ vm.getModuleTitle() }}
+            </span>
 
             <!-- Home state: Avatar Circle + Saludo + Cargo -->
             <div class="topbar-left-meta" style="display: flex; align-items: center; gap: 10px;" ng-if="vm.isHomeState()">
@@ -23,7 +34,7 @@
 
         <span flex></span>
 
-        <!-- Contenedor Derecha: Pantalla Completa + Notificaciones (en Home) + Menú Opciones -->
+        <!-- Contenedor Derecha: Pantalla Completa + Notificaciones + Menú Opciones -->
         <div layout="row" layout-align="end center" style="gap: 4px;">
             <!-- Botón Pantalla Completa -->
             <md-button class="margin-0 md-icon-button btn-fullscreen" ng-click="vm.fullscreen()" aria-label="Pantalla completa" id="btn-fullscreen">
@@ -32,8 +43,8 @@
                 <md-tooltip class="tooltip-fullscreen"><span class="exit">Salir </span>Pantalla completa</md-tooltip>
             </md-button>
 
-            <!-- Botón Notificaciones (Home state) -->
-            <md-button class="margin-0 md-icon-button" aria-label="Notificaciones" ng-if="vm.isHomeState()">
+            <!-- Botón Notificaciones -->
+            <md-button class="margin-0 md-icon-button" aria-label="Notificaciones">
                 <md-tooltip>Notificaciones</md-tooltip>
                 <md-icon style="color: #f59e0b !important;">notifications</md-icon>
             </md-button>
@@ -45,6 +56,11 @@
                     <md-icon style="color: #ffffff !important;">more_vert</md-icon>
                 </md-button>
                 <md-menu-content class="navbar-options">
+                    <md-menu-item>
+                        <md-button ng-click="vm.goHome()">
+                            <md-icon>home</md-icon> Ir a Inicio
+                        </md-button>
+                    </md-menu-item>
                     <md-menu-item>
                         <md-button ng-click="vm.profile()">
                             <md-icon>account_circle</md-icon> Mi cuenta
@@ -65,5 +81,6 @@
         </div>
     </div>
 </md-toolbar>
+
 
 

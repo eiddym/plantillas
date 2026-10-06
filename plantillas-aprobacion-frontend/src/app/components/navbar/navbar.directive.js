@@ -11,7 +11,7 @@
             restrict: 'E',
             templateUrl: 'app/components/navbar/navbar.html',
             scope: {},
-            controller: ['ExpirationTime', '$location', 'Storage', 'SideNavFactory', 'Util', 'DataService', '$window', 'restUrl', '$rootScope', NavbarController],
+            controller: ['ExpirationTime', '$location', 'Storage', 'SideNavFactory', 'Util', 'DataService', '$window', 'restUrl', '$rootScope', 'BreadcrumbFactory', NavbarController],
             controllerAs: 'vm',
             bindToController: true
         }
@@ -19,7 +19,7 @@
         return directive
 
         /** @ngInject */
-        function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl, $rootScope) {
+        function NavbarController(ExpirationTime, $location, Storage, SideNavFactory, Util, DataService, $window, restUrl, $rootScope, BreadcrumbFactory) {
             var vm = this;
 
             vm.isHomeState = function() {
@@ -32,6 +32,37 @@
                     return !path || path === '/' || path === '/inicio' || path === '' || path === '/home' || stateName === 'home' || stateName === 'inicio';
                 } catch(e) {
                     return true;
+                }
+            };
+
+            vm.goHome = function() {
+                $location.path('/');
+            };
+
+            vm.getModuleTitle = function() {
+                try {
+                    var current = (BreadcrumbFactory && BreadcrumbFactory.getCurrent) ? BreadcrumbFactory.getCurrent() : '';
+                    if (current && typeof current === 'string' && current.trim()) return current;
+
+                    var path = ($location.path() || '').replace('/', '').trim().toLowerCase();
+                    var titles = {
+                        'documentos': 'Documentos',
+                        'aprobacion': 'Documentos Pendientes',
+                        'firmar': 'Pendientes de Firma',
+                        'archivo': 'Archivo General',
+                        'catalogos': 'Catálogos Generales',
+                        'usuario': 'Gestión de Usuarios',
+                        'usuarios': 'Gestión de Usuarios',
+                        'unidad': 'Unidades Organizacionales',
+                        'unidades': 'Unidades Organizacionales',
+                        'monitoreo': 'Monitoreo de Flujos',
+                        'profile': 'Perfil de Usuario',
+                        'configuracion': 'Configuración'
+                    };
+                    if (!path || path === 'inicio' || path === 'home') return '';
+                    return titles[path] || (path ? path.charAt(0).toUpperCase() + path.slice(1) : '');
+                } catch(e) {
+                    return '';
                 }
             };
 
@@ -140,5 +171,6 @@
     }
 
 })();
+
 
 
