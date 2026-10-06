@@ -33,6 +33,12 @@ acme-navbar {
 	}
 }
 
+.md-open-menu-container:not(.md-active) {
+	display: none !important;
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
 @media (min-width: $minWidth) {
 	acme-navbar {
 	    left: 0;

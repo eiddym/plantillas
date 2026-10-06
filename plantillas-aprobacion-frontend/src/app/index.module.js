@@ -21,7 +21,6 @@
     .run(function($rootScope) {
       $rootScope.$on('$stateChangeSuccess', function(event, toState) {
         var isHome = !toState || toState.name === 'home' || toState.name === 'inicio' || toState.url === '/' || toState.url === '/inicio';
-        $rootScope.isHomeState = isHome;
         $rootScope.currentStateName = toState ? toState.name : '';
 
         if (isHome) {
