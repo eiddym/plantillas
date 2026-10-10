@@ -112,47 +112,51 @@
       }
 
       .pdf-page1-metadata {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-        margin: 0 0 12pt 0;
-        font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+        margin: 0 0 10pt 0 !important;
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
       }
       .pdf-meta-izq {
-        display: table-cell;
-        width: 62%;
-        vertical-align: top;
-        font-size: 9pt;
-        line-height: 1.45;
-        color: #333;
+        width: 60% !important;
+        vertical-align: top !important;
+        text-align: left !important;
+        font-size: 8.5pt !important;
+        line-height: 1.4 !important;
+        color: #333 !important;
+        padding: 0 !important;
       }
       .pdf-meta-der {
-        display: table-cell;
-        width: 38%;
-        vertical-align: top;
-        text-align: right;
+        width: 40% !important;
+        vertical-align: top !important;
+        text-align: right !important;
+        padding: 0 !important;
       }
       .pdf-fecha-qr {
-        display: inline-block;
-        text-align: center;
+        display: inline-block !important;
+        text-align: center !important;
       }
       .pdf-fecha {
-        font-size: 10pt;
-        line-height: 13pt;
-        margin-bottom: 4px;
-        color: #333;
+        font-size: 9.5pt !important;
+        font-weight: 600 !important;
+        line-height: 12pt !important;
+        margin-bottom: 3px !important;
+        color: #222 !important;
+        text-align: center !important;
       }
       .pdf-fecha-qr img {
-        width: 28mm;
-        height: 28mm;
-        display: block;
-        margin: 0 auto;
+        width: 25mm !important;
+        height: 25mm !important;
+        display: block !important;
+        margin: 0 auto !important;
       }
       .pdf-qr-leyenda {
-        font-size: 7.5pt;
-        margin-top: 3px;
-        color: #555;
-        white-space: nowrap;
+        font-size: 7pt !important;
+        margin-top: 2px !important;
+        color: #555 !important;
+        white-space: nowrap !important;
+        text-align: center !important;
       }
 
       .bloque-campos {
@@ -345,22 +349,24 @@
     <div class="cuerpo-documento">
       <div class="reserva-qr"></div>
       <% if (typeof html === 'undefined' || !html) { %>
-        <div class="pdf-page1-metadata">
-          <div class="pdf-meta-izq">
-            <%= typeof pdf_cite !== 'undefined' && pdf_cite ? pdf_cite : (typeof doc !== 'undefined' && doc && doc.nombre ? doc.nombre.replace(/\.pdf$/i, '') : '') %><br>
-            Expediente : <%= typeof pdf_expediente !== 'undefined' && pdf_expediente !== null ? pdf_expediente : (typeof exp !== 'undefined' ? exp : '') %><br>
-            Código de verificación : <%= typeof pdf_codigo !== 'undefined' && pdf_codigo ? pdf_codigo : (typeof codigoSeguridad !== 'undefined' ? codigoSeguridad : '') %>
-          </div>
-          <div class="pdf-meta-der">
-            <div class="pdf-fecha-qr">
-              <div class="pdf-fecha"><%= typeof pdf_fecha !== 'undefined' && pdf_fecha ? pdf_fecha : '' %></div>
-              <% if (typeof qr_base64 !== 'undefined' && qr_base64) { %>
-                <img src="<%= qr_base64 %>" alt="QR">
-              <% } %>
-              <div class="pdf-qr-leyenda">Escanear para verificar</div>
-            </div>
-          </div>
-        </div>
+        <table class="pdf-page1-metadata" role="presentation" style="width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 0 10pt 0;">
+          <tr>
+            <td class="pdf-meta-izq" style="width: 60%; vertical-align: top; text-align: left;">
+              <%= typeof pdf_cite !== 'undefined' && pdf_cite ? pdf_cite : (typeof doc !== 'undefined' && doc && doc.nombre ? doc.nombre.replace(/\.pdf$/i, '') : '') %><br>
+              Expediente : <%= typeof pdf_expediente !== 'undefined' && pdf_expediente !== null ? pdf_expediente : (typeof exp !== 'undefined' ? exp : '') %><br>
+              Código de verificación : <%= typeof pdf_codigo !== 'undefined' && pdf_codigo ? pdf_codigo : (typeof codigoSeguridad !== 'undefined' ? codigoSeguridad : '') %>
+            </td>
+            <td class="pdf-meta-der" style="width: 40%; vertical-align: top; text-align: right;" align="right">
+              <div class="pdf-fecha-qr" style="display: inline-block; text-align: center;">
+                <div class="pdf-fecha"><%= typeof pdf_fecha !== 'undefined' && pdf_fecha ? pdf_fecha : '' %></div>
+                <% if (typeof qr_base64 !== 'undefined' && qr_base64) { %>
+                  <img src="<%= qr_base64 %>" alt="QR" style="width: 25mm; height: 25mm; display: block; margin: 0 auto;">
+                <% } %>
+                <div class="pdf-qr-leyenda">Escanear para verificar</div>
+              </div>
+            </td>
+          </tr>
+        </table>
       <% } %>
 
             <%# Funcion que retorna html de acuerdo al tipo de campo  %>

@@ -90,12 +90,8 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
     console.log('[PUPPETEER STEP 4] HTML content set. Preparing PDF params...');
 
     const hasHeaderFooter = !!(headerHtml || footerHtml);
-    const formattedHeader = headerHtml
-      ? `<div style="width:215.9mm; margin:0; padding:0; font-size:12pt; -webkit-print-color-adjust:exact; print-color-adjust:exact;">${headerHtml}</div>`
-      : '<div></div>';
-    const formattedFooter = footerHtml
-      ? `<div style="width:215.9mm; margin:0; padding:0; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact;">${footerHtml}</div>`
-      : '<div></div>';
+    const formattedHeader = headerHtml || '<div></div>';
+    const formattedFooter = footerHtml || '<div></div>';
 
     let paperWidth = 8.5;
     let paperHeight = 11;
@@ -108,8 +104,8 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
       paperWidth = 11.69; paperHeight = 16.54;
     }
 
-    const marginTop = marginToInches('4.6cm', 1.81);
-    const marginBottom = marginToInches('2.8cm', 1.10);
+    const marginTop = marginToInches('3.2cm', 1.26);
+    const marginBottom = marginToInches('2.2cm', 0.87);
     const marginLeft = marginToInches('2.5cm', 0.98);
     const marginRight = marginToInches('2.5cm', 0.98);
 
@@ -184,8 +180,6 @@ const crearPdfConPartes = (
   console.log('[DEBUG LOGOS] logo_base64 len:', pDatos.logo_base64 ? pDatos.logo_base64.length : 'UNDEF', 'logo_ferecomin_base64 len:', pDatos.logo_ferecomin_base64 ? pDatos.logo_ferecomin_base64.length : 'UNDEF');
   ejs.renderFile(rutaHeader, pDatos, (headerError, headerHtml) => {
     if (headerError) return reject(headerError);
-    console.log('[DEBUG RENDERED HEADER HTML len]:', headerHtml ? headerHtml.length : 0);
-    console.log('[DEBUG RENDERED HEADER HTML HAS RIGHT LOGO]:', headerHtml.includes('Logo FERECOMIN'));
     ejs.renderFile(rutaFooter, pDatos, (footerError, footerHtml) => {
       if (footerError) return reject(footerError);
 
@@ -703,8 +697,11 @@ function generarPDF (pl) {
 }
 
 function formatearFecha(date, horas = false) {
-  let resultado = "";
+  if (!date) return '';
+  if (typeof date === 'string' && /^\d{1,2}\s+de\s+[a-zA-Z]+\s+de\s+\d{4}/i.test(date.trim())) return date.trim();
   const fecha = new Date(date);
+  if (isNaN(fecha.getTime())) return String(date);
+  let resultado = "";
   const mes = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   resultado = `${fecha.getDate()} de ${mes[fecha.getMonth()]} de ${fecha.getFullYear()}`;
   if (horas) resultado = `${resultado} a hrs ${fecha.getHours()}:${fecha.getMinutes()}:${fecha.getSeconds()}.${fecha.getMilliseconds()}`;

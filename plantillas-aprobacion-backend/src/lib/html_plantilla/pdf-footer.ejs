@@ -1,85 +1,13 @@
-<style>
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  * { box-sizing: border-box; }
-
-  .pdf-footer-container {
-    width: 215.9mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
-    font-size: 8pt !important;
-    color: #333 !important;
-  }
-  .pdf-footer-wrapper-tabla {
-    width: 215.9mm !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  .pdf-footer-line {
-    width: 100% !important;
-    height: 1.5pt !important;
-    background-color: #CAAE92 !important;
-    margin: 0 0 3pt 0 !important;
-    display: block !important;
-  }
-  .pdf-footer-tabla {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-  }
-  .pdf-footer-datos {
-    text-align: center !important;
-    font-size: 7.5pt !important;
-    line-height: 1.25 !important;
-  }
-  .pdf-footer-pagina {
-    width: 70px !important;
-    text-align: right !important;
-    vertical-align: bottom !important;
-    font-size: 8pt !important;
-    white-space: nowrap !important;
-  }
-</style>
-
-<div class="pdf-footer-container">
-  <table class="pdf-footer-wrapper-tabla" role="presentation" style="width: 215.9mm; border-collapse: collapse; table-layout: fixed; margin: 0; padding: 0;">
-    <colgroup>
-      <col style="width: 25mm;">
-      <col style="width: 165.9mm;">
-      <col style="width: 25mm;">
-    </colgroup>
-    <tr>
-      <td></td>
-      <td>
-        <div class="pdf-footer-line"></div>
-        <table class="pdf-footer-tabla" role="presentation" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-          <colgroup>
-            <col style="width: 70px;">
-            <col style="width: auto;">
-            <col style="width: 70px;">
-          </colgroup>
-          <tr>
-            <td style="width: 70px;"></td>
-            <td class="pdf-footer-datos">
-              ZONA PROGRESO, CALLE RAVELO S/N, ENTRE BOLIVAR Y ABAROA, UYUNI - BOLIVIA<br>
-              M.C./NIT: 484874028 | TELEFONO: 71617875 | CORREO: contacto@marabuntarl.com<br>
-              marabuntarl.com
-            </td>
-            <td class="pdf-footer-pagina">
-              <span class="pageNumber"></span>/<span class="totalPages"></span>
-            </td>
-          </tr>
-        </table>
-      </td>
-      <td></td>
-    </tr>
-  </table>
+<div style="width: 100%; box-sizing: border-box; padding: 0 25mm; font-family: 'Open Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+  <div style="border-top: 1pt solid #CAAE92; padding-top: 3px; display: flex; justify-content: space-between; align-items: center; font-size: 5.8pt; color: #444; line-height: 7.5pt;">
+    <div style="width: 45px;"></div>
+    <div style="text-align: center;">
+      <%= (typeof entidad !== 'undefined' && entidad && entidad.direccion) ? entidad.direccion : 'ZONA PROGRESO, CALLE RAVELO S/N, ENTRE BOLIVAR Y ABAROA, UYUNI - BOLIVIA' %><br>
+      <%= (typeof entidad !== 'undefined' && entidad && entidad.nit) ? entidad.nit : 'M.C./NIT: 484874028' %> | <%= (typeof entidad !== 'undefined' && entidad && entidad.telefono) ? entidad.telefono : 'TELEFONO: 71617875' %> | <%= (typeof entidad !== 'undefined' && entidad && entidad.correo) ? entidad.correo : 'CORREO: contacto@marabuntarl.com' %><br>
+      <%= (typeof entidad !== 'undefined' && entidad && entidad.web) ? entidad.web : 'marabuntarl.com' %>
+    </div>
+    <div style="width: 45px; text-align: right; font-size: 6.8pt; color: #555; white-space: nowrap;">
+      <span class="pageNumber"></span>/<span class="totalPages"></span>
+    </div>
+  </div>
 </div>
