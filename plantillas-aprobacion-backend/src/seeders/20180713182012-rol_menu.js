@@ -10,7 +10,8 @@ module.exports = {
         'MENÚS',
         'UNIDADES',
         'MIS DOCUMENTOS',
-        'DOCUMENTOS PENDIENTES'
+        'DOCUMENTOS PENDIENTES',
+        'ARCHIVO'
       ],
 
       JEFE: [
@@ -20,7 +21,8 @@ module.exports = {
         'DERIVADOS',
         'FIRMAR',
         'MIS CATALOGOS',
-        'COMPARTIDOS'
+        'COMPARTIDOS',
+        'ARCHIVO'
       ],
 
       OPERADOR: [
@@ -28,7 +30,8 @@ module.exports = {
         'DOCUMENTOS PENDIENTES',
         'FIRMAR',
         'MIS CATALOGOS',
-        'COMPARTIDOS'
+        'COMPARTIDOS',
+        'ARCHIVO'
       ],
 
       SECRETARIA: [
@@ -38,7 +41,8 @@ module.exports = {
         'FIRMAR',
         'IMPRIMIR DOCUMENTOS',
         'MIS CATALOGOS',
-        'COMPARTIDOS'
+        'COMPARTIDOS',
+        'ARCHIVO'
       ],
 
       CONFIGURADOR: [
@@ -53,7 +57,8 @@ module.exports = {
         'IMPRIMIR DOCUMENTOS',
         'MIS CATALOGOS',
         'COMPARTIDOS',
-        'CONTACTOS'
+        'CONTACTOS',
+        'ARCHIVO'
       ],
 
       CONTACTOS: [

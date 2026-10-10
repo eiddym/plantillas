@@ -143,25 +143,37 @@ module.exports={
     let  menuEntrar=null;
 
     for(const r in pRolesMenu){
-      const menu = pRolesMenu[r].menu;
-      const padre = pRolesMenu[r].menu.menu_padre;
-      const objPadre = JSON.stringify(padre);
-      let existe = false;
-      for(let g = 0; g < menusDevolverAux.length; g++){
-        if(JSON.stringify(menusDevolverAux[g]) == objPadre){
-          existe = true;
-          break;
-        }
+      const itemMenu = pRolesMenu[r].menu;
+      if (!itemMenu) continue;
+
+      let padre = null;
+      if (itemMenu.fid_menu_padre == null) {
+        // El menú es padre directo (ej. ARCHIVO)
+        padre = JSON.parse(JSON.stringify(itemMenu));
+      } else if (itemMenu.menu_padre) {
+        // El menú es hijo y su padre viene en menu_padre
+        padre = JSON.parse(JSON.stringify(itemMenu.menu_padre));
       }
 
-      if(!existe){
+      if (padre) {
         delete padre.estado;
-        menusDevolverAux.push(padre)
-      }
-      else if(menu.fid_menu_padre == null ){
-        const menuDatos = JSON.parse(JSON.stringify(menu));
-        delete menuDatos.menu_padre;
-        menusDevolverAux.push(menuDatos);
+        delete padre.menu_padre;
+        delete padre.fid_menu_padre;
+
+        let existe = false;
+        for(let g = 0; g < menusDevolverAux.length; g++){
+          if(menusDevolverAux[g] && (
+            (padre.id_menu && menusDevolverAux[g].id_menu === padre.id_menu) ||
+            menusDevolverAux[g].label === padre.label
+          )){
+            existe = true;
+            break;
+          }
+        }
+
+        if(!existe){
+          menusDevolverAux.push(padre);
+        }
       }
     }
 
@@ -171,13 +183,13 @@ module.exports={
       if(padre != null){
         padre.submenu = [];
         for (const j in pRolesMenu) {
+          const m = pRolesMenu[j].menu;
+          if(m && m.fid_menu_padre != null && padre.id_menu == m.fid_menu_padre){
 
-          if(padre.id_menu == pRolesMenu[j].menu.fid_menu_padre &&
-            pRolesMenu[j].menu.fid_menu_padre != null){
-
-            const hijo = JSON.parse(JSON.stringify(pRolesMenu[j].menu));
+            const hijo = JSON.parse(JSON.stringify(m));
             delete hijo.menu_padre;
             delete hijo.estado;
+            delete hijo.fid_menu_padre;
             padre.submenu.push(hijo);
 
             if(!menuEntrar){
@@ -185,6 +197,10 @@ module.exports={
             }
 
           }
+        }
+
+        if(!menuEntrar && padre.url && padre.submenu.length === 0){
+          menuEntrar=`/${padre.url}`;
         }
 
         delete padre.estado;
@@ -306,7 +322,7 @@ module.exports={
         include:[{
           model:pModeloMenu,
           as:'menu',
-          attributes:[['nombre','label'],['ruta','url'],
+          attributes:['id_menu', ['nombre','label'],['ruta','url'],
           ['icono','icon'],'fid_menu_padre','estado'],
           where:{estado:'ACTIVO'},
           include:[{
@@ -314,6 +330,7 @@ module.exports={
             as:'menu_padre',
             attributes:['id_menu',['nombre','label'],['ruta','url'],
             ['icono','icon'],'estado'],
+            required:false,
             where:{estado:'ACTIVO'},
           }],
         }],

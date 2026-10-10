@@ -152,6 +152,7 @@
                 if (key.indexOf('CAT') !== -1) return '#0d9488';
                 if (key.indexOf('ADM') !== -1) return '#10b981';
                 if (key.indexOf('CONF') !== -1) return '#64748b';
+                if (key.indexOf('ARCH') !== -1) return '#64748b';
                 return '#00e5ff';
             };
 
@@ -178,13 +179,14 @@
                 if (label.indexOf('CAT') !== -1) return 'folder_special';
                 if (label.indexOf('ADM') !== -1) return 'settings';
                 if (label.indexOf('CONF') !== -1) return 'build';
+                if (label.indexOf('ARCH') !== -1) return 'inventory_2';
                 return opcion.icon || 'folder';
             };
 
             vm.toggleLeft = buildDelayedToggler('left');
 
             vm.send = function (url, submenu) {
-                if (typeof submenu == 'undefined') {
+                if (typeof submenu == 'undefined' || !submenu) {
                     if (Storage.exist('menu')) {
                         var page = Util.getMenuOption(Storage.getSession('menu'), url);
                         BreadcrumbFactory.setParent(page[0]);

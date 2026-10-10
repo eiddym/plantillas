@@ -26,7 +26,8 @@
       'DOCUMENTOS': { color: 'blue', icon: 'description' },
       'CATALOGOS': { color: 'teal', icon: 'folder' },
       'ADMINISTRACIÓN': { color: 'green', icon: 'settings' },
-      'CONFIGURACIÓN': { color: 'purple', icon: 'build' }
+      'CONFIGURACIÓN': { color: 'purple', icon: 'build' },
+      'ARCHIVO': { color: 'slate', icon: 'archive' }
     };
 
     var ICON_COLOR_MAP = {
@@ -35,7 +36,7 @@
       'firmar': { icon: 'edit', color: 'purple', countKey: 'firmas', desc: 'Pendientes de firma digital' },
       'aprobar_documento': { icon: 'fingerprint', color: 'indigo', countKey: 'firmas', desc: 'Aprobación con Ciudadanía' },
       'impresion': { icon: 'print', color: 'blue', countKey: 'documentos', desc: 'Impresión oficial de documentos' },
-      'archivo': { icon: 'archive', color: 'slate', countKey: 'documentos', desc: 'Archivo digital emitido' },
+      'archivo': { icon: 'archive', color: 'slate', countKey: 'archivos', desc: 'Archivo digital emitido' },
       'catalogos': { icon: 'folder', color: 'teal', countKey: 'catalogos', desc: 'Tablas de datos y catálogos' },
       'compartidos': { icon: 'share', color: 'teal', countKey: 'compartidos', desc: 'Catálogos compartidos' },
       'usuario': { icon: 'group', color: 'green', countKey: 'usuarios', desc: 'Gestión de usuarios' },
@@ -99,6 +100,35 @@
               items: secItems
             });
           }
+        } else {
+          // El menú es padre directo y aún no tiene submenús (ej. ARCHIVO)
+          var metaPadre = ICON_COLOR_MAP[padre.url] || {
+            icon: padre.icon || 'archive',
+            color: 'slate',
+            countKey: 'archivos',
+            desc: 'Archivo digital emitido'
+          };
+          var parentMeta = PARENT_COLOR_MAP[padre.label] || {
+            color: metaPadre.color || 'slate',
+            icon: padre.icon || metaPadre.icon || 'archive'
+          };
+          var valPadre = (metaPadre.countKey && contadores[metaPadre.countKey] !== undefined) ? 
+            contadores[metaPadre.countKey] : 
+            (contadores['documentos'] || 0);
+
+          secciones.push({
+            label: padre.label,
+            icon: parentMeta.icon,
+            color: parentMeta.color,
+            items: [{
+              label: padre.label,
+              url: padre.url || 'archivo',
+              icon: metaPadre.icon,
+              color: metaPadre.color,
+              valor: valPadre,
+              desc: metaPadre.desc || ('Módulo ' + padre.label)
+            }]
+          });
         }
       });
 

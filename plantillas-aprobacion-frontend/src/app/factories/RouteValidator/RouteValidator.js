@@ -48,9 +48,14 @@
                     // rutaPermitida = true;
                     if(existeUsuario && !rutaPermitida){
                         for (var i = 0; i < menus.length; i++) {
-                            for (var j = 0; j < menus[i].submenu.length; j++) {
-                                if(tienePermiso(menus[i].submenu[j].url, toState.url)){
-                                    rutaPermitida = true;
+                            if (menus[i].url && tienePermiso(menus[i].url, toState.url)) {
+                                rutaPermitida = true;
+                            }
+                            if (menus[i].submenu && menus[i].submenu.length) {
+                                for (var j = 0; j < menus[i].submenu.length; j++) {
+                                    if(tienePermiso(menus[i].submenu[j].url, toState.url)){
+                                        rutaPermitida = true;
+                                    }
                                 }
                             }
                         }

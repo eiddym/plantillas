@@ -29,14 +29,17 @@ module.exports = app => {
       let totalRoles = 0;
       let totalUnidades = 0;
 
-      // 1. Conteo de Documentos
+      // 1. Conteo de Documentos y Archivo
+      let totalArchivos = 0;
       if (Documento) {
         if (idUsuario) {
           totalDocs = await Documento.count({ where: { _usuario_creacion: idUsuario } }).catch(() => 0);
           totalPendientes = await Documento.count({ where: { estado: { [Op.in]: ['DERIVADO', 'ENVIADO', 'PENDIENTE'] } } }).catch(() => 0);
           totalFirmas = await Documento.count({ where: { estado: 'FIRMAR' } }).catch(() => 0);
+          totalArchivos = await Documento.count({ where: { nombre: { [Op.like]: '%/%' } } }).catch(() => 0);
         } else {
           totalDocs = await Documento.count().catch(() => 0);
+          totalArchivos = await Documento.count({ where: { nombre: { [Op.like]: '%/%' } } }).catch(() => 0);
         }
       }
 
@@ -63,6 +66,7 @@ module.exports = app => {
         documentos: totalDocs,
         pendientes: totalPendientes,
         firmas: totalFirmas,
+        archivos: totalArchivos,
         catalogos: totalCatalogos,
         compartidos: totalCompartidos,
         usuarios: totalUsuarios,
