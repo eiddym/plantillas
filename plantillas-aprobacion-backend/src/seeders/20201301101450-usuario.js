@@ -10,6 +10,7 @@ module.exports = {
       apellidos: 'default ',
       cargo: 'Default system user',
       email: 'docs@marabuntarl.com',
+      tipo_autenticacion: 'LOCAL',
       estado: 'ACTIVO',
       _fecha_creacion: new Date(),
       _fecha_modificacion: new Date(),

@@ -490,8 +490,8 @@ module.exports = app => {
     })
     .then(virtualesResp => {
       usuarioResp.dataValues.virtuales = virtualesResp;
-      // delete usuarioResp.dataValues.contrasena
-      // delete usuarioResp.contrasena
+      delete usuarioResp.dataValues.contrasena;
+      delete usuarioResp.contrasena;
       res.status(200).send(util.formatearMensaje("EXITO","Obtención de datos exitosa.",usuarioResp));
       
     })
@@ -895,7 +895,7 @@ module.exports = app => {
       usuario.contrasena = crypto.createHash("SHA256").update(usuario.contrasena).digest("hex");
       condiciones.where.contrasena = crypto.createHash("SHA256").update(usuario.verificarContrasena).digest("hex");
     }
-    else if (usuario.contrasena && typeof usuario.contrasena === 'string' && usuario.contrasena.trim() !== '') {
+    else if (usuario.contrasena && typeof usuario.contrasena === 'string' && usuario.contrasena.trim() !== '' && usuario.contrasena.length !== 64) {
       usuario.contrasena = crypto.createHash("SHA256").update(usuario.contrasena).digest("hex");
     }
     else{

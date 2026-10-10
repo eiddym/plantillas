@@ -355,6 +355,7 @@ module.exports={
   },
 
   buscarRolUno: (id, UsuarioRol, Rol, Usuario, Oficina) => Usuario.findOne({
+    attributes: { exclude: ['contrasena'] },
     where: {
       id_usuario: id,
     },

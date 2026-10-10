@@ -51,6 +51,7 @@
           var vmd=$scope;
 
           vmd.data = data;
+          vmd.data.contrasena = '';
           vmd.data.tipo_autenticacion = vmd.data.tipo_autenticacion || 'AUTHENTIK';
           // funciones
           vmd.cerrar = cerrar;
@@ -218,6 +219,9 @@
               usuario.id_usuario=vmd.data.id_usuario;
               usuario._usuario_modificacion=cuenta.id;
               usuario._fecha_modificacion=new Date();
+              if(!vmd.data.contrasena || vmd.data.contrasena.trim() === ''){
+                delete usuario.contrasena;
+              }
             }
             else{
               usuario._usuario_creacion=cuenta.id;

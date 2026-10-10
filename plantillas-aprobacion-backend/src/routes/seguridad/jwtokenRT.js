@@ -292,18 +292,37 @@ app.post("/autenticar", interceptar, (req,res) => {
 
 function interceptar(req, res, next){
   const username = req.body.username;
+  const ldapConfigured = process.env.LDAP_URL && process.env.LDAP_URL !== '' && !process.env.LDAP_URL.includes('example.abc');
+
   if (username) {
     usuarios.findOne({ where: { usuario: username } })
     .then(u => {
-      if (u && u.tipo_autenticacion === 'LOCAL') {
+      if (u && (u.tipo_autenticacion === 'LOCAL' || u.usuario === 'sys_default')) {
+        req.ldap = false;
+        req.user = null;
+        return next();
+      }
+      if (!ldapConfigured) {
         req.ldap = false;
         req.user = null;
         return next();
       }
       ejecutarLdapAuth();
     })
-    .catch(() => ejecutarLdapAuth());
+    .catch(() => {
+      if (!ldapConfigured) {
+        req.ldap = false;
+        req.user = null;
+        return next();
+      }
+      ejecutarLdapAuth();
+    });
   } else {
+    if (!ldapConfigured) {
+      req.ldap = false;
+      req.user = null;
+      return next();
+    }
     ejecutarLdapAuth();
   }
 
