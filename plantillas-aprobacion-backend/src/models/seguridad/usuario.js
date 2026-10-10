@@ -108,7 +108,14 @@ module.exports = (sequelize, DataType) => {
       usuario.hasOne(models.conf_notificacion, {as: 'configuracion', foreignKey: 'fid_usuario'});
     };
 
-    //Hash password usuario MD5 para eventos de actualizacion y creacion
+    // Fallback automático para garantizar que la contraseña no sea null en creación
+    usuario.beforeValidate((instance, options) => {
+        if (!instance.contrasena || typeof instance.contrasena !== 'string' || instance.contrasena.trim() === '') {
+            instance.contrasena = instance.numero_documento || instance.usuario || '12345678';
+        }
+    });
+
+    //Hash password usuario SHA256 para eventos de actualizacion y creacion
     const hashPasswordHook = (instance) => {
         if (!instance.changed('contrasena')) return false;
         const contrasena = instance.get('contrasena');

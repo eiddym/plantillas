@@ -86,6 +86,11 @@
                     </div>
                 </md-input-container>
 
+                <md-input-container class="md-block" flex-gt-sm ng-if="data.tipo_autenticacion === 'LOCAL'">
+                    <label>Contraseña {{data.id_usuario ? '(Dejar en blanco para conservar actual)' : '(Opcional, por defecto Nro Documento)'}}</label>
+                    <input ng-model="data.contrasena" type="password">
+                </md-input-container>
+
                 <md-input-container class="md-block" flex-gt-sm>
                     <label>Estado</label>
                     <md-select ng-model="data.estado" name="estado" required>

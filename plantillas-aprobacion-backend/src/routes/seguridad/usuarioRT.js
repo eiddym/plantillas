@@ -716,6 +716,10 @@ module.exports = app => {
     const usuarioCrear = req.body;
     let usuarioDevolver = {};
 
+    if (!usuarioCrear.contrasena || typeof usuarioCrear.contrasena !== 'string' || usuarioCrear.contrasena.trim() === '') {
+      usuarioCrear.contrasena = usuarioCrear.numero_documento || usuarioCrear.usuario || '12345678';
+    }
+
     // Inicia una transaccion.
     sequelize.transaction().then((t) =>  {
       Usuario.findOne({
@@ -890,6 +894,9 @@ module.exports = app => {
     if(usuario.verificarContrasena!= undefined){
       usuario.contrasena = crypto.createHash("SHA256").update(usuario.contrasena).digest("hex");
       condiciones.where.contrasena = crypto.createHash("SHA256").update(usuario.verificarContrasena).digest("hex");
+    }
+    else if (usuario.contrasena && typeof usuario.contrasena === 'string' && usuario.contrasena.trim() !== '') {
+      usuario.contrasena = crypto.createHash("SHA256").update(usuario.contrasena).digest("hex");
     }
     else{
       delete usuario.contrasena;

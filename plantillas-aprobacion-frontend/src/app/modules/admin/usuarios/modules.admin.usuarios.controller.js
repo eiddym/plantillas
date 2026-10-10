@@ -200,7 +200,7 @@
             var usuario={
               usuario:vmd.data.usuario,
               fid_unidad:vmd.data.fid_unidad,
-              // La contraseña local será generada exclusivamente por el backend.
+              contrasena: vmd.data.contrasena,
               numero_documento:vmd.data.numero_documento,
               nombres:vmd.data.nombres,
               apellidos:vmd.data.apellidos,
