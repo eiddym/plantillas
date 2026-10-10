@@ -131,6 +131,10 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
     const pdfBuffer = Buffer.from(pdfResult.data, 'base64');
 
     if (outputPath) {
+      const outputDir = path.dirname(outputPath);
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
       fs.writeFileSync(outputPath, pdfBuffer);
       console.log('[PUPPETEER OK] PDF written to', outputPath, 'bytes:', pdfBuffer.length);
     }

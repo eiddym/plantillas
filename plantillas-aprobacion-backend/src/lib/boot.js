@@ -1,4 +1,20 @@
 module.exports = app => {
+  const fs = require('fs');
+  const dirsToEnsure = [
+    './public/documentos',
+    './public/externos',
+    './public/aprobacion',
+    './public/adjuntos'
+  ];
+  dirsToEnsure.forEach(dir => {
+    try {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    } catch (e) {
+      console.warn(`[BOOT] No se pudo crear directorio ${dir}:`, e.message);
+    }
+  });
 
   // Almacena las rutas contenidas en el sistema.
   const rutas = {GET:[],PUT:[],POST:[],OPTIONS:[],DELETE:[]};
