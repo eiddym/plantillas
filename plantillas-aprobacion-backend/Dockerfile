@@ -32,8 +32,11 @@ RUN npm install --no-audit --no-fund
 # Copiar el resto del backend: index.js, src, parches, public y recursos.
 COPY . .
 
-# Los archivos config.js y config.json no se versionan; crearlos desde los samples.
-# Las credenciales y valores productivos se leen desde variables de entorno.
+# Registrar tipografías institucionales (Teko) en la caché del sistema fontconfig.
+RUN mkdir -p /usr/share/fonts/truetype/teko && \
+    cp /app/src/lib/html_plantilla/assets/fonts/*.ttf /usr/share/fonts/truetype/teko/ 2>/dev/null || true && \
+    fc-cache -f /usr/share/fonts/truetype/teko/
+
 RUN if [ ! -f /app/src/config/config.js ] && \
        [ -f /app/src/config/config.js.sample ]; then \
       cp /app/src/config/config.js.sample /app/src/config/config.js; \

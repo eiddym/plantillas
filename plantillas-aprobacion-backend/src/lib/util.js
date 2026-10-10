@@ -104,10 +104,10 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
       paperWidth = 11.69; paperHeight = 16.54;
     }
 
-    const marginTop = marginToInches('3.2cm', 1.26);
-    const marginBottom = marginToInches('2.2cm', 0.87);
-    const marginLeft = marginToInches('2.5cm', 0.98);
-    const marginRight = marginToInches('2.5cm', 0.98);
+    const marginTop = marginToInches('3.0cm', 1.18);
+    const marginBottom = marginToInches('2.0cm', 0.79);
+    const marginLeft = marginToInches('1.5cm', 0.59);
+    const marginRight = marginToInches('1.5cm', 0.59);
 
     const cdpOptions = {
       printBackground: true,
