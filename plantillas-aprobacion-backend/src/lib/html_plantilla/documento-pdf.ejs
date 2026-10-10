@@ -3,25 +3,63 @@
   <head>
     <meta charset="utf-8">
     <style type="text/css">
+      @font-face {
+        font-family: 'TekoPDF';
+        src: url('data:font/truetype;charset=utf-8;base64,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...
+    font-weight: bold;
+    font-style: normal;
+  }
 
-      body{
-        font-family: 'Open Sans';
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
-      #pageHeader{
-        font-family:'Open Sans'; font-size:10px;
+      body {
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
+        font-size: 11pt !important;
+        line-height: 15pt !important;
+        color: #222222 !important;
       }
-      #pageHeader .cite {
-        /*text-align: center;*/
-        float:left;
+      h1, h2, h3, h4, h5, h6, .titulo {
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
+        font-weight: 700 !important;
+        color: #111111 !important;
+        margin-top: 14pt !important;
+        margin-bottom: 14pt !important;
+        line-height: 1.3 !important;
       }
-      #pageHeader .cite .expediente{
-        text-align: none;
+      h1 {
+        font-size: 16pt !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        text-align: center !important;
       }
-      .globalPdf{
-        font-size: 10px;
+      h2 { font-size: 13pt !important; }
+      h3 { font-size: 12pt !important; }
+      h4 { font-size: 11pt !important; }
+
+      p, .parrafo {
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
+        font-size: 11pt !important;
+        line-height: 15pt !important;
+        color: #222222 !important;
+        text-align: justify !important;
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
       }
-      .globalHtml{
-        font-size: 14px;
+
+      #pageHeader {
+        font-family: 'Open Sans', Arial, sans-serif;
+        font-size: 9.5pt;
+      }
+      .globalPdf {
+        font-size: 10pt;
+      }
+      .globalHtml {
+        font-size: 10.5pt;
       }
       .cabecera{
         display: block;
@@ -68,129 +106,84 @@
       .expediente {
         text-align: none !important;
       }
-      .etiqueta, h1, h2, h3, h4, h5, h6 {
-        font-weight: normal;
-      }
       .etiqueta{}
       div .titulo{
         text-align: center;
       }
-      .parrafo{}
-      .texto{
-        border: none;
-      }
-      .radio[type=radio]{
-        border-radius:15px;
-        -webkit-appearance:button;
-        border: double 2px #000;
-        background-color:#fff;
-        color:#FFF;
-        white-space: nowrap;
-        overflow:hidden;
-        display: inline;
-        width:15px;
-        height:15px;
-        vertical-align: middle;
-      }
-      .radio[type=radio]:checked{
-        background-color:black;
-        overflow: hidden;
-      }
-      .radio div{
-        display: inline-block;
-      }
-      .checkbox[type=checkbox]{
-        color: #ccc;
-        padding-left:5px;
-        padding-right:5px;
-        -webkit-appearance:none;
-        border: double 2px #000;
-        white-space: nowrap;
-        overflow: hidden;
-        height:15px;
-        width: 15px;
-        vertical-align: middle;
-      }
-      .checkbox[type=checkbox]:checked:before{
-        content: 'X';
-        color:black;
-        margin-left: -4px;
-      }
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 36px;
-        height: 20px;
-      }
-      .switch input {display:none;}
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 13px;
-        width: 13px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        -webkit-transition: .4s;
-        transition: .4s;
-      }
-      input:checked + .slider {
-        background-color: #2196F3;
-      }
-      input:focus + .slider {
-        box-shadow: 0 0 1px #2196F3;
-      }
-      input:checked + .slider:before {
-        -webkit-transform: translateX(26px);
-        -ms-transform: translateX(26px);
-        transform: translateX(26px);
-      }
-      .slider.round {
-        border-radius: 34px;
-      }
-      .slider.round:before {
-        border-radius: 50%;
-      }
-      .chips{
-        display: block;
-      }
-      .chips div{
-        background-color: #bdc3c7;
-        border-radius: 5px;
-        height: 15px;
-        display: inline-block;
-      }
-      .barra{
-        height: 5px;
+
+      .pdf-page1-metadata {
+        display: table;
         width: 100%;
-        border: solid 1px gray;
-        border-radius: 3px;
+        table-layout: fixed;
+        margin: 0 0 12pt 0;
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif;
       }
-      .ap-text-center{
-        align: center;
+      .pdf-meta-izq {
+        display: table-cell;
+        width: 62%;
+        vertical-align: top;
+        font-size: 9pt;
+        line-height: 1.45;
+        color: #333;
       }
-      .ap-text-right{
-        align: right;
+      .pdf-meta-der {
+        display: table-cell;
+        width: 38%;
+        vertical-align: top;
+        text-align: right;
       }
-      .ap-text-left{
-        align: left;
+      .pdf-fecha-qr {
+        display: inline-block;
+        text-align: center;
       }
-      .ap-text-justify{
-        align: justify;
+      .pdf-fecha {
+        font-size: 10pt;
+        line-height: 13pt;
+        margin-bottom: 4px;
+        color: #333;
+      }
+      .pdf-fecha-qr img {
+        width: 28mm;
+        height: 28mm;
+        display: block;
+        margin: 0 auto;
+      }
+      .pdf-qr-leyenda {
+        font-size: 7.5pt;
+        margin-top: 3px;
+        color: #555;
+        white-space: nowrap;
+      }
+
+      .bloque-campos {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin: 0 0 8pt 0;
       }
       .datosGenerales {
+        width: 16mm;
+        min-width: 16mm;
+        max-width: 16mm;
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+        font-weight: 700;
+        font-size: 11pt;
+        line-height: 15pt;
+        color: #111;
         vertical-align: top;
+        text-align: left;
+        padding: 0 0 2pt 0;
+        white-space: nowrap;
+      }
+      .datosGeneralesValor {
+        font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+        font-weight: 400;
+        font-size: 11pt;
+        line-height: 15pt;
+        color: #222;
+        vertical-align: top;
+        text-align: left;
+        padding: 0 0 2pt 2mm;
       }
       .border-test {
         border: 1px solid black;
@@ -243,7 +236,7 @@
         text-align: justify;
       }
       .fondo-texto {
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' version=\'1.1\' height=\'200px\' width=\'450px\'><text x=\'0\' y=\'55\' fill=\'rgba(0, 0, 0, 0.4);\' font-size=\'30\' style=\'-webkit-transform: rotate(-6deg)\'> <%=mensaje%></text></svg>");
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' version=\'1.1\' height=\'200px\' width=\'450px\'><text x=\'0\' y=\'55\' fill=\'rgba(0, 0, 0, 0.4);\' font-size=\'30\' style=\'-webkit-transform: rotate(-6deg)\'> <%= typeof mensaje !== 'undefined' && mensaje ? mensaje : '' %></text></svg>");
         height: 100%;
         width: 100%;
         position: absolute;
@@ -338,275 +331,37 @@
 </style>
   </head>
 
-  <body class="<%= !html? 'globalPdf': 'globalHtml' %>" >
+  <body class="<%= (typeof html !== 'undefined' && html)? 'globalHtml': 'globalPdf' %>" >
 
 
 
     <%
-      if(html) marcaAgua = false;
+      if(typeof html !== 'undefined' && html) marcaAgua = false;
       var codigoSeguridad = typeof codigo ==='undefined'? '': codigo;
         var entidad = typeof entidad === 'undefined' ? {} : entidad;
     %>
-    <div class="<%= (marcaAgua == true)? 'fondo-texto':'none' %>"></div>
+    <div class="<%= (typeof marcaAgua !== 'undefined' && marcaAgua == true)? 'fondo-texto':'none' %>"></div>
     <div class="mi-contenido">
-    <!-- ===== CABECERA SIMULADA (paginación + logo + línea + metadatos + QR) ===== -->
-    <style>
-      @font-face {
-        font-family: 'TekoPDF';
-        src: url('data:font/truetype;charset=utf-8;base64,AAEAAAAPAIAAAwBwR1BPU0R2THUAAChEAAAAIEdTVULRA9WrAAAoZAAAARZPUy8yWFNWngAAJGQAAABgU1RBVHmTauUAACl8AAAAKmNtYXARjxKVAAAkxAAAAVJnYXNwAAAAEAAAKDwAAAAIZ2x5ZsTJOLMAAAD8AAAgOmhlYWQsqTX4AAAiQAAAADZoaGVhCb7+wAAAJEAAAAAkaG10eL6lDmgAACJ4AAAByGxvY2HEu8yzAAAhWAAAAOhtYXhwAI4BGQAAITgAAAAgbmFtZSt/RxgAACYgAAAB+nBvc3T/nwAyAAAoHAAAACBwcmVwaAaMhQAAJhgAAAAHAAIABAAAAd8CfAADAAoAAGUVITUFIwMDIxMzAXz+6wF4kF9ejpG222ho2wHo/hgCfAD//wAEAAAB3wMrBiYAAQAAAAcAcABFAI0AAwAsAAABtAJ8ABAAGgAkAABTITIWFRUUBgcWFhUVFAYjITc1NCYjIxUzMjYRNTQmIyMVMzI2LAEJRToTGhoTOkX+9/sMD1JSDwwMD1JSDwwCfDs0byExCworIXw0O3t7DgutDAEcdw4LqQwAAwAnAAABpQJ8ABMAHwArAABTERQWMzMVIyImNRE0NjMzFSMiBhc1NCYjIzUzMhYVFQM1MxUUBiMjNTMyNrcMDxpGRDs7REkdDwxeCw8dSEQ7kJA7REgdDwsCAf56DgtiOzMBnzQ7YgtyZA4LYjs0cP7eYW4zO2ILAAADADMAAAG8AnwACwAXABsAAEE1NCYjIzUzMhYVFQMRMxEUBiMjNTMyNgMzESMBLQwPqtVEO4+PO0TVqg8M+pCQAX2EDgtiOzSQ/v4BEv7iNDtiDAIO/YQABAAsAAABiAJ8AAMABwALAA8AAFMzESMBFSM1ARUhNQEVITUskJABN/UBEv7lASP+3QJ8/YQBeGlpAQRpaf3taWn//wAsAAABiAMrBiYABgAAAAcAcAAoAI0AAwAsAAABgwJ8AAMABwALAABTMxEjARUjNQEVITUskJABN/QBFP7iAnz9hAFkY2MBGGlpAAQAJwAAAaUCfAATABcAIwAvAABTERQWMzMVIyImNRE0NjMzFSMiBhcVIzU3NTQmIyM1MzIWFRUDNTMVFAYjIzUzMja3DA8YREQ7O0RJHQ8M7sEyDA8dSUQ6j486REYaDwwCAf56DgtiOzMBnzQ7Ygu5X19YUw4LYjs0X/7NmqczO2ILAAMALAAAAccCfAADAAcACwAAQRUjNQMzESMBMxEjAVK2cI6OAQ6NjQFvaWkBDf2EAnz9hAABAC8AAAC+AnwAAwAAUzMRIy+PjwJ8/YQA//8ALwAAASgDKwYmAAsAAAAHAHD/yACNAAEACwAAAXICfAATAAB3MxUUFjMzMjY1ETMRFAYjIyImNQuQDA8REAuQO0RpRDvubA0MDA0B+v3zNDs7NAAAAwAsAAAB0wJ8AAMABwALAABTMxMjEyMTMyEzESO+lYCaGpV7mv5Zj48BQv6+AUIBOv2EAAIALAAAAXICfAADAAcAAFMzESMzNSEVLI+PNQERAnz9hGlpAAEALAAAAjcCfAAMAABlIwMRIxEzExMzESMRAWdqUn+daWmcfooBH/5XAnz+mAFo/YQBqwABACwAAAG6AnwACQAAQTMRIwMRIxEzEwE3g4CLg4KJAnz9hAF8/oQCfP6F//8ALAAAAboDIQYmABEAAAAHAHIACgCIAAQAKQAAAawCfAALABcAIwAvAABBNTQmIyM1MzIWFRUHNTMVFAYjIzUzMjYDFSM1NDYzMxUjIgYVFRQWMzMVIyImNTUBHQsPIk1EOo+POkRPJA8LZY87REwhDwwMDyBLRDsBMMoOC2k7NN2uxtk0O2kMAYXK3TQ7aQu9yQ0MaTs03P//ACkAAAGsAysGJgATAAAABwBwAD4AjQACACwAAAGxAnwAEwAXAABBNTQmIyM1MzIWFRUUBiMjNTMyNgMzESMBIgsPs95EOjpE0qcPC/aPjwFgmg4LaTs0wDQ7aQwBKf2EAAUAKf+zAdUCfAALABcAIwAvADMAAEE1NCYjIzUzMhYVFQc1MxUUBiMjNTMyNgMVIzU0NjMzFSMiBhUVFBYzMxUjIiY1NRczFyMBHQsPIk1EOo+POkRPJA8LZY87REwhDwwMDyBLRDt1nZqgATDKDgtpOzTdrsbZNDtpDAGFyt00O2kLvckNDGk7NNzprwADACwAAAHRAnwAEwAXABsAAEE1NCYjIzUzMhYVFRQGIyM1MzI2AzMRIxMzEyMBIgsPs95EOjpE0qcPC/aPj5COh5kBa48OC2k7NLEzO2ULAR79hAEm/toAAQAhAAABmQJ8ADMAAGU1NCYjIyImNTU0NjMzMhYVFSM1NCYjIyIGFRUUFjMzMhYVFRQGIyMiJjU1MxUUFjMzMjYBCgwPWEI0OkR6RDqPDA8iDwwMD1ZDNTpEeUQ7jwwPIg8MgnMNCz0zkDQ7OzRSPw4LCw5wDQs6NJU0Ozs0Uj8NDAwAAgAFAAABfQJ8AAMABwAAUzMRIwEVITV5j48BBP6IAlL9rgJ8aWkAAAIALAAAAa8CfAALABcAAGURMxEUBiMjNTMyNgMRFBYzMxUjIiY1EQEgjzpETyMPDGUMDiFMRDqCAfr98zQ7aQwCB/4GDQxpOzQCDf//ACwAAAGvAysGJgAaAAAABwBwADsAjQABAAYAAAHPAnwABgAAQTMDIwMzEwE6lY2vjZVPAnz9hAJ8/igAAAEACgAAAuQCfAAMAABBMwMjAwMjAzMTEzMTAlaOeqxHRqx7lDxUkVQCfP2EAaD+YAJ8/iYB2v4mAAABAAEAAAHQAnwACwAAQRMjJwcjEwMzFzczATWboUpLmZSOoT09mgFE/rzKygFEATi7uwAAAgABAAABygJ8AAYACgAAZSMDMxMTMwEzESMBKX6qk1VPkv7Yj4+2Acb+1QEr/of+/QADABAAAAGHAnwAAwAHAAsAAEEVITUXMwMjIRUhNQGH/pXXlOOUAXH+jwJ8aWlp/lZpaQAAAwAhAAABiAHvABMAGQAtAAB3IzU0NjMzMhYVFSM1NCYjIyIGFRMjETc1MwUzFRQWMzMyNjU1MxUUBiMjIiY1rYw3PhgpKwUOEBcPDNuLAon+mYwMDxcQDgUrKRg+N+uVMzwrKFIcEQ8LDv6TAZkDU+uCDQwPERtRKCs7NAD//wAhAAABkAKeBiYAIQAAAAYAcDAAAAMAKQAAAZECnQATACcALQAAQTMVFAYjIyImNTUzFRQWMzMyNjU3IzU0JiMjIgYVFSM1NDYzMzIWFQEzEQcVIwEFjDc+GSgrBQ8OGA8MjIwMDxgODwUrKBk+N/6YjAKKAQSVNDsrKFAaEQ8MDWqBDgsPER1TKCs7MwEc/bgDUgAAAwAhAAABhQHvABMAHwArAABTFRQWMzMVIyImNRE0NjMzFSMiBhc1NCYjIzUzMhYVFQc1MxUUBiMjNTMyNq0MDxU9RDs7RD4WDwxQCxASNkQ7iIg7RDYSEAsBbesNDGk7NAERMzxpCz8xDgtpPDNEujBDNDtpDAAAAwAhAAABiAKdABMAGQAtAAB3IzU0NjMzMhYVFSM1NCYjIyIGFRMzESM1JyczFRQWMzMyNjU1MxUUBiMjIiY1rYw3PhgpKwUOEBcPDFCLiQLcjAwPFxAOBSspGD437JUzOysoUx0RDwsOATD9Y1IDr4INDA8RGlAoKzs0AAQAIgAAAZEB7wATAB8AKwAvAABTFRQWMzMVIyImNRE0NjMzFSMiBhc1NCYjIzUzMhYVFQc1MxUUBiMjNTMyNjcVITWoDA8bPUQ7O0Q/HQ8MYwsPGTpEO4eGO0Q5GA8Lh/63AXL2DQtkOzQBETM8ZAucjg4LZDwznGYhMDQ7ZAyzUlIA//8AIgAAAZECngYmACYAAAAGAHAsAAACAAkAAAESAp0ACwAPAABTESMRNDYzMxUjIgYXFSE1xos6RFkxDwxM/vcCHf3jAi40O2cLPGlpAAQAIf97AYgB7wATACcAMwA5AABTMxUUFjMzMjY1NTMVFAYjIyImNTcjNTQ2MzMyFhUVIzU0JiMjIgYVEzUzFRQGIyM1MzI2NyMRNzUzIYwMDxcQDgUrKRg+N4yMNz4YKSsFDhAXDwxQizpE1KwPDIuLAokBBG0NDA8RGlAoKzs0Z5UzPCsoUx0RDwsO/o0mNjM8ZgsoAYgBUgACACkAAAGRAp0AEwAXAABhIxE0JiMjIgYVFSM1NDYzMzIWFQMjETMBkYwMDxgODwUrKBk+N9yMjAFtDgsPERxSKCs8M/6AAp0AAAIAJwAAALgCnQADAAcAAHMjETMnNTMVtYyMjpEB70JsbAACACkAAAEeAp4AAwAHAABzIxEzJzczB7WMjIJcj3oB7yCPjwAC//P/ewC4Ap0ACwAPAABXETMRFAYjIzUzMjYDNTMVKYw6REQcDwsCkQYB9f37MzxmCwJFbGwAAAMAKQAAAbACnQADAAcACwAAcyMRMxMzFyM3IzcztYyMAY1tkiWNaZECnf5h/v7xAAEAKQAAALUCnQADAABzIxEztYyMAp0AAAMAKQAAAmwB7wATABkALQAAYSMRNCYjIyIGFRUjNTQ2MzMyFhUDIxEzFRcBIxE0JiMjIgYVFSMnJjYzMzIWFQGRjAwPGA4PBSsoGT433IyKAgG3iwwPGA8OBwYCNCkZPTcBbQ4LDxEdUygrPDP+gAHvUgL+ZQFtDgsPER1RJy48MwACACkAAAGRAe8ABQAZAABzIxEzFRcTIxE0JiMjIgYVFSM1NDYzMzIWFbWMigLcjAwPGA4PBSsoGT43Ae9SAv5lAW0OCw8RHVMoKzwzAP//ACUAAAGRApkGJgAxAAAABgBy6QAABAAkAAABkgHvAAsAFwAjAC8AAGU1NCYjIzUzMhYVFQc1MxUUBiMjNTMyNgMVIzU0NjMzFSMiBhUVFBYzMxUjIiY1NQEJDA8VPkQ3iYk3REAXDwxbijhEPRQPDAwPEzxEOMymDQtlPDO0T2d1NDtkDAECprQzPGULmGoNDGQ7NHgA//8AJAAAAZICngYmADMAAAAGAHAyAAADACn/ewGRAe8AEwAZAC0AAGUjNTQmIyMiBhUVIzU0NjMzMhYVAyMRMxUXFzMVFAYjIyImNTUzFRQWMzMyNjUBkYwMDxgODwUrKBk+N9yMigJQjDc+GSgrBQ8OGA8M64IOCw8RHVMoKzwz/fsCdFEElpU0OysoUBoRDwwNAAADACH/ewGIAe8AEwAZAC0AAHcjNTQ2MzMyFhUVIzU0JiMjIgYVEyMRNzUzBTMVFBYzMzI2NTUzFRQGIyMiJjWtjDc+GCkrBQ4QFw8M24sCif6ZjAwPFxAOBSspGD4365UzPCsoUx0RDwsO/g4CHwRR64INDA8RGlAoKzs0AAACACkAAAElAfIACwARAABBFSMiFRUjNTQ2NjMDIxEzFTcBJTE/BRctIF+MigIB8nlGGXIdLhv+DgHvagwAAAEAHAAAAXUB7wAzAAB3NTQmIyMiJjU1NDYzMzIWFRUjNTQmIyMiBhUVFBYzMzIWFRUUBiMjIiY1NTMVFBYzMzI27QwPOUQ5O0RVRDuGDA8PDwwMDzlEOTtEWUQ6iAwOEQ8MdzgNCzszSzM8PDMsJA0LCw08DQs6M0g0Ozs0KyMNDAwAAAIABQAAAQUCSwALAA8AAFMRFBYzMxUjIiY1ERcVITXFDA4mTkQ6zP8AAkv+OA0Lazs0AdxcaWkAAgAmAAABjQHvABMAGQAAUzMRFBYzMzI2NTUzFRQGIyMiJjUTMxEjNScmjAwPFxAOBSspGD433IuJAgHv/pMNDA8RHVMoKzs0AYD+EVICAP//ACYAAAGNAp4GJgA6AAAABgBwJwAAAQABAAABlAHvAAYAAFMTEzMDIwONPj6Lcq9yAe/+nQFj/hEB7wABAAUAAAJvAe8ADAAAQTMDIwMDIwMzExMzEwHtgmWWPD2VYYIwQIU7Ae/+EQFC/r4B7/6gAWD+ogAAAQAEAAABlgHvAAsAAGUXIycHIzcnMxc3MwEbe489Oop0dpMzMo3//5yc/fKTkwAAAQAD/3sBnwHvABAAAFMzExMzAwYGIyM1MzI2NzcjA5FCPI11D0pISz4VHQcFOwHv/qgBWP4FOUBoDhgTAAADAAsAAAFWAe8AAwAHAAsAAEEVITUXMwMjIRUhNQFP/smjlLGTAUv+tQHvZWVl/ttlZQAABAAJAAABogKdAAMADwATABcAAGEjETMnESMRNDYzMxUjIgYXFSE1JTUzFQGiioreiTpEOBIPDJr+qwEPigHvL/3iAi40O2YLPWlpSGZmAAADAAkAAAGiAp0ACwAPABMAAFMRIxE0NjMzFSMiBhcVITUBIxEzxIk6RDgSDwya/qsBmYmJAh794gIuNDtmCz1paf4RAp0AAgAnAAABoQJ8ACQASQAAdxUUFjMzFSMiJjU1NDY3JiY1NTQ2MzMVIyIGFRUUFjMzFSMiBjc1NCYjIzUzMhYVFRQGBxYWFRUUBiMjNTMyNjU1NCYjIzUzMjaxDA8fRUQ7FBgYFDtEQx0PDAwPHBwPDGcMDxk/RDoTGRkTOkQ/GQ8MDA8dHQ8M+3oOC2g7NH0hLAoLMCJtNDtoCw5zDQtcC39zDgtoOzRtIjALCiwhfTQ7aAsOeg4LXAsAAgAoAAABnQJ8ABsAIQAAdxUUFjMzMjY1NTQmIyM1MzIWFRUUBiMjIiY1NTcjESEVI7cMDyMPDAwPcptEOztEd0Q7k40BaNvXVQ0MDA2XDgtpOzS9NDs7NGhbAUppAAMACQAAAcUCfAADAAgADAAAdzUhFSE1EzMBNzMRIzMBkv5E2ZD+27GHh3dqanwBif375/6iAAMAIQAAAZkCfAATACcAMwAAUxUUFjMzFSMiJjU1NDYzMxUjIgYTETQmIyM1MzIWFREUBiMjNTMyNicVFBYzMxUjIiY1Na0MD2uTRDs7REIaDwxgCw8aQUU6OkVBGg8LWwwPGkFEOwH6hA4LYjszpDQ7aQv+egF4DgtpOzT+YjQ7aQxLPg0MaTs0UQAAAgATAAAA9QJ8AAMABwAAUxUjNTMzESO/rFOPjwJ8aWn9hAAAAgAJAAABbwJ8AAMACAAAQRUhNSEVAyMTAU3+vAFmuJTbAnxwcFD91AJ8AAADACkAAAGhAnwAEwAnADMAAGU1NCYjIzUzMhYVFRQGIyM1MzI2AxEUFjMzFSMiJjURNDYzMxUjIgYXNTQmIyM1MzIWFRUBFQsQa5NEOztEQhoQC2AMDhpBRDs7REEaDgxZCxAYQEQ7gncOC2U7M5o0O2kMAYX+iA0MaTs0AZ40O2kLUEIOC2k7NFUAAAEAGgAAAYcCfAA0AABTFSM1NDYzMzIWFRUUBgcWFhUVFAYjIyImNTUzFRQWMzMyNjU1NCYjIzUzMjY1NTQmIyMiBqqQO0RwRDoTGhoTOkRwRDuQDA4bEAsLEE5OEAsLEBsODAH6S140Ozs0bCIvDAorIn40Ozs0XUoNDAwNdg4LYwsNbg4LCwABABgAAAGEAnwAHgAAUxUjNTQ2MzMyFhUVFAYHBzMVITU3NjY1NTQmIyMiBqePOkRsRDwcHYC7/pewGREMDxkODAH6VGc0Ozs0UDBEJbtpYewgMCE8DgsLAAACACkAAAGiAnwADwAfAABBERQGIyMiJjURNDYzMzIWAxE0JiMjIgYVERQWMzMyNgGiOkR8RDs7RHxEOo8MDyUPDAwPJQ8MAg3+YjQ7OzQBnjQ7O/5BAXgOCwsO/ogNDAwAAAQANAAAAogCfQADAAcACwAqAABTFSM1EyMTMwURIxEBFSM1NDYzMzIWFRUUBgcHMxUjNTc2NjU1NCYjIyIGk1/LefJ5/sxbAaNZICZQJh8SEUtv2m0OBgYIDgcHAnw9Pf2EAn0B/qIBXv6XMkAcISEcJx8uE1lBOn0PGRcdCAYGAAAGADQAAAJ2An0AAwAIAAwAEAAUABgAAGU1MxUjNTczAzczFSMBFSM1EyMTMwURIxEBkeX9eVmjWFRU/pNfy3nyef7MW0BAQEba/uCExAJ8PT39hAJ9Af6iAV4AAAUAHwAAAqMCfQA0ADgAPQBBAEUAAFMVIzU0NjMzMhYVFRQGBxYWFRUUBiMjIiY1NTMVFBYzMzI2NTU0JiMjNTMyNjU1NCYjIyIGATUzFSM1NzMDNzMVIwMzAyN3WCAmUCYgCg4OCiAmUCYgWAcIDwgGBggjIwgGBggPCAcBRub+elijWFVViHryeQIyJjMdICAdPhMaBgUZEkMcISEcNCYHBwcHOggFOgYHOwcGBv4HQEBG2v7ghMQCff2DAAAFABEBQgFbAnwACwAXACMALwA7AABTIzAmJjU1MxUUBgYnBzAGJicnNxceAgcXMAYGBwcnNz4CFTcwFhYXFwcnLgIXJzA2Njc3FwcGBibGHxMTahITCwkiPisWIRcqMhYRGQITGw5WDxoxIRkhMhoOVg8ZFAIRCRUzKhcgFyk+IgHgHTwsFxgrPB0PHgkBDQhkBw0kGwYSIzskEz4UIyQOEhINJCQTPxQkOiMGHhskDgdlCA0BCQAAAf///60BnwK9AAMAAEMzASMBegEmegK9/PAAAAIAJQAAALYB7wADAAcAAFM1MxUDNTMVJZGRkQFalZX+ppSUAAEAJf9vALYAlAAEAAB3MxUHIyWRZC2UUNUAAgAyAAAA1gJ8AAMABwAAUzMDIwc1MxUypBlyEJECfP5i3pSUAAAEAB4AAAJDAnsAAwAHAAsADwAAUzMDIwEVITUBIxMzATUhFcV5hHkCAv4FAVR5hHn9/gH7Anv9hQHmXl7+GgJ7/hpfXwAAAQAlAAAAtgCUAAMAAHM1MxUlkZSUAAQAFAAAAYkCfAATABcAGwAnAABTNTQmIyM1MzIWFRUUBiMjNTMyNgczByMHNTMVAxUjNTQ2MzMVIyIG+gsPG0ZEOjpEWzAPC3uRDXcPkWuPOkU9Eg8MAYh5DQxiPDKDMjxSDAyR3pSUAgFFUjI8YgwAAAIAJf9vALYB7wAEAAgAAHczFQcjETUzFSWRZC2RlFDVAeuVlQAAAf/0/60BlAK9AAMAAEEzASMBG3n+2noCvfzwAAEAHgD6AS0BXAADAAB3NSEVHgEP+mJiAAEAAP91Adr/1wADAABVNSEVAdqLYmIAAAEADf9hASwDFAAkAABTFRQGBxYWFRUUFjMzFSMiJjU1NCYjIzUzMjY1NTQ2MzMVIyIG8CwiJCoMDyFQRDciKAoKKCI3RFAhDwwCmOE7OgcDPDTrDgxiQzLZLyxiLDDXMURiDAABAAn/YQEpAxQAJAAAUzU0JiMjNTMyFhUVFBYzMxUjIgYVFRQGIyM1MzI2NTU0NjcmJkYNDyFQRTchKAsLKCE3RVAhDw0qIyEsAbfhDgxiRDHXMCxiLC/ZMkNiDA7rNDwDBzoAAwAv/2ABHQMUAAMABwALAABTNTMVJzMRIzM1MxVkue6PjzK8AqtpaWn8TGlpAAMAF/9gAQUDFAADAAcACwAAUxUjNTMzESM3FSM10Llfj49dvAMUaWn8TGlpaQABACv/VgE2AyAAFQAAUzQ2MzMVIw4CFREUFhYXMxUjIiY1K4R8CwokMxwcMyQKC3yEAcOptHcBMmVM/uxMZDICd7SqAAH//v9WAQoDIAAVAABlFAYjIzUzPgI1ETQmJicjNTMyFhUBCoV8CwskMxsbMyQLC3yFtKq0dwIyZEwBFExlMgF3tKkAAgAnAYIBVgJ8AAMABwAAUzMVIzczFSMnfn6wf38CfPr6+gAAAQAnAYIArQJ8AAMAAFMzFSMnhoYCfPoAAQAh/9wCXgJ8AD4AAEUjASYmNTU0NjMzMhYVFRQGBgcHBgYVFRQWMzMyNjU1MxUUBiMjIiY1NTQ2Njc3NjY1NTQmIyMiBhUVFBYWFwJekP68Iyc7RG1EORYqHokMDQwPxw8McUBE80Q7ECMedx0bDA8fDwwOHhgkAWEoOCJONDs7NE0mMSQUUggSEzcNDAwNeIQ0Ozs0Sx4oIBJIEhoYRQ4LCw5LERsfGwACADX/pQLyAloANQBFAABTNDYzMzIWFzUzETMyNjURNCYjISIGFREUFjMhFSEiJjURNDYzITIWFREUBiMjNQYGIyMiJjU3FRQWMzMyNjU1NCYjIyIG8jM5FB8lB3MsDwwMD/5yDwwMDwFj/nk9ODg9AdQ+Njg9vQUoIRQ5M3sLDRsODQ0OGw0LAUswNxsYM/75Cw4BGg4LCw7+Qg0LYzszAdg0Ozs0/tQzPDocHjcwiHwNCg0QcBAOCgABADP/WwC1Ax8AAwAAUzMRIzOCggMf/DwAAAMAIf+vAZkCzgADAAcAOwAAQSM1MxEjNTMnNTQmIyMiJjU1NDYzMzIWFRUjNTQmIyMiBhUVFBYzMzIWFRUUBiMjIiY1NTMVFBYzMzI2ASGIiIiIFwwPWEI0OkR6RDqPDA8iDwwMD1ZDNTpEeUQ7jwwPIg8MAkuD/OGDUHMNCz0zkDQ7OzRSPw4LCw5wDQs6NJU0Ozs0Uj8NDAwAAAEATgEmAgUCngAGAABTMxMjJwcjzLt+kUtJkgKe/oj//wABAFMA0AIwAXoAHQAAZSIuAiMiBhUVIzU0NjMzMh4CMzI2NTUzFRQGIwGUHSwkIxURC4AuNzcgLyQhEhEKgC430BcfGBARLU0vLhcgFxARLU4uLgACABoAogHQAdcAAwAHAABTNSEVBTUhFRoBtv5KAbYBam1tyG1tAAEAGgB5AdACAwAGAABBJTUFFQU1AUf+0wG2/koBP1Jyg36JcwAAAQAaAHkB0AIDAAYAAEEFBRUlNSUB0P7TAS3+SgG2AZFSU3OJfoMAAAUAGgAAAwYCfAAPAB8ALwA/AEMAAEEVFAYjIyImNTU0NjMzMhYBFRQGIyMiJjU1NDYzMzIWJTU0JiMjIgYVFRQWMzMyNgE1NCYjIyIGFRUUFjMzMjYDMwEjAUEvOFk3MDA3WTgvAcUuOFk3MDA3WTgu/ccJDRMMCgoMEw0JAcYJDhIMCgoMEg4JkGz+sGoCIbgqMTEquCswMP7HuCoxMSq4KzAwPJYMCgoMlgwJCf7+lgwKCgyWDAkJAhz9hAACABIAbwHHAgsAAwAHAABTNSEVATMRIxIBtf7ih4cBCGpqAQP+ZAAAAQB1Ag8BYAKeAAMAAFM3Mwd1W5B7Ag+PjwABAGcCDwFSAp4AAwAAUxcjJ/dbcHsCno+PAAEAPAIVAZoCmQAaAABBIiYmIyIVFSM1NDYzMzIWFjMyNjU1MxUUBiMBMBorIQwRcSc0DxorIQoKCXEoNAIVFxgWGSoqMBgXCgwZLyksAAAAAQAAAHMAkAAMAIcACgABAAAAAAAAAAAAAAAAAAQAAQAAAAAAGQAlAFsAmADEAOUA8QELAU0BZwF0AYABnwG5AcsB5QH7AgcCSAJUAnkCwALsAy4DQgNoA3QDhwOkA74D1wPxBDAEOwR7BLcE9QU3BUIFXgWrBdAF4QXzBg8GJwYzBnQGmwamBucG8gcxB3AHjwfRB+0IFQggCDMIUAhoCIcIoQjJCOwJSQl4CZMJ2QnrCgEKRwqLCrgK6QsqC1gLtwu3DBMMIQwzDEAMUwx2DIEMugzNDNsM5wzzDSUNVw1uDYUNpw3JDdsN5w48DpkOpg70DwUPLw9CD1UPaQ/ID9wP6Q/2EB0AAQAAAAIAANVbkadfDzz1AAMD6AAAAADg2/e3AAAAAOa2+4P+Fv5DB+gDmAAAAAYAAgAAAAAAAALyAKYB4wAEAeMABAHcACwBwgAnAeUAMwGZACwBmQAsAY8ALAHIACcB9AAsAO4ALwDuAC8BmgALAdsALAFzACwCZAAsAeYALAHmACwB1QApAdUAKQHIACwB1QApAdUALAG6ACEBggAFAdsALAHbACwB1QAGAu4ACgHRAAEBywABAZcAEAGyACEBsgAhAbIAKQGdACEBsgAhAa0AIgGtACIBFwAJAbIAIQG3ACkA3wAnAN8AKQDf//MBrgApAN8AKQKRACkBtwApAbcAJQG3ACQBtwAkAbIAKQGyACEBKgApAZEAHAEPAAUBtwAmAbcAJgGVAAECdAAFAZcABAGiAAMBYgALAcsACQHLAAkByQAnAb0AKAHFAAkBwgAhASIAEwF0AAkBxAApAa8AGgGfABgBywApAscANALTADQCwQAfALMAAAFsABEBk///ANsAJQDbACUBCAAyAmEAHgDbACUBpQAUANsAJQGT//QBTAAeAdoAAAE2AA0BNgAJATsALwE7ABcBNQArATX//gF8ACcA1AAnAjMAIQMgADUA8AAzAboAIQJyAE4ChQBTAeoAGgHqABoB6gAaAyEAGgHZABIB1gB1AGcAPAABAAADvv4lAAAHLP4W+P0H6AABAAAAAAAAAAAAAAAAAAAAcQAEAoYCWAAFAAACigJYAAAASwKKAlgAAAFeADIBJAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAABJRkYgAMAAIAD6A77+JQAAA74B2wAAAAEAAAAAAeYCfAAAACAABAAAAAIAAAADAAAAFAADAAEAAAAUAAQBPgAAABwAEAADAAwAfgDBAMkAzQDRANMA2gDhAOkA7QDxAPMA+v//AAAAIADBAMkAzQDRANMA2gDhAOkA7QDxAPMA+v//AAD/Qf8+/z//Qf9B/0H/Qf8+/z//Qf9B/0EAAQAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUABVAGMAVgBoAG4AZQBkAGEAYgBRAG8AVABbAFcAWgBMAEcASwBKAEUARABJAEgAQwBGAFMAWQBtAGsAbABYAGYAAQADAAQABQAGAAgACQAKAAsADQAOAA8AEAARABMAFQAWABcAGAAZABoAHAAdAB4AHwAgAF8AUgBgAGkAXABxACEAIwAkACUAJgAoACkAKgArAC0ALgAvADAAMQAzADUANgA3ADgAOQA6ADwAPQA+AD8AQABdAGcAXgBqAAC4Af+FsASNAAAAAAkAcgADAAEECQAAAKIAAAADAAEECQABABQAogADAAEECQACAA4AtgADAAEECQADACoAxAADAAEECQAEABQAogADAAEECQAFAGoA7gADAAEECQAGABQBWAADAAEECQEAAAwBbAADAAEECQEEABABeABDAG8AcAB5AHIAaQBnAGgAdAAgADIAMAAyADMAIABUAGgAZQAgAFQAZQBrAG8AIABQAHIAbwBqAGUAYwB0ACAAQQB1AHQAaABvAHIAcwAgACgAaAB0AHQAcABzADoALwAvAHcAdwB3AC4AZwBpAHQAaAB1AGIALgBjAG8AbQAvAGcAbwBvAGcAbABlAGYAbwBuAHQAcwAvAHQAZQBrAG8AKQBUAGUAawBvACAATABpAGcAaAB0AFIAZQBnAHUAbABhAHIAMgAuADAAMAAwADsASQBGAEYAIAA7AFQAZQBrAG8ALQBMAGkAZwBoAHQAVgBlAHIAcwBpAG8AbgAgADIALgAwADAAMAA7AGcAZgB0AG8AbwBsAHMAWwAwAC4AOQAuADIAOAAuAGQAZQB2ADkAKwBnADcAZAAyADEAMwA5AGQALgBkADIAMAAyADMAMAA3ADAANwBdAFQAZQBrAG8ALQBMAGkAZwBoAHQAVwBlAGkAZwBoAHQAUwBlAG0AaQBCAG8AbABkAAAAAwAAAAAAAP+cADIAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAH//wAPAAEAAAAKABwAHgABREZMVAAIAAQAAAAA//8AAAAAAAAAAQAAAAoAUACEAARERkxUABpkZXYyABpkZXZhABpsYXRuAB4AIAAAABAAAk1PTCAAHFJPTSAAHAAA//8AAwABAAIAAwAA//8AAwAAAAIAAwAEY2NtcAAaY2NtcAAgZnJhYwAobGlnYQAuAAAAAQAAAAAAAgAAAAAAAAABAAEAAAABAAIAAwAIAC4AagACAAAAAQAIAAEACgACABIAGAABAAIAQQBCAAIAKAArAAIAKAAvAAQAAAABAAgAAQAsAAIACgAgAAIABgAOAE4AAwBaAEUATQADAFoASwABAAQATwADAFoARQABAAIARwBKAAQACAABAAgAAQAaAAEACAACAAYADABBAAIAKwBCAAIALwABAAEAKAAAAAEAAQAIAAEAAAAUAAEAAAAcAAJ3Z2h0AQAAAAACAAEAAAAAAQQCWAAAAAA=') format('truetype');
-        font-weight: 600;
-        font-style: normal;
-      }
-
-.cabecera-completa {
-        width: 100%;
-        margin-top: -0.1cm;
-        margin-bottom: 10px;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 7pt;
-        color: #222;
-      }
-      .cabecera-pagina {
-        text-align: right;
-        font-size: 9pt;
-        margin-bottom: 4px;
-      }
-      .cabecera-logo {
-        margin-bottom: 4px;
-      }
-      .cabecera-logo img {
-        height: 42px !important;
-        max-height: 42px !important;
-        width: auto !important;
-        display: block !important;
-      }
-      .membrete-institucional {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        margin: 0;
-      }
-      .membrete-institucional td {
-        padding: 0;
-        vertical-align: middle !important;
-      }
-      .membrete-logo-izq,
-      .membrete-logo-der {
-        width: 82px;
-        text-align: center;
-        vertical-align: middle !important;
-      }
-      .membrete-logo-izq img,
-      .membrete-logo-der img {
-        width: 72px !important;
-        height: 72px !important;
-        max-width: 72px !important;
-        max-height: 72px !important;
-        object-fit: contain;
-        display: block !important;
-        margin: 0 auto !important;
-      }
-      .membrete-texto-central {
-        width: calc(100% - 164px);
-        padding: 0 4px !important;
-        text-align: center;
-        color: #000;
-        vertical-align: middle !important;
-      }
-      .membrete-razon-social {
-        color: #7b3f16;
-        font-family: 'TekoPDF', 'Open Sans', Arial, sans-serif !important;
-        font-size: 25px;
-        font-weight: 700;
-        line-height: 1.0;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        white-space: nowrap;
-        margin-bottom: 2px;
-      }
-      .membrete-personeria {
-        color: #000;
-        font-family: 'TekoPDF', 'Open Sans', Arial, sans-serif !important;
-        font-size: 11.5px;
-        font-weight: 700;
-        line-height: 1.15;
-        text-transform: uppercase;
-        margin-top: 1px;
-      }
-      .membrete-afiliacion {
-        color: #000;
-        font-family: 'TekoPDF', 'Open Sans', Arial, sans-serif !important;
-        font-size: 10.5px;
-        font-weight: 700;
-        line-height: 1.15;
-        text-transform: uppercase;
-        margin-top: 1px;
-      }
-
-      .cabecera-linea {
-        width: 100%;
-        height: 2px;
-        background-color: #c4a484;
-        margin: 6px 0 8px 0;
-      }
-      .cabecera-info {
-        display: table;
-        width: 100%;
-        table-layout: fixed;
-      }
-      .cabecera-info > div {
-        display: table-cell;
-        vertical-align: top;
-      }
-      .cabecera-meta {
-        width: 68%;
-        font-size: 9.5pt;
-        line-height: 1.4;
-        color: #222;
-        font-family: 'Open Sans', Arial, sans-serif !important;
-      }
-      .cabecera-right {
-        width: 32%;
-        text-align: center;
-      }
-      .cabecera-fecha {
-        margin-bottom: 4px;
-        text-align: right;
-        font-size: 9.5pt;
-        color: #222;
-        font-family: 'Open Sans', Arial, sans-serif !important;
-        padding-right: 6px;
-      }
-      .cabecera-qr {
-        display: inline-block;
-        text-align: center;
-      }
-      .cabecera-qr img {
-        width: 74px !important;
-        height: 74px !important;
-        display: block !important;
-        margin: 0 auto;
-      }
-      .cabecera-qr-caption {
-        font-size: 8pt;
-        color: #555;
-        margin-top: 2px;
-        text-align: center;
-        white-space: nowrap;
-      }
-      .cuerpo-documento {
-        position: relative;
-        margin-top: 10px;
-        padding-top: 0;
-      }
-      .cuerpo-documento,
-      .cuerpo-documento * {
-        font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
-      }
-      .cuerpo-documento h1,
-      .cuerpo-documento h2,
-      .cuerpo-documento h3,
-      .cuerpo-documento .datosGenerales {
-        font-weight: bold !important;
-      }
-      .reserva-qr {
-        float: right;
-        width: 32%;
-        height: 78px;
-      }
-
-      /*
-       * El título queda centrado dentro del ancho útil de la hoja.
-       * Permanece en el flujo, por lo que PARA/DE/REF empieza debajo.
-       */
-      .cuerpo-documento > .contenedor > h2 {
-        clear: both;
-        width: 100%;
-        margin: 15px 0 15px 0;
-        text-align: center;
-        font-family: 'Open Sans', Arial, Helvetica, sans-serif;
-        font-size: 14pt;
-        line-height: 1.1;
-      }
-
-      /*
-       * El header anterior está duplicado por la cabecera simulada.
-       * Se oculta sin afectar la cabecera nueva.
-       */
-      .cuerpo-documento #pageHeader {
-        display: none;
-      }
-
-      /*
-       * Quita el espacio de contenedores vacíos entre título y datos.
-       */
-      .cuerpo-documento > .contenedor:empty {
-        display: none;
-      }
-      .cuerpo-documento h1 {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        margin: 0;
-        text-align: center;
-      }
-    </style>
-
-    <div class="cabecera-completa">
-      <table class="membrete-institucional" role="presentation">
-        <tbody>
-          <tr>
-            <td class="membrete-logo-izq">
-              <% if (typeof logo_base64 !== 'undefined' && logo_base64) { %>
-                <img src="<%= logo_base64 %>" alt="Logo Cooperativa">
-              <% } %>
-            </td>
-
-            <td class="membrete-texto-central">
-              <div class="membrete-razon-social">
-                <%= (entidad && entidad.razon_social) || 'COOPERATIVA MINERA MARABUNTA R.L.' %>
-              </div>
-              <div class="membrete-personeria">
-                <%= (entidad && entidad.personeria_juridica) || 'P.J. 483/2025, R.E.C. 01.01.2760' %>
-              </div>
-              <div class="membrete-afiliacion">
-                <%= (entidad && entidad.afiliacion) || 'AFILIADA A LA FEDERACIÓN REGIONAL DE COOPERATIVAS MINERAS DEL SUD R.L. UYUNI' %>
-              </div>
-            </td>
-
-            <td class="membrete-logo-der">
-              <% if (typeof logo_ferecomin_base64 !== 'undefined' && logo_ferecomin_base64) { %>
-                <img src="<%= logo_ferecomin_base64 %>" alt="Logo FERECOMIN">
-              <% } %>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="cabecera-linea"></div>
-
-      <div class="cabecera-info">
-        <div class="cabecera-meta">
-          <%= typeof pdf_cite !== 'undefined' ? pdf_cite : '' %><br>
-          Expediente : <%= typeof pdf_expediente !== 'undefined' ? pdf_expediente : '' %><br>
-          Código de verificación : <%= typeof pdf_codigo !== 'undefined' ? pdf_codigo : '' %>
-        </div>
-        <div class="cabecera-right">
-          <div class="cabecera-fecha"><%= typeof pdf_fecha !== 'undefined' ? pdf_fecha : '' %></div>
-          <% if (typeof qr_base64 !== 'undefined' && qr_base64) { %>
-            <div class="cabecera-qr">
-              <img src="<%= qr_base64 %>" alt="QR">
-              <div class="cabecera-qr-caption">Escanear para verificar</div>
-            </div>
-          <% } %>
-        </div>
-      </div>
-    </div>
-    <!-- ===== FIN CABECERA SIMULADA ===== -->
-
     <div class="cuerpo-documento">
       <div class="reserva-qr"></div>
+      <% if (typeof html === 'undefined' || !html) { %>
+        <div class="pdf-page1-metadata">
+          <div class="pdf-meta-izq">
+            <%= typeof pdf_cite !== 'undefined' && pdf_cite ? pdf_cite : (typeof doc !== 'undefined' && doc && doc.nombre ? doc.nombre.replace(/\.pdf$/i, '') : '') %><br>
+            Expediente : <%= typeof pdf_expediente !== 'undefined' && pdf_expediente !== null ? pdf_expediente : (typeof exp !== 'undefined' ? exp : '') %><br>
+            Código de verificación : <%= typeof pdf_codigo !== 'undefined' && pdf_codigo ? pdf_codigo : (typeof codigoSeguridad !== 'undefined' ? codigoSeguridad : '') %>
+          </div>
+          <div class="pdf-meta-der">
+            <div class="pdf-fecha-qr">
+              <div class="pdf-fecha"><%= typeof pdf_fecha !== 'undefined' && pdf_fecha ? pdf_fecha : '' %></div>
+              <% if (typeof qr_base64 !== 'undefined' && qr_base64) { %>
+                <img src="<%= qr_base64 %>" alt="QR">
+              <% } %>
+              <div class="pdf-qr-leyenda">Escanear para verificar</div>
+            </div>
+          </div>
+        </div>
+      <% } %>
 
             <%# Funcion que retorna html de acuerdo al tipo de campo  %>
       <%
@@ -670,74 +425,7 @@
             }
             break;
           case 'cite':
-            var cite = null;
-            var fecha = null;
-            if(pDatos[pItem.key] && pDatos[pItem.key]['cite'] && pDatos[pItem.key]['fecha']){
-              cite=pDatos[pItem.key]['cite'];
-              fecha=pDatos[pItem.key]['fecha'];
-            }
-            else {
-              cite=pItem.templateOptions.labelCite;
-              fecha=pItem.templateOptions.labelFecha;
-            }
-            if(pItem.templateOptions.tipoMembrete =='externo'){ %>
-            <div id="pageHeader">
-              <div  style="display:block; ">
-                <div style="display:inline-block;">
-                  <span><%= fecha %></span><br>
-                  <span><%= cite %></span><br>
-                  <span>Expediente: <%= exp %>  </span>
-                  <% if(codigoSeguridad !== '') { %>
-                    <br><span>Código de verificación: <%= codigoSeguridad %>  </span>
-                  <%}%>
-                </div>
-                <div style="display:inline-block; float:right;">
-                  <% if(pMarcaAgua==true) {%>
-                    <div style="width:140px;height:182px; border: dashed 1px black;"></div>
-                  <%} else{%>
-                    <div style="width:140px;height:182px;"></div>
-                  <%}%>
-                </div>
-              </div>
-            </div>
-            <%}
-            else if(pItem.templateOptions.tipoMembrete =='legal') { %>
-              <div id="pageHeader">
-                <div  style="display:block; ">
-                  <div style="display:inline-block;">
-                    <span><%= fecha %></span><br>
-                    <span><%= cite %></span><br>
-                    <span>Expediente: <%= exp %></span>
-                    <% if(codigoSeguridad !== '') {%>
-                      <br><span>Código de verificación: <%= codigoSeguridad %></span><br>
-                    <%} %>
-                  </div>
-                  <div style="display:inline-block; float:right;">
-                    <div style="width:140px;height:150px"></div>
-                  </div>
-                </div>
-              </div>
-            <%}
-              else { %>
-                <div id="pageHeader">
-                  <div class="cite">
-                    <%= cite %>
-                    <div class="expediente">
-                      Expediente : <%= exp %>
-                    </div>
-                    <% if (codigoSeguridad !== '') { %>
-                      <div class="expediente">
-                        Código de verificación : <%= codigoSeguridad %>
-                      </div><br>
-                    <% } %>
-                  </div>
-
-                  <div style="float:right; text-align:center;">
-                    <%= fecha %>
-                  </div>
-                </div><br>
-              <% } %>
-              <% break; %>
+            break;
             case 'lista': %>
             <table width="100%" class="lista-tabla" cellspacing="0">
               <tr>
@@ -869,22 +557,22 @@
               : (datosGenerales.de ? [datosGenerales.de] : []);
 
             if(pItem.templateOptions.showItem){ %>
-              <table width="100%">
+              <table class="bloque-campos">
                 <tbody>
                   <% if(pItem.templateOptions.show.para && para.length > 0) { %>
                     <tr>
                       <td class="datosGenerales">PARA:</td>
-                      <td><%=para[0].nombres%> <%=para[0].apellidos%><br/><%=para[0].cargo%><br/></td>
+                      <td class="datosGeneralesValor"><%=para[0].nombres%> <%=para[0].apellidos%><br/><%=para[0].cargo%></td>
                     </tr>
                   <% }
                   if(pItem.templateOptions.show.via && via.length > 0) { %>
                         <tr>
                           <td class="datosGenerales">VÍA:</td>
-                          <td>
+                          <td class="datosGeneralesValor">
                             <% for(var j = 0; j < via.length; j++){
                               var itemVia = via[j]; %>
                               <%= itemVia.nombres %> <%= itemVia.apellidos %>
-                              <br /><%=itemVia.cargo%><br />
+                              <br /><%=itemVia.cargo%>
                             <%} %>
                           </td>
                         </tr>
@@ -892,22 +580,22 @@
                   if(pItem.templateOptions.show.de) { %>
                     <tr>
                       <td class="datosGenerales">DE:</td>
-                      <td>
+                      <td class="datosGeneralesValor">
                         <% for(var j = 0; j < de.length; j++){
                           var itemDe = de[j]; %>
                           <%= itemDe.nombres %> <%= itemDe.apellidos %>
-                          <br /><%=itemDe.cargo%><br />
+                          <br /><%=itemDe.cargo%>
                           <%}%>
                       </td>
                     </tr>
                   <% } if(pItem.templateOptions.show.ref) { %>
                     <tr>
-                      <td class="datosGenerales"><%= pItem.templateOptions.labelRef %></td>
-                      <td><%=pDatos[pItem.key].ref%><br /></td>
+                      <td class="datosGenerales"><%= pItem.templateOptions.labelRef || 'REF.:' %></td>
+                      <td class="datosGeneralesValor"><%= (pDatos[pItem.key] && pDatos[pItem.key].ref) ? pDatos[pItem.key].ref : '' %></td>
                     </tr>
                   <% } %>
                 </tbody>
-              </table><br />
+              </table>
             <%}
             break;
           case 'encabezado':
@@ -922,17 +610,16 @@
               ? datosEncabezado.de
               : (datosEncabezado.de ? [datosEncabezado.de] : []);
             %>
-            <table width="100%">
+            <table class="bloque-campos">
               <tbody>
                 <% if(pItem.templateOptions.show.para && paraEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">PARA:</td>
-                    <td>
+                    <td class="datosGeneralesValor">
                       <% for(var z = 0; z < paraEncabezado.length; z++){
                         var itemPara = paraEncabezado[z]; %>
-                        <%= itemPara.nombres %>
-                        <%= itemPara.apellidos %><br />
-                        <% if(itemPara.mostrar_cargo) { %>
+                        <%= itemPara.nombres %> <%= itemPara.apellidos %><br />
+                        <% if(itemPara.mostrar_cargo || itemPara.cargo) { %>
                           <%= itemPara.cargo %><br />
                         <% } %>
                       <% } %>
@@ -943,12 +630,11 @@
                 <% if(pItem.templateOptions.show.via && viaEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">VÍA:</td>
-                    <td>
+                    <td class="datosGeneralesValor">
                       <% for(var j = 0; j < viaEncabezado.length; j++){
                         var itemViaEncabezado = viaEncabezado[j]; %>
-                        <%= itemViaEncabezado.nombres %>
-                        <%= itemViaEncabezado.apellidos %><br />
-                        <% if(itemViaEncabezado.mostrar_cargo) { %>
+                        <%= itemViaEncabezado.nombres %> <%= itemViaEncabezado.apellidos %><br />
+                        <% if(itemViaEncabezado.mostrar_cargo || itemViaEncabezado.cargo) { %>
                           <%= itemViaEncabezado.cargo %><br />
                         <% } %>
                       <% } %>
@@ -959,12 +645,11 @@
                 <% if(pItem.templateOptions.show.de && deEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">DE:</td>
-                    <td>
+                    <td class="datosGeneralesValor">
                       <% for(var j = 0; j < deEncabezado.length; j++){
                         var itemDeEncabezado = deEncabezado[j]; %>
-                        <%= itemDeEncabezado.nombres %>
-                        <%= itemDeEncabezado.apellidos %><br />
-                        <% if(itemDeEncabezado.mostrar_cargo) { %>
+                        <%= itemDeEncabezado.nombres %> <%= itemDeEncabezado.apellidos %><br />
+                        <% if(itemDeEncabezado.mostrar_cargo || itemDeEncabezado.cargo) { %>
                           <%= itemDeEncabezado.cargo %><br />
                         <% } %>
                       <% } %>
@@ -974,16 +659,12 @@
 
                 <% if(pItem.templateOptions.show.ref) { %>
                   <tr>
-                    <td class="datosGenerales">
-                      <%= pItem.templateOptions.labelRef %>
-                    </td>
-                    <td>
-                      <%= datosEncabezado.ref %><br />
-                    </td>
+                    <td class="datosGenerales"><%= pItem.templateOptions.labelRef || 'REF.:' %></td>
+                    <td class="datosGeneralesValor"><%= datosEncabezado.ref || '' %></td>
                   </tr>
                 <% } %>
               </tbody>
-            </table><br />
+            </table>
             <% break;
           case undefined:
             if(pItem.fieldGroup){ %>
@@ -1081,7 +762,8 @@
             break;
           case 'ccArchivo':
             if(datos[pItem.key]){
-              var vectorDatos = datos[pItem.key].split('\n') || [];
+              var valCc = String(datos[pItem.key]).replace(/undefined/gi, '');
+              var vectorDatos = valCc.split('\n') || [];
               var htmlDatos = "";
               for(var s = 0; s < vectorDatos.length; s++) {
                 if(s-1 === vectorDatos.length) htmlDatos += "<span>"+ vectorDatos[s]+"</span>";

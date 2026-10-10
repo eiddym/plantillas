@@ -502,6 +502,27 @@
                         }
                     }
                 },
+                clasificacion: {
+                    template: {
+                        type: "select",
+                        key: "inputSelect",
+                        templateOptions: {
+                            label: "Clasificación",
+                            multiple: false,
+                            labelProp: "value",
+                            valueProp: "id",
+                            options: [
+                                { value: "Reservado", id: "Reservado" },
+                                { value: "Secreto", id: "Secreto" },
+                                { value: "Confidencial", id: "Confidencial" },
+                                { value: "Desclasificado", id: "Desclasificado" }
+                            ],
+                            defaultValue: "Reservado",
+                            disabled: false,
+                            required: true
+                        }
+                    }
+                },
                 encabezado: {
                   template: {
                     type: "encabezado",

@@ -126,36 +126,38 @@ app.post('/api/v1/plantillasFormly/generarDocumento', (req, res) => {
     ],
   })
   .then(docResp => {
-    if(!docResp)  throw Error('Asegurese de guardar el documento antes de generar la vista.');
-    const docOrigen = docResp.dataValues;
-    docEncontrado = docResp.dataValues;
-    /*
-    if(Array.isArray(docOrigen.firmaron) && docOrigen.firmaron.length > 0 ) enFirma = true;
-    if(docResp.firmante_actual !== null && docOrigen.firmaron == null) enFirma = false;
-    */
-    // aprobación con ciudadania
-    if(Array.isArray(docOrigen.aprobaron_cd) && docOrigen.aprobaron_cd.length > 0 ) enFirma = true;
-    if(docResp.aprobador_cd_actual !== null && docOrigen.aprobaron_cd == null) enFirma = false;
-    req.body.grupo = docResp.grupo;
-    req.body.codigo = '';
+    if (docResp) {
+      const docOrigen = docResp.dataValues;
+      docEncontrado = docResp.dataValues;
+      if(Array.isArray(docOrigen.aprobaron_cd) && docOrigen.aprobaron_cd.length > 0 ) enFirma = true;
+      if(docResp.aprobador_cd_actual !== null && docOrigen.aprobaron_cd == null) enFirma = false;
+      req.body.grupo = docResp.grupo;
+      req.body.codigo = '';
 
-    if (docEncontrado.firma && docEncontrado.firma.codigo) {
-      req.body.codigo = docEncontrado.firma.codigo;
+      if (docEncontrado.firma && docEncontrado.firma.codigo) {
+        req.body.codigo = docEncontrado.firma.codigo;
+      }
+
+      datos.codigo = req.body.codigo;
+      datos.codigoSeguridad = req.body.codigoSeguridad || '';
+      datos.grupo = docResp.grupo;
+      anulado = docEncontrado.anulado;
+    } else {
+      req.body.grupo = req.body.grupo || 0;
+      datos.grupo = datos.grupo || 0;
     }
-
-    datos.codigo = req.body.codigo;
-    datos.codigoSeguridad = req.body.codigoSeguridad || '';
-    datos.grupo = docResp.grupo;
-    anulado = docEncontrado.anulado;
   })
   .then(() => {
     // Valida la lectura o generación del documento.
-    if(anulado === true || enFirma === true) return;
-    if(enFirma === false && (estados.indexOf(docEncontrado.estado) == -1)) generar= false;
-    if(enFirma === false &&(estados.indexOf(docEncontrado.estado) > -1)) generar = true;
-    return util.generarDocumento(req.body, generar);
-  })
-  .then(() => {
+    if (docEncontrado) {
+      if (enFirma === false && (estados.indexOf(docEncontrado.estado) == -1)) generar = false;
+      if (enFirma === false && (estados.indexOf(docEncontrado.estado) > -1)) generar = true;
+    } else {
+      generar = false;
+    }
+    if (generar && !anulado && !enFirma) {
+      util.generarDocumento(req.body, generar).catch(e => logger.error("Error generando PDF de fondo:", e));
+    }
     respuesta.nombre = `${util.formatoNombreDoc(datos.doc.nombre)}.pdf`;
     return util.generarHtml(datos);
   })

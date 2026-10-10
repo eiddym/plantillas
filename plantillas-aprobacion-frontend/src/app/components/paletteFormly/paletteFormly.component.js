@@ -30,6 +30,7 @@
                 "titulo" : "DOCUMENTOS",
                 "submenu": [
                     { name: "Datos generales", tipo: "datosGenerales" },
+                    { name: "Clasificación", tipo: "clasificacion" },
                     { name: "Encabezado", tipo: "encabezado" },
                     { name: "Asunto" , tipo: "inputt" },
                     // { name: "Cite", tipo: "cite" },

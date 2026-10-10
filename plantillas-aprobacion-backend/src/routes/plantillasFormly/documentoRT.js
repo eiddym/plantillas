@@ -142,6 +142,13 @@ module.exports = app => {
         bl.verificarExternos(req.body)
         .then(pValores => {
           if(pValores) req.body.plantilla_valor=pValores;
+          let pValObj = {};
+          try { pValObj = JSON.parse(req.body.plantilla_valor || '{}'); } catch(e) {}
+          if (!pValObj.inputSelect) {
+            pValObj.inputSelect = "Reservado";
+            req.body.plantilla_valor = JSON.stringify(pValObj);
+          }
+          req.body.clasificacion = pValObj.inputSelect;
           return bl.verificarObtenerMultiple(req.body, transaccion);
         })
         .then((multipleResp) => {
@@ -279,9 +286,38 @@ module.exports = app => {
       },
     })
     .then(pDocumento => {
-      if(pDocumento)
+      if(pDocumento) {
+        let pVal = {};
+        try { pVal = JSON.parse(pDocumento.plantilla_valor || '{}'); } catch(e) {}
+        const clasif = pVal.inputSelect || 'Reservado';
+        const auditUser = req.body.audit_usuario || {};
+        const esMaeOAdmin = auditUser.es_mae === true || auditUser.username === 'admin' || auditUser.usuario === 'admin';
+
+        if (clasif === 'Confidencial' || clasif === 'Secreto') {
+          const idUs = Number(auditUser.id_usuario);
+          const esCreador = Number(pDocumento._usuario_creacion) === idUs;
+          const esDe = pDocumento.de && pDocumento.de.includes(`"${idUs}"`);
+          const esPara = pDocumento.para && pDocumento.para.includes(`"${idUs}"`);
+
+          if (!esCreador && !esDe && !esPara && !esMaeOAdmin) {
+            return res.status(403).send(util.formatearMensaje("ERROR", `Acceso Denegado: Este documento tiene clasificación ${clasif.toUpperCase()} y su lectura está restringida.`));
+          }
+        }
+
+        // Auditoría de Lectura de documento sensible
+        if (clasif !== 'Desclasificado' && auditUser.id_usuario) {
+          historial_flujo.create({
+            id_documento: pDocumento.id_documento,
+            accion: 'LECTURA_DOCUMENTO_SENSIBLE',
+            observaciones: `Lectura del documento clasificado como [${clasif}] por ${auditUser.nombres || ''} ${auditUser.apellidos || auditUser.usuario || ''}.`,
+            _usuario_creacion: auditUser.id_usuario,
+            _usuario_modificacion: auditUser.id_usuario,
+            _fecha_creacion: new Date()
+          }).catch(() => {});
+        }
+
         res.status(200).send(util.formatearMensaje("EXITO","La operación se realizó correctamente.", pDocumento));
-      else throw new Error("El documento solicitado no esta disponible.");
+      } else throw new Error("El documento solicitado no esta disponible.");
     })
     .catch(pError => res.status(412).send(util.formatearMensaje("ERROR",pError)));
   });
@@ -431,24 +467,87 @@ module.exports = app => {
 
   app.post('/api/v1/plantillasFormly/documentoPDF', (req, res) => {
     let dirArch = '.';
-    if(req.body.cite && req.body.cite.indexOf(dirExternos.replace('./', '/'))==0)
-      dirArch += req.body.cite
-    else if(req.body.cite && req.body.cite.indexOf(dirExternosAprobacion.replace('./', '/'))==0)
-      dirArch += req.body.cite
+    if (req.body.cite && req.body.cite.indexOf(dirExternos.replace('./', '/')) == 0)
+      dirArch += req.body.cite;
+    else if (req.body.cite && req.body.cite.indexOf(dirExternosAprobacion.replace('./', '/')) == 0)
+      dirArch += req.body.cite;
     else dirArch = `${dirDocumento}${req.body.cite}`;
-    const nombre= req.body.cite.substr(0,req.body.cite.indexOf('.pdf'));
     const usuarioPeticion = req.body.audit_usuario;
-    const msg = "Usted no esta autorizado para ver este documento.";
+    const forceRegen = req.body.force === true || req.body.force === 'true' || req.query.force === 'true';
 
-    fs.readFile(dirArch, (pError, pData) => {
+    const sendFileIfExists = (filePath, callback) => {
+      fs.readFile(filePath, (pError, pData) => {
+        if (!pError && pData && pData.length > 0) {
+          return res.send(pData);
+        }
+        callback();
+      });
+    };
 
-      if(pError){
-        pError=(process.env.NODE_ENV=='production')?"No se pudo obtener el documento":pError;
-        res.status(412).send(util.formatearMensaje("ERROR",pError));
+    const renderFreshDocument = () => {
+      let citeBuscado = req.body.cite || '';
+      if (citeBuscado.endsWith('.pdf')) {
+        citeBuscado = citeBuscado.slice(0, -4);
       }
-      else res.send(pData);
-    });
-  })
+
+      modelos.documento.findAll({
+        where: {
+          estado: { [Op.ne]: 'ELIMINADO' }
+        }
+      })
+      .then(docList => {
+        let matchedDoc = docList.find(d => 
+          d.nombre === req.body.cite ||
+          d.nombre === citeBuscado ||
+          util.formatoNombreDoc(d.nombre) === citeBuscado ||
+          `${util.formatoNombreDoc(d.nombre)}.pdf` === req.body.cite
+        );
+
+        if (!matchedDoc) {
+          matchedDoc = docList.find(d => d.nombre && citeBuscado.includes(util.formatoNombreDoc(d.nombre)));
+        }
+
+        if (!matchedDoc) {
+          throw new Error(`No se pudo encontrar el documento ${req.body.cite}`);
+        }
+
+        const datos = {
+          doc: {
+            nombre: matchedDoc.nombre,
+            plantilla: matchedDoc.plantilla,
+          },
+          form_actual: util.dataToView(JSON.parse(matchedDoc.plantilla), JSON.parse(matchedDoc.plantilla_valor)),
+          model_actual: JSON.parse(matchedDoc.plantilla_valor),
+          audit_usuario: usuarioPeticion,
+          host: dirExternos,
+          grupo: matchedDoc.grupo,
+          codigo: matchedDoc.codigo || '',
+        };
+        if (datos.model_actual && datos.model_actual['cite-0'] && datos.model_actual['cite-0'].fecha) {
+          datos.model_actual['cite-0'].fecha = util.formatearFecha(datos.model_actual['cite-0'].fecha);
+        }
+
+        const targetFileName = `${util.formatoNombreDoc(matchedDoc.nombre)}.pdf`;
+        const targetFilePath = `${dirDocumento}${targetFileName}`;
+
+        return util.generarDocumento(datos, true).then(() => {
+          const fileToRead = fs.existsSync(targetFilePath) ? targetFilePath : (fs.existsSync(dirArch) ? dirArch : null);
+          if (!fileToRead) {
+            throw new Error('No se pudo encontrar el archivo generado.');
+          }
+          const pData2 = fs.readFileSync(fileToRead);
+          res.send(pData2);
+        });
+      })
+      .catch(err => {
+        logger.error('Error en documentoPDF al generar PDF dinámicamente:', err);
+        const errMsg = (process.env.NODE_ENV == 'production') ? "No se pudo obtener el documento" : (err.message || err);
+        res.status(412).send(util.formatearMensaje("ERROR", errMsg));
+      });
+    };
+
+    renderFreshDocument();
+  });
 
   app.post('/api/v1/plantillasFormly/multiple', (req, res) => {
     console.log('Iniciando la busqueda de documentos multiples', req.body.cite);
@@ -683,12 +782,12 @@ module.exports = app => {
           {
             model: documento,
             as: 'padre',
-            attributes: ['id_documento', 'nombre', 'nombre_plantilla', 'abreviacion', 'estado', 'fecha', '_fecha_creacion']
+            attributes: ['id_documento', 'nombre', 'nombre_plantilla', 'abreviacion', 'estado', 'fecha', '_fecha_creacion', 'clasificacion', 'plantilla_valor']
           },
           {
             model: documento,
             as: 'hijos',
-            attributes: ['id_documento', 'nombre', 'nombre_plantilla', 'abreviacion', 'estado', 'fecha', '_fecha_creacion', 'documento_padre']
+            attributes: ['id_documento', 'nombre', 'nombre_plantilla', 'abreviacion', 'estado', 'fecha', '_fecha_creacion', 'documento_padre', 'clasificacion', 'plantilla_valor']
           }
         ],
         order: [['_fecha_creacion', 'DESC']]
@@ -1116,6 +1215,52 @@ module.exports = app => {
 
   @apiSampleRequest off 
 */
+  app.post('/api/v1/plantillasFormly/documento/:id/desclasificar', (req, res) => {
+    const idDoc = req.params.id;
+    const auditUser = req.body.audit_usuario || (req.user ? req.user : null);
+
+    if (!auditUser || !auditUser.id_usuario) {
+      return res.status(401).send(util.formatearMensaje("ERROR", "Usuario no autenticado."));
+    }
+
+    usuario.findByPk(auditUser.id_usuario)
+    .then(usr => {
+      const esAdminOMae = usr && (usr.es_mae === true || usr.usuario === 'admin');
+      if (!esAdminOMae) {
+        return res.status(403).send(util.formatearMensaje("ERROR", "Acceso Denegado: Únicamente la Máxima Autoridad Ejecutiva (MAE) está autorizada para desclasificar este documento."));
+      }
+
+      return documento.findByPk(idDoc)
+      .then(doc => {
+        if (!doc) {
+          return res.status(404).send(util.formatearMensaje("ERROR", "Documento no encontrado."));
+        }
+
+        let val = {};
+        try { val = JSON.parse(doc.plantilla_valor || '{}'); } catch(e) {}
+
+        val.inputSelect = "Desclasificado";
+
+        return doc.update({ plantilla_valor: JSON.stringify(val), clasificacion: 'Desclasificado' })
+        .then(docUpdated => {
+          return historial_flujo.create({
+            id_documento: doc.id_documento,
+            accion: 'DESCLASIFICADO_POR_MAE',
+            observaciones: `El documento fue DESCLASIFICADO oficialmente por la MAE (${usr.nombres} ${usr.apellidos}).`,
+            _usuario_creacion: usr.id_usuario,
+            _usuario_modificacion: usr.id_usuario,
+            _fecha_creacion: new Date()
+          }).then(() => {
+            res.status(200).send(util.formatearMensaje("EXITO", "Documento desclasificado exitosamente por la MAE.", docUpdated));
+          });
+        });
+      });
+    })
+    .catch(err => {
+      res.status(500).send(util.formatearMensaje("ERROR", err.message || err));
+    });
+  });
+
   app.put('/api/v1/plantillasFormly/documento/:id', (req, res) => {
     let xdoc;
     const msg = "La operación se realizó correctamente.";
@@ -1141,6 +1286,22 @@ module.exports = app => {
           const esViaActual = Number(xdoc.via_actual) === Number(usuarioId);
           const esFirmanteActual = Number(xdoc.firmante_actual) === Number(usuarioId);
           const esAprobadorActual = Number(xdoc.aprobador_cd_actual) === Number(usuarioId);
+
+          let prevVal = {}, newVal = {};
+          try { prevVal = JSON.parse(xdoc.plantilla_valor || '{}'); } catch(e) {}
+          try { newVal = JSON.parse(req.body.plantilla_valor || '{}'); } catch(e) {}
+
+          const prevClasif = prevVal.inputSelect || xdoc.clasificacion || 'Reservado';
+          const newClasif = newVal.inputSelect || prevClasif;
+          req.body.clasificacion = newClasif;
+
+          if (prevClasif !== 'Desclasificado' && newClasif === 'Desclasificado') {
+            const auditUser = req.body.audit_usuario || {};
+            const esMae = auditUser.es_mae === true || auditUser.username === 'admin' || auditUser.usuario === 'admin';
+            if (!esMae) {
+              throw new Error("Acceso Denegado: Únicamente la Máxima Autoridad Ejecutiva (MAE) está autorizada para desclasificar este documento.");
+            }
+          }
 
           let esRolAutorizado = false;
           const roles = (req.body.audit_usuario && req.body.audit_usuario.roles) || [];
@@ -1307,15 +1468,13 @@ module.exports = app => {
           }
         })
         .then((respuesta) => {
-          return modelos.documento.findByPk(idDocumento, tr)
+          return modelos.documento.findByPk(idDocumento, tr);
         })
         .then((respuesta) => {
-          if (respuesta.estado === "DERIVADO") {
-            return notificar.enviar(modelos, respuesta, "derivado", {});
-          } else {
-            if (!respuesta.aprobador_cd_actual) {
-              return notificar.enviar(modelos, respuesta, "enviado", {});
-            }
+          if (respuesta && respuesta.estado === "DERIVADO") {
+            notificar.enviar(modelos, respuesta, "derivado", {}).catch(e => logger.warn('[NOTIF DERIVADO]', e));
+          } else if (respuesta && !respuesta.aprobador_cd_actual) {
+            notificar.enviar(modelos, respuesta, "enviado", {}).catch(e => logger.warn('[NOTIF ENVIADO]', e));
           }
         })
         .then(() => {
@@ -1324,7 +1483,7 @@ module.exports = app => {
       .then(() => res.send(util.formatearMensaje("EXITO", "El documento fue aprobado correctamente", {})))
         .catch(error => {
           logger.error('<<<<++++>>>> Error en la aprobacion del documento', error);
-          t.rollback();
+          t.rollback().catch(() => {});
           res.status(412).send(util.formatearMensaje("ERROR", error));
         });
       })

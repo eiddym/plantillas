@@ -29,10 +29,11 @@ const transporte = nodemailer.createTransport(jsonConfig);
 let usuarioOrigen=null;
 
 function enviar(pModelos, pDocumento, pEntorno, pTr) {
-  enviarNotificacion(pModelos, pDocumento, pEntorno, pTr);
-  return new Promise((resolve) => {
-    resolve();
-  });
+  return enviarNotificacion(pModelos, pDocumento, pEntorno, pTr)
+    .catch(err => {
+      logger.warn('[NOTIFICACION] No se pudo enviar notificacion:', err.message || err);
+      return true;
+    });
 }
 
 function enviarNotificacion(pModelos, pDocumento, pEntorno, pTr){
@@ -54,9 +55,8 @@ function enviarNotificacion(pModelos, pDocumento, pEntorno, pTr){
   }
 
   return new Promise((resolve, reject) => {
-    if(process.env.NODE_ENV =='test') resolve();
+    if(process.env.NODE_ENV =='test') return resolve();
     return pModelos.conf_notificacion.findOne({
-    // return pModeloConfiguracion.findOne({
       where:{
         fid_usuario: id_1,
       },
@@ -70,7 +70,6 @@ function enviarNotificacion(pModelos, pDocumento, pEntorno, pTr){
         usuarioOrigen=pResultado.dataValues;
         return pModelos.conf_notificacion
           .findAll({
-            // return pModeloConfiguracion.findOne({
             where: {
               fid_usuario: id_2,
             },
@@ -83,9 +82,15 @@ function enviarNotificacion(pModelos, pDocumento, pEntorno, pTr){
           })
           .then((pRespuestaUsuario) => pRespuestaUsuario);
       }
-      else throw new Error("Este usuario no tiene la configuracion basica de notificacion")
+      else {
+        logger.warn(`[NOTIFICACION] El usuario ${id_1} no tiene configuracion de notificacion`);
+        return [];
+      }
     })
     .then(pDestinos => {
+      if (!pDestinos || pDestinos.length === 0) {
+        return resolve();
+      }
       const telefonos = [];
       const correos = [];
 
@@ -141,6 +146,9 @@ function enviarNotificacion(pModelos, pDocumento, pEntorno, pTr){
               }
               else resolve();
             break;
+            default:
+              resolve();
+            break;
           }
         }
         else {
@@ -148,6 +156,7 @@ function enviarNotificacion(pModelos, pDocumento, pEntorno, pTr){
           resolve();
         }
       });
+      resolve();
     })
     .catch(pError => {
       logger.error("Error en el envio de la notificacion", pError.message);

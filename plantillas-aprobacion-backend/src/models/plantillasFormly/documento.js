@@ -145,6 +145,11 @@ module.exports = (sequelize, DataType) => {
             defaultValue: 'NUEVO',
             xlabel: 'Estado',
         },
+        clasificacion: {
+            type: DataType.ENUM('Reservado', 'Secreto', 'Confidencial', 'Desclasificado'),
+            defaultValue: 'Reservado',
+            xlabel: 'Clasificación del Documento',
+        },
         _usuario_creacion: {
             type: DataType.INTEGER,
             allowNull: false,

@@ -4,5 +4,6 @@ node_modules/
 .sql
 pgdata/
 respaldos/
-.env
-respaldos/
+*.pdf
+*.png
+!**/assets/**

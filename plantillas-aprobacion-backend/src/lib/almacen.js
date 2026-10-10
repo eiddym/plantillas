@@ -20,6 +20,7 @@ module.exports = {
       url: config.almacen.url_crear_solicitud,
       headers,
       data: datos,
+      timeout: 3000,
     })
     .then(resp => {
       if (resp.status !== 200) throw Error('Estado diferente al de exito.');
@@ -42,6 +43,7 @@ module.exports = {
       method: 'get',
       url,
       headers,
+      timeout: 3000,
     })
     .then(resp => {
       if (resp.status !== 200) throw Error('Estado diferente al de exito.');
@@ -63,6 +65,7 @@ module.exports = {
       method: 'get',
       url,
       headers,
+      timeout: 3000,
     })
     .then(resp => {
       if (resp.status !== 200) throw Error('Estado diferente al de exito.');
@@ -89,6 +92,7 @@ module.exports = {
     url: config.almacen.url_notificar,
     headers,
     data: datos,
+    timeout: 3000,
   })
   .then(() => resolve())
   .catch(error => reject(error))),

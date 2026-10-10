@@ -172,5 +172,42 @@
     function toggleExpandirExpediente(expediente) {
       expediente.expandido = !expediente.expandido;
     }
+
+    vm.obtenerClasificacion = function(doc) {
+      if (!doc) return 'Reservado';
+      if (doc.clasificacion) return doc.clasificacion;
+      if (!doc.plantilla_valor) return 'Reservado';
+      try {
+        var val = typeof doc.plantilla_valor === 'string' ? JSON.parse(doc.plantilla_valor) : doc.plantilla_valor;
+        return val.inputSelect || 'Reservado';
+      } catch(e) {
+        return 'Reservado';
+      }
+    };
+
+    vm.desclasificarDocumento = function(ev, doc) {
+      if (ev && ev.stopPropagation) ev.stopPropagation();
+      var confirm = $mdDialog.confirm()
+        .title('Desclasificación Oficial de Documento (MAE)')
+        .textContent('¿Está seguro de cambiar la clasificación del documento CITE "' + doc.nombre + '" a DESCLASIFICADO (PÚBLICO)? Esta acción desrestringirá los accesos al documento y quedará registrada en el historial de auditoría.')
+        .ariaLabel('Confirmar Desclasificación')
+        .targetEvent(ev)
+        .ok('Confirmar Desclasificación')
+        .cancel('Cancelar');
+
+      $mdDialog.show(confirm).then(function() {
+        vm.cargando = true;
+        var url = restUrl + 'plantillasFormly/documento/' + doc.id_documento + '/desclasificar';
+        DataService.post(url, { audit_usuario: cuenta })
+          .then(function (res) {
+            Message.success((res && res.mensaje) ? res.mensaje : "Documento desclasificado exitosamente por la MAE.");
+            cargarArchivo();
+          })
+          .catch(function (err) {
+            vm.cargando = false;
+            Message.error("Error al desclasificar documento: " + (err.data ? err.data.mensaje : err.message));
+          });
+      });
+    };
   }
 })();

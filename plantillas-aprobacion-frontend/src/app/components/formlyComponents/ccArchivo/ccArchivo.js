@@ -15,8 +15,10 @@
     $timeout(iniciarController);
 
     function iniciarController() {
-        if(angular.isUndefined(sc.model[sc.options.key])){
-            sc.model[sc.options.key] = generarAbreviacion(cuenta.first_name + " " + cuenta.last_name);
+        if(angular.isUndefined(sc.model[sc.options.key]) || sc.model[sc.options.key].indexOf('undefined') > -1){
+            var nombreCompleto = ((cuenta.nombres || cuenta.first_name || '') + " " + (cuenta.apellidos || cuenta.last_name || '')).trim();
+            if (!nombreCompleto) nombreCompleto = cuenta.usuario || "Cc";
+            sc.model[sc.options.key] = generarAbreviacion(nombreCompleto);
             sc.model[sc.options.key] += '\nCc.:archivo';    
         }
     }

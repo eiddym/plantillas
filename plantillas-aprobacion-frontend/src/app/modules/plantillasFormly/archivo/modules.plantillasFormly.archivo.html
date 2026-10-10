@@ -132,11 +132,16 @@
                 <div class="expediente-body" ng-show="exp.expandido">
                   <div class="doc-item doc-padre-item">
                     <div class="doc-status-badge" ng-class="exp.padre.estado">{{ exp.padre.estado }}</div>
+                    <span class="doc-status-badge" ng-style="{'background-color': vm.obtenerClasificacion(exp.padre) === 'Desclasificado' ? '#15803d' : (vm.obtenerClasificacion(exp.padre) === 'Secreto' ? '#b91c1c' : (vm.obtenerClasificacion(exp.padre) === 'Confidencial' ? '#c2410c' : '#3b82f6')), 'color': '#fff', 'margin-left': '6px'}">{{ vm.obtenerClasificacion(exp.padre) | uppercase }}</span>
                     <div class="doc-details">
                       <span class="doc-title"><strong>[PRINCIPAL]</strong> {{ exp.padre.nombre }}</span>
                       <span class="doc-sub">{{ exp.padre.nombre_plantilla }} - Fecha: {{ exp.padre._fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                     <div class="doc-btns">
+                      <md-button class="md-icon-button md-warn" ng-if="vm.esAdminOMae && vm.obtenerClasificacion(exp.padre) !== 'Desclasificado'" ng-click="vm.desclasificarDocumento($event, exp.padre)">
+                        <md-tooltip>Desclasificar Documento (MAE)</md-tooltip>
+                        <md-icon>lock_open</md-icon>
+                      </md-button>
                       <md-button class="md-icon-button md-accent" ng-click="vm.vistaPrevia($event, exp.padre.id_documento)">
                         <md-tooltip>Ver PDF</md-tooltip>
                         <md-icon>remove_red_eye</md-icon>
@@ -152,11 +157,16 @@
                   <div class="doc-item doc-hijo-item" ng-repeat="hijo in exp.hijos">
                     <div class="doc-tree-line">└─</div>
                     <div class="doc-status-badge" ng-class="hijo.estado">{{ hijo.estado }}</div>
+                    <span class="doc-status-badge" ng-style="{'background-color': vm.obtenerClasificacion(hijo) === 'Desclasificado' ? '#15803d' : (vm.obtenerClasificacion(hijo) === 'Secreto' ? '#b91c1c' : (vm.obtenerClasificacion(hijo) === 'Confidencial' ? '#c2410c' : '#3b82f6')), 'color': '#fff', 'margin-left': '6px'}">{{ vm.obtenerClasificacion(hijo) | uppercase }}</span>
                     <div class="doc-details">
                       <span class="doc-title">{{ hijo.nombre }}</span>
                       <span class="doc-sub">{{ hijo.nombre_plantilla }} (Respuesta/Derivación) - {{ hijo._fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
                     <div class="doc-btns">
+                      <md-button class="md-icon-button md-warn" ng-if="vm.esAdminOMae && vm.obtenerClasificacion(hijo) !== 'Desclasificado'" ng-click="vm.desclasificarDocumento($event, hijo)">
+                        <md-tooltip>Desclasificar Documento (MAE)</md-tooltip>
+                        <md-icon>lock_open</md-icon>
+                      </md-button>
                       <md-button class="md-icon-button md-accent" ng-click="vm.vistaPrevia($event, hijo.id_documento)">
                         <md-tooltip>Ver PDF</md-tooltip>
                         <md-icon>remove_red_eye</md-icon>
@@ -178,7 +188,12 @@
                   <span class="doc-sub">{{ exp.padre.nombre_plantilla }} | Creado: {{ exp.padre._fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</span>
                 </div>
                 <div class="doc-status-badge" ng-class="exp.padre.estado">{{ exp.padre.estado }}</div>
+                <span class="doc-status-badge" ng-style="{'background-color': vm.obtenerClasificacion(exp.padre) === 'Desclasificado' ? '#15803d' : (vm.obtenerClasificacion(exp.padre) === 'Secreto' ? '#b91c1c' : (vm.obtenerClasificacion(exp.padre) === 'Confidencial' ? '#c2410c' : '#3b82f6')), 'color': '#fff', 'margin-left': '6px'}">{{ vm.obtenerClasificacion(exp.padre) | uppercase }}</span>
                 <div class="doc-btns">
+                  <md-button class="md-icon-button md-warn" ng-if="vm.esAdminOMae && vm.obtenerClasificacion(exp.padre) !== 'Desclasificado'" ng-click="vm.desclasificarDocumento($event, exp.padre)">
+                    <md-tooltip>Desclasificar Documento (MAE)</md-tooltip>
+                    <md-icon>lock_open</md-icon>
+                  </md-button>
                   <md-button class="md-icon-button md-accent" ng-click="vm.vistaPrevia($event, exp.padre.id_documento)">
                     <md-tooltip>Ver PDF</md-tooltip>
                     <md-icon>remove_red_eye</md-icon>
@@ -204,6 +219,7 @@
           <th>Acciones</th>
           <th>CITE</th>
           <th>Tipo de Documento</th>
+          <th>Clasificación</th>
           <th>Estado</th>
           <th>Fecha Creación</th>
         </tr>
@@ -211,6 +227,10 @@
       <tbody>
         <tr ng-repeat="doc in vm.documentos | filter:vm.busqueda">
           <td class="action-cell">
+            <md-button class="md-icon-button md-warn" ng-if="vm.esAdminOMae && vm.obtenerClasificacion(doc) !== 'Desclasificado'" ng-click="vm.desclasificarDocumento($event, doc)">
+              <md-tooltip>Desclasificar Documento (MAE)</md-tooltip>
+              <md-icon>lock_open</md-icon>
+            </md-button>
             <md-button class="md-icon-button" ng-click="vm.vistaPrevia($event, doc.id_documento)">
               <md-tooltip>Ver PDF</md-tooltip>
               <md-icon>remove_red_eye</md-icon>
@@ -222,6 +242,7 @@
           </td>
           <td class="cite-cell"><strong>{{ doc.nombre }}</strong></td>
           <td>{{ doc.nombre_plantilla }}</td>
+          <td><span class="doc-status-badge" ng-style="{'background-color': vm.obtenerClasificacion(doc) === 'Desclasificado' ? '#15803d' : (vm.obtenerClasificacion(doc) === 'Secreto' ? '#b91c1c' : (vm.obtenerClasificacion(doc) === 'Confidencial' ? '#c2410c' : '#3b82f6')), 'color': '#fff'}">{{ vm.obtenerClasificacion(doc) | uppercase }}</span></td>
           <td><span class="doc-status-badge" ng-class="doc.estado">{{ doc.estado }}</span></td>
           <td>{{ doc._fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</td>
         </tr>

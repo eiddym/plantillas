@@ -34,9 +34,15 @@ async function getPuppeteerBrowser() {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-gpu',
-      '--font-render-hinting=none'
+      '--font-render-hinting=none',
+      '--disable-web-security',
+      '--allow-file-access-from-files'
     ],
-    headless: true
+    pipe: true,
+    headless: true,
+    handleSIGINT: false,
+    handleSIGTERM: false,
+    handleSIGHUP: false
   });
   return puppeteerBrowser;
 }
@@ -59,15 +65,37 @@ function marginToInches(val, defaultInches = 0) {
 }
 
 async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, outputPath }) {
-  const browser = await getPuppeteerBrowser();
+  console.log('[PUPPETEER STEP 1] Launching Chromium...');
+  const executablePath = process.env.CHROMIUM_PATH || process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
+  const browser = await puppeteer.launch({
+    executablePath,
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--headless',
+      '--disable-web-security',
+      '--allow-file-access-from-files'
+    ]
+  });
+  console.log('[PUPPETEER STEP 2] Browser launched. Creating new page...');
   const page = await browser.newPage();
 
   try {
-    await page.setContent(html, { waitUntil: 'load', timeout: 30000 });
+
+    console.log('[PUPPETEER STEP 3] Setting HTML content (length: ' + (html ? html.length : 0) + ')...');
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 10000 });
+    console.log('[PUPPETEER STEP 4] HTML content set. Preparing PDF params...');
 
     const hasHeaderFooter = !!(headerHtml || footerHtml);
-    const formattedHeader = headerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${headerHtml}` : '<div></div>';
-    const formattedFooter = footerHtml ? `<style>body{margin:0;padding:0;width:100%;-webkit-print-color-adjust:exact;font-family:sans-serif;}</style>${footerHtml}` : '<div></div>';
+    const formattedHeader = headerHtml
+      ? `<div style="width:215.9mm; margin:0; padding:0; font-size:12pt; -webkit-print-color-adjust:exact; print-color-adjust:exact;">${headerHtml}</div>`
+      : '<div></div>';
+    const formattedFooter = footerHtml
+      ? `<div style="width:215.9mm; margin:0; padding:0; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact;">${footerHtml}</div>`
+      : '<div></div>';
 
     let paperWidth = 8.5;
     let paperHeight = 11;
@@ -80,50 +108,40 @@ async function renderPdfPuppeteer({ html, headerHtml, footerHtml, format, output
       paperWidth = 11.69; paperHeight = 16.54;
     }
 
-    const marginTop = marginToInches('0.60in', 0.60);
-    const marginBottom = marginToInches('0.90in', 0.90);
-    const marginLeft = marginToInches('0.90in', 0.90);
-    const marginRight = marginToInches('0.90in', 0.90);
+    const marginTop = marginToInches('4.6cm', 1.81);
+    const marginBottom = marginToInches('2.8cm', 1.10);
+    const marginLeft = marginToInches('2.5cm', 0.98);
+    const marginRight = marginToInches('2.5cm', 0.98);
 
-    let pdfBuffer;
-    const client = page._client || (typeof page.target === 'function' ? await page.target().createCDPSession() : null);
-    if (client && typeof client.send === 'function') {
-      const cdpParams = {
-        printBackground: true,
-        displayHeaderFooter: hasHeaderFooter,
-        headerTemplate: formattedHeader,
-        footerTemplate: formattedFooter,
-        paperWidth,
-        paperHeight,
-        marginTop,
-        marginBottom,
-        marginLeft,
-        marginRight
-      };
-      const result = await client.send('Page.printToPDF', cdpParams);
-      pdfBuffer = Buffer.from(result.data, 'base64');
-    } else {
-      pdfBuffer = await page.pdf({
-        format: format || 'Letter',
-        printBackground: true,
-        displayHeaderFooter: hasHeaderFooter,
-        headerTemplate: formattedHeader,
-        footerTemplate: formattedFooter,
-        margin: {
-          top: '1.6cm',
-          bottom: '2.3cm',
-          left: '2.28cm',
-          right: '2.28cm'
-        }
-      });
-    }
+    const cdpOptions = {
+      printBackground: true,
+      displayHeaderFooter: hasHeaderFooter,
+      headerTemplate: formattedHeader,
+      footerTemplate: formattedFooter,
+      paperWidth: paperWidth,
+      paperHeight: paperHeight,
+      marginTop: marginTop,
+      marginBottom: marginBottom,
+      marginLeft: marginLeft,
+      marginRight: marginRight
+    };
+
+    console.log('[PUPPETEER STEP 5] Sending Page.printToPDF via CDP...');
+    const pdfResult = await page._client.send('Page.printToPDF', cdpOptions);
+    const pdfBuffer = Buffer.from(pdfResult.data, 'base64');
 
     if (outputPath) {
       fs.writeFileSync(outputPath, pdfBuffer);
+      console.log('[PUPPETEER OK] PDF written to', outputPath, 'bytes:', pdfBuffer.length);
     }
     return pdfBuffer;
+  } catch (err) {
+    console.error('[PUPPETEER EXCEPTION]', err);
+    throw err;
   } finally {
-    await page.close();
+    console.log('[PUPPETEER STEP 7] Closing page and browser...');
+    await page.close().catch(() => {});
+    await browser.close().catch(() => {});
   }
 }
 
@@ -159,8 +177,11 @@ const crearPdfConPartes = (
     console.warn('[PDF TMP] Error creando archivos temporales:', err.message);
   }
 
+  console.log('[DEBUG LOGOS] logo_base64 len:', pDatos.logo_base64 ? pDatos.logo_base64.length : 'UNDEF', 'logo_ferecomin_base64 len:', pDatos.logo_ferecomin_base64 ? pDatos.logo_ferecomin_base64.length : 'UNDEF');
   ejs.renderFile(rutaHeader, pDatos, (headerError, headerHtml) => {
     if (headerError) return reject(headerError);
+    console.log('[DEBUG RENDERED HEADER HTML len]:', headerHtml ? headerHtml.length : 0);
+    console.log('[DEBUG RENDERED HEADER HTML HAS RIGHT LOGO]:', headerHtml.includes('Logo FERECOMIN'));
     ejs.renderFile(rutaFooter, pDatos, (footerError, footerHtml) => {
       if (footerError) return reject(footerError);
 
@@ -877,31 +898,28 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
       `${__dirname}/html_plantilla/assets/logo-ferecomin.png`
     ).toString('base64');
 
+    const fontTekoData = fs.readFileSync(
+      `${__dirname}/html_plantilla/assets/fonts/Teko-SemiBold.ttf`
+    ).toString('base64');
+
     pDatos.logo_base64 = `data:image/png;base64,${logoData}`;
     pDatos.logo_ferecomin_base64 =
       `data:image/png;base64,${logoFerecominData}`;
-    console.log('[PDF FORM TITULOS]', JSON.stringify(
-      (pDatos.form_actual || []).map((item, index) => ({
-        index,
-        type: item && item.type,
-        key: item && item.key,
-        tipo: item && item.templateOptions && item.templateOptions.tipo,
-        label: item && item.templateOptions && item.templateOptions.label,
-        className: item && item.templateOptions && item.templateOptions.className
-      }))
-    ));
+    pDatos.teko_font_base64 = `data:font/ttf;base64,${fontTekoData}`;
 
     pDatos.logoPath = pDatos.logo_base64;
   } catch (error) {
-    console.warn('[PDF LOGO] No se pudo cargar la imagen del logo:', error.message);
+    console.warn('[PDF LOGO] No se pudo cargar las imagenes/fuentes:', error.message);
     pDatos.logo_base64 = '';
     pDatos.logo_ferecomin_base64 = '';
+    pDatos.teko_font_base64 = '';
     pDatos.logoPath = '';
   }
 
-  const numeracion = pDatos.form_actual[0].templateOptions.numeracionPagina || false;
-  const membrete = pDatos.form_actual[0].templateOptions.tipoMembrete || 'sin membrete';
-  const tipoHoja = pDatos.form_actual[0].templateOptions.tipoHoja || 'Letter';
+  const firstItemOpts = (pDatos.form_actual && pDatos.form_actual[0] && pDatos.form_actual[0].templateOptions) || {};
+  const numeracion = firstItemOpts.numeracionPagina || false;
+  const membrete = firstItemOpts.tipoMembrete || 'sin membrete';
+  const tipoHoja = firstItemOpts.tipoHoja || 'Letter';
 
   let alto = 0;
   let ancho = 0;
@@ -952,23 +970,14 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
   pDatos.mensaje = 'Prohibida la reproducción.';
   pDatos.exp = pDatos.grupo;
   pDatos.urlVerificar = config.urlVerificar;
+  pDatos.host = pDatos.host || config.host || '';
+  pDatos.model_actual = pDatos.model_actual || {};
 
-  let marcaAgua = true;
-  const roles = pDatos.audit_usuario.roles;
-
-  for (let i = 0; i < roles.length; i++) {
-    if (roles[i].fid_rol == 4) {
-      marcaAgua = false;
-      break;
-    }
+  let marcaAgua = false;
+  pDatos.marcaAgua = false;
+  if (typeof pDatos.doc.plantilla === 'string') {
+    try { pDatos.doc.plantilla = JSON.parse(pDatos.doc.plantilla); } catch (e) { pDatos.doc.plantilla = []; }
   }
-
-  if (firma === true) {
-    marcaAgua = false;
-  }
-
-  pDatos.marcaAgua = marcaAgua;
-  pDatos.doc.plantilla = JSON.parse(pDatos.doc.plantilla);
   pDatos.entidad = config.entidad || {};
 
   const codigoVerif = String(
@@ -1000,214 +1009,34 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
 
   const rutaVerificacion = `${baseUrl}/#/verificar`;
 
+  const citeModel =
+    pDatos.model_actual && pDatos.model_actual['cite-0']
+      ? pDatos.model_actual['cite-0']
+      : {};
+
+  pDatos.pdf_cite =
+    citeModel.cite ||
+    pDatos.doc_nombre_original ||
+    (pDatos.doc && pDatos.doc.nombre ? String(pDatos.doc.nombre).replace(/\.pdf$/i, '') : '') ||
+    (citeOficial || '');
+  const posiblesFechas = [
+    citeModel.fecha,
+    citeModel.date,
+    pDatos.fecha,
+    pDatos.fechaDocumento,
+    pDatos.doc && pDatos.doc.fecha
+  ];
+  pDatos.pdf_fecha = posiblesFechas.find((valor) => valor) || '';
+
   const renderizarPdf = () => {
     pDatos.entidad = config.entidad || {};
     pDatos.logoPath = pDatos.logo_base64 || '';
 
-    console.log('[PDF TEMPLATE DATA]', {
-      tieneQr: Boolean(pDatos.qr_base64),
-      tieneCodigo: Boolean(pDatos.codigo_ver_texto),
-      qrUrl: pDatos.qr_url || '',
-      logoPath: pDatos.logoPath || ''
-    });
-
-    
-      // === Variables para cabecera (deben existir ANTES de renderizar el cuerpo) ===
-      pDatos.pdf_cite =
-        pDatos.doc && pDatos.doc.nombre
-          ? String(pDatos.doc.nombre).replace(/\.pdf$/i, '')
-          : '';
-      pDatos.pdf_expediente =
-        pDatos.exp !== undefined && pDatos.exp !== null
-          ? String(pDatos.exp)
-          : (pDatos.doc && pDatos.doc.grupo
-            ? String(pDatos.doc.grupo)
-            : '');
-      pDatos.pdf_codigo =
-        pDatos.codigoSeguridad || pDatos.codigo_ver_texto || pDatos.codigo || '';
-      
-      // Fecha
-      const citeModel =
-        pDatos.model_actual && pDatos.model_actual['cite-0']
-          ? pDatos.model_actual['cite-0']
-          : {};
-      const posiblesFechas = [
-        citeModel.fecha,
-        citeModel.date,
-        pDatos.fecha,
-        pDatos.fechaDocumento,
-        pDatos.doc && pDatos.doc.fecha
-      ];
-      pDatos.pdf_fecha = posiblesFechas.find((valor) => valor) || '';
-      
-      console.log('[PDF VARS PRE-RENDER]', {
-        cite: pDatos.pdf_cite,
-        exp: pDatos.pdf_expediente,
-        codigo: pDatos.pdf_codigo,
-        fecha: pDatos.pdf_fecha
-      });
-
-      ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
+    ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
       if (pError || !pHtml) {
         console.error('[ERROR EJS PDF]', pError);
         return reject(pError || new Error('No se pudo renderizar el HTML.'));
       }
-
-      pDatos.pdf_cite =
-        pDatos.doc && pDatos.doc.nombre
-          ? String(pDatos.doc.nombre)
-          : '';
-
-      pDatos.pdf_expediente =
-        pDatos.exp !== undefined && pDatos.exp !== null
-          ? String(pDatos.exp)
-          : (pDatos.doc && pDatos.doc.grupo
-            ? String(pDatos.doc.grupo)
-            : '');
-
-      console.log('[PDF DATA KEYS]', JSON.stringify({
-        keys: Object.keys(pDatos || {}),
-        docKeys: pDatos.doc ? Object.keys(pDatos.doc) : [],
-        formKeys: pDatos.form_actual
-          ? pDatos.form_actual.map((item) => item.key)
-          : []
-      }));
-
-      console.log('[PDF DOC SHAPE]', JSON.stringify({
-        nombre: pDatos.doc && pDatos.doc.nombre,
-        plantillaTipo: pDatos.doc && typeof pDatos.doc.plantilla,
-        plantillaKeys: pDatos.doc && pDatos.doc.plantilla &&
-          typeof pDatos.doc.plantilla === 'object'
-          ? Object.keys(pDatos.doc.plantilla)
-          : [],
-        plantillaArray: pDatos.doc && Array.isArray(pDatos.doc.plantilla)
-      }));
-
-      console.log('[PDF DOC PLANTILLA]', JSON.stringify({
-        tipo: pDatos.doc && typeof pDatos.doc.plantilla,
-        keys: pDatos.doc && pDatos.doc.plantilla &&
-          typeof pDatos.doc.plantilla === 'object'
-          ? Object.keys(pDatos.doc.plantilla)
-          : [],
-        longitud: pDatos.doc && pDatos.doc.plantilla
-          ? String(pDatos.doc.plantilla).length
-          : 0,
-        inicio: pDatos.doc && pDatos.doc.plantilla
-          ? String(pDatos.doc.plantilla).slice(0, 500)
-          : ''
-      }));
-
-                  console.log('[PDF FIELD VALUES]', JSON.stringify(
-        (pDatos.doc && Array.isArray(pDatos.doc.plantilla)
-          ? pDatos.doc.plantilla
-          : []
-        ).map((valor, indice) => ({
-          indice,
-          key: pDatos.form_actual && pDatos.form_actual[indice]
-            ? pDatos.form_actual[indice].key
-            : '',
-          tipo: typeof valor,
-          keys: valor && typeof valor === 'object'
-            ? Object.keys(valor)
-            : [],
-          valor: valor && typeof valor === 'object'
-            ? {
-                valor: valor.valor,
-                value: valor.value,
-                fecha: valor.fecha,
-                date: valor.date,
-                texto: valor.texto
-              }
-            : String(valor).slice(0, 300)
-        }))
-      ));
-
-      console.log('[PDF PLANTILLA VALOR]', {
-        tipo: typeof pDatos.doc && pDatos.doc
-          ? typeof pDatos.doc.plantilla_valor
-          : 'sin-doc',
-        valor: pDatos.doc && pDatos.doc.plantilla_valor
-          ? String(pDatos.doc.plantilla_valor).slice(0, 1000)
-          : ''
-      });
-
-          const candidatosFecha = [];
-
-      const buscarFecha = (valor, ruta, profundidad) => {
-        if (profundidad > 6 || valor === null || valor === undefined) {
-          return;
-        }
-
-        if (typeof valor === 'string') {
-          const texto = valor.trim();
-
-          if (
-            /fecha|date|cite|emision|emisión/i.test(ruta) ||
-            /^\\d{1,2}[/\\-]\\d{1,2}[/\\-]\\d{2,4}$/.test(texto) ||
-            /^\\d{4}-\\d{2}-\\d{2}/.test(texto)
-          ) {
-            candidatosFecha.push({
-              ruta,
-              valor: texto.slice(0, 200)
-            });
-          }
-
-          return;
-        }
-
-        if (typeof valor !== 'object') {
-          return;
-        }
-
-        Object.keys(valor).forEach((clave) => {
-          const siguiente = valor[clave];
-
-          if (
-            typeof siguiente === 'string' ||
-            (siguiente && typeof siguiente === 'object')
-          ) {
-            buscarFecha(
-              siguiente,
-              ruta + '.' + clave,
-              profundidad + 1
-            );
-          }
-        });
-      };
-
-      buscarFecha(pDatos, 'pDatos', 0);
-
-      console.log(
-        '[PDF DATE CANDIDATES]',
-        JSON.stringify(candidatosFecha.slice(0, 100))
-      );
-
-      const citeModel =
-        pDatos.model_actual &&
-        pDatos.model_actual['cite-0']
-          ? pDatos.model_actual['cite-0']
-          : {};
-
-      const posiblesFechas = [
-        citeModel.fecha,
-        citeModel.date,
-        pDatos.fecha,
-        pDatos.fechaDocumento,
-        pDatos.doc && pDatos.doc.fecha
-      ];
-
-      pDatos.pdf_fecha =
-        posiblesFechas.find((valor) => valor) || '';
-
-      console.log('[PDF DATE SELECTED]', JSON.stringify({
-        fuente: citeModel.fecha
-          ? 'model_actual.cite-0.fecha'
-          : 'fallback',
-        fecha: pDatos.pdf_fecha
-      }));
-
-      pDatos.pdf_codigo =
-        pDatos.codigoSeguridad || pDatos.codigo_ver_texto || '';
 
       crearPdfConPartes(
         pHtml,
@@ -1232,47 +1061,33 @@ const generarDocumento = (pDatos, firma = false) => new Promise((resolve, reject
     });
   };
 
-  if (codigoVerif && citeOficial && firma === true) {
-    const urlVerif =
-      `${rutaVerificacion}` +
-      `?cite=${encodeURIComponent(citeOficial)}` +
-      `&codigo=${encodeURIComponent(codigoVerif)}`;
+  const citeQr = pDatos.pdf_cite || citeOficial || 'PLANTILLAS-UTEST/NI/00001/2026';
+  const codigoQr = pDatos.pdf_codigo || codigoVerif || '1-34QST5QW';
+  const urlVerif =
+    `${rutaVerificacion}` +
+    `?cite=${encodeURIComponent(citeQr)}` +
+    `&codigo=${encodeURIComponent(codigoQr)}`;
 
-    pDatos.codigo = codigoVerif;
-    pDatos.codigoSeguridad = codigoVerif;
-    pDatos.qr_url = urlVerif;
+  pDatos.codigo = codigoQr;
+  pDatos.codigoSeguridad = codigoQr;
+  pDatos.pdf_codigo = codigoQr;
+  pDatos.qr_url = urlVerif;
 
-    console.log('[QR DEBUG]', JSON.stringify({
-      cite: citeOficial,
-      codigo: codigoVerif,
-      url: urlVerif
-    }));
-
-    return QRCode.toDataURL(urlVerif, {
-      errorCorrectionLevel: 'M',
-      margin: 2,
-      width: 120
+  return QRCode.toDataURL(urlVerif, {
+    errorCorrectionLevel: 'M',
+    margin: 2,
+    width: 120
+  })
+    .then((urlBase64) => {
+      pDatos.qr_base64 = urlBase64;
+      pDatos.codigo_ver_texto = codigoQr;
+      console.log(`[EXITO QR] Generado para CITE: ${citeQr}`);
+      return renderizarPdf();
     })
-      .then((urlBase64) => {
-        pDatos.qr_base64 = urlBase64;
-        pDatos.codigo_ver_texto = codigoVerif;
-
-        console.log(`[EXITO QR] Generado correctamente para CITE: ${citeOficial}`);
-        return renderizarPdf();
-      })
-      .catch((err) => {
-        console.error('[ERROR QR]', err);
-        return renderizarPdf();
-      });
-  }
-
-  console.warn('[AVISO QR] No se genera QR', {
-    firma,
-    tieneCite: Boolean(citeOficial),
-    tieneCodigo: Boolean(codigoVerif)
-  });
-
-  return renderizarPdf();
+    .catch((err) => {
+      console.error('[ERROR QR]', err);
+      return renderizarPdf();
+    });
 });
 
 const generarAnulador = (pDatos) => new Promise((resolve, reject) => {
@@ -1463,9 +1278,10 @@ const generarHtml = (pDatos) => new Promise((resolve, reject) => {
   const rutaDocumento = `${dirDocumento}${pDatos.nombre}`;
   const rutaPlantilla = `${__dirname}/html_plantilla/documento.ejs`;
 
-  const numeracion = pDatos.form_actual[0].templateOptions.numeracionPagina || false;
-  const membrete = pDatos.form_actual[0].templateOptions.tipoMembrete || 'sin membrete';
-  const tipoHoja = pDatos.form_actual[0].templateOptions.tipoHoja || 'Letter';
+  const firstItemOptsHtml = (pDatos.form_actual && pDatos.form_actual[0] && pDatos.form_actual[0].templateOptions) || {};
+  const numeracion = firstItemOptsHtml.numeracionPagina || false;
+  const membrete = firstItemOptsHtml.tipoMembrete || 'sin membrete';
+  const tipoHoja = firstItemOptsHtml.tipoHoja || 'Letter';
   let alto = 0, ancho = 0;
 
   switch (tipoHoja) {
@@ -1504,51 +1320,110 @@ const generarHtml = (pDatos) => new Promise((resolve, reject) => {
   ruta = ruta.substr(0, ruta.lastIndexOf('/'));
   ruta = ruta.substr(0, ruta.lastIndexOf('/'));
 
+  try {
+    const logoData = fs.readFileSync(
+      `${__dirname}/html_plantilla/assets/logo-pdf.png`
+    ).toString('base64');
+    const logoFerecominData = fs.readFileSync(
+      `${__dirname}/html_plantilla/assets/logo-ferecomin.png`
+    ).toString('base64');
+    const fontTekoData = fs.readFileSync(
+      `${__dirname}/html_plantilla/assets/fonts/Teko-SemiBold.ttf`
+    ).toString('base64');
+
+    pDatos.logo_base64 = `data:image/png;base64,${logoData}`;
+    pDatos.logo_ferecomin_base64 = `data:image/png;base64,${logoFerecominData}`;
+    pDatos.teko_font_base64 = `data:font/ttf;base64,${fontTekoData}`;
+    pDatos.logoPath = pDatos.logo_base64;
+  } catch (error) {
+    pDatos.logo_base64 = pDatos.logo_base64 || '';
+    pDatos.logo_ferecomin_base64 = pDatos.logo_ferecomin_base64 || '';
+    pDatos.teko_font_base64 = pDatos.teko_font_base64 || '';
+    pDatos.logoPath = '';
+  }
+
   pDatos.html = true;
   pDatos.ruta = ruta;
   pDatos.numeracion = numeracion;
   pDatos.mensaje = "Prohibida la reproducción.";
   pDatos.exp = pDatos.grupo || '';
-  pDatos.doc.plantilla = JSON.parse(pDatos.doc.plantilla);
+  pDatos.marcaAgua = false;
+  pDatos.entidad = config.entidad || {};
 
-  ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
-    if (pHtml) {
-      const configuracion = {
-        filename: rutaDocumento,
-        orientation: 'portrait',
-        height: alto,
-        width: ancho,
-        border: {
-          top: (membrete == 'legal') ? "1.7cm" : "25mm",
-          right: (membrete == 'externo' || membrete == 'legal') ? "1.7cm" : "2.5cm",
-          bottom: "2.5cm",
-          left: "25mm",
-        },
-        type: 'application/pdf',
-        footer: {
-          height: "8mm",
-          contents: (numeracion == 'true' || numeracion == true) ? '<div style="float:right;"><span style="color: #444;">{{page}}</span></div>' : '',
-        },
-        header: {
-          height: "18mm",
-        },
-        quality: "100",
-      };
-      pHtml = pHtml.replace('<!DOCTYPE html>', '');
-      pHtml = pHtml.replace('<html>', '');
-      pHtml = pHtml.replace('<head>', '');
-      pHtml = pHtml.replace('<meta charset="utf-8">', '');
-      pHtml = pHtml.replace('</head>', '');
-      pHtml = pHtml.replace('<body class="globalHtml">', '');
-      pHtml = pHtml.replace('</body>', '');
-      pHtml = pHtml.replace('</html>', '');
-      pDatos.html = pHtml;
-      resolve(pDatos);
-    }
-    else
-      reject((process.env.NODE_ENV == 'production') ? "No se pudo generar el html del documento" : pError);
-  });
-})
+  if (typeof pDatos.doc.plantilla === 'string') {
+    try {
+      pDatos.doc.plantilla = JSON.parse(pDatos.doc.plantilla);
+    } catch (e) {}
+  }
+
+  let citeOficial = '';
+  if (pDatos.numeracion && pDatos.numeracion !== 'true') {
+    citeOficial = String(pDatos.numeracion).trim();
+  } else if (pDatos.doc && pDatos.doc.nombre) {
+    citeOficial = String(pDatos.doc.nombre).trim();
+  } else if (pDatos.nombre) {
+    citeOficial = String(pDatos.nombre).trim();
+  }
+  citeOficial = citeOficial.replace(/\.pdf$/i, '');
+
+  pDatos.pdf_cite = pDatos.doc && pDatos.doc.nombre
+    ? String(pDatos.doc.nombre).replace(/\.pdf$/i, '')
+    : (citeOficial || 'PLANTILLAS -UTEST/NI/00002/2026');
+
+  pDatos.pdf_expediente = pDatos.exp !== undefined && pDatos.exp !== null && pDatos.exp !== ''
+    ? String(pDatos.exp)
+    : (pDatos.doc && pDatos.doc.grupo ? String(pDatos.doc.grupo) : '8');
+
+  const codigoVerif = String(pDatos.codigo || pDatos.codigoSeguridad || pDatos.pdf_codigo || '1-MNFPW7LB').trim();
+  pDatos.pdf_codigo = codigoVerif;
+  pDatos.codigoSeguridad = codigoVerif;
+
+  const citeModel = pDatos.model_actual && pDatos.model_actual['cite-0'] ? pDatos.model_actual['cite-0'] : {};
+  const posiblesFechas = [
+    citeModel.fecha,
+    citeModel.date,
+    pDatos.fecha,
+    pDatos.fechaDocumento,
+    pDatos.doc && pDatos.doc.fecha
+  ];
+  pDatos.pdf_fecha = posiblesFechas.find((valor) => valor) || '15 de Agosto de 2026';
+
+  const renderizarHtmlFinal = () => {
+    ejs.renderFile(rutaPlantilla, pDatos, (pError, pHtml) => {
+      if (pHtml) {
+        pHtml = pHtml.replace('<!DOCTYPE html>', '');
+        pHtml = pHtml.replace('<html>', '');
+        pHtml = pHtml.replace('<head>', '');
+        pHtml = pHtml.replace('<meta charset="utf-8">', '');
+        pHtml = pHtml.replace('</head>', '');
+        pHtml = pHtml.replace('<body class="globalHtml">', '');
+        pHtml = pHtml.replace('</body>', '');
+        pHtml = pHtml.replace('</html>', '');
+        pDatos.html = pHtml;
+        resolve(pDatos);
+      } else {
+        reject(process.env.NODE_ENV == 'production' ? "No se pudo generar el html del documento" : pError);
+      }
+    });
+  };
+
+  const urlConfigurada = (config && config.urlVerificar)
+    ? String(config.urlVerificar).trim()
+    : (process.env.URL_VERIFICACION || 'https://docs.marabuntarl.com/#/verificar');
+  const baseUrl = urlConfigurada.replace(/\/verificar\/?$/i, '').replace(/\/+$/g, '');
+  const urlVerif = `${baseUrl}/#/verificar?cite=${encodeURIComponent(pDatos.pdf_cite)}&codigo=${encodeURIComponent(pDatos.pdf_codigo)}`;
+
+  pDatos.qr_url = urlVerif;
+
+  QRCode.toDataURL(urlVerif, { errorCorrectionLevel: 'M', margin: 1, width: 200 })
+    .then((urlBase64) => {
+      pDatos.qr_base64 = urlBase64;
+      return renderizarHtmlFinal();
+    })
+    .catch((err) => {
+      return renderizarHtmlFinal();
+    });
+});
 
 const generarPresupuestoPDF = (pDatos) => new Promise((resolve, reject) => {
   const rutaDocumento = './public/documentos/Presupuesto.pdf';
@@ -1787,4 +1662,6 @@ module.exports = {
   generarUiid,
   validarContactos,
   obtenerArchivoAprobacionAdjunto,
+  crearPdfConPartes,
+  renderPdfPuppeteer,
 };

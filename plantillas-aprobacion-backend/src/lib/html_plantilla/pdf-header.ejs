@@ -1,9 +1,115 @@
 <style>
-  .pdf-header {
-    width: 100%;
-    height: 1px;
-    font-size: 1px;
-    color: transparent;
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  * { box-sizing: border-box; }
+
+  .pdf-header-container {
+    width: 215.9mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: 'Teko Light', 'TekoPDF', 'Teko', sans-serif !important;
+  }
+  .membrete-wrapper-tabla {
+    width: 215.9mm !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .membrete-tabla {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+  }
+  .membrete-logo-izq,
+  .membrete-logo-der {
+    width: 22mm !important;
+    vertical-align: middle !important;
+    padding: 0 0 3pt 0 !important;
+  }
+  .membrete-logo-izq { text-align: left !important; }
+  .membrete-logo-der { text-align: right !important; }
+  .membrete-logo-izq img,
+  .membrete-logo-der img {
+    width: 20mm !important;
+    height: 20mm !important;
+    display: block !important;
+    object-fit: contain !important;
+    border-radius: 50% !important;
+  }
+  .membrete-logo-der img { margin-left: auto !important; }
+  .membrete-razon-social,
+  .membrete-personeria,
+  .membrete-afiliacion {
+    font-family: 'Teko Light', 'TekoPDF', 'Teko', sans-serif !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+  }
+  .membrete-razon-social {
+    font-size: 20pt !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    color: #8B2500 !important;
+  }
+  .membrete-personeria,
+  .membrete-afiliacion {
+    font-size: 8pt !important;
+    font-weight: 700 !important;
+    line-height: 10pt !important;
+    margin: 0 !important;
+    color: #111 !important;
   }
 </style>
-<div class="pdf-header"></div>
+
+<div class="pdf-header-container">
+  <table class="membrete-wrapper-tabla" role="presentation" style="width: 215.9mm; border-collapse: collapse; table-layout: fixed; margin: 0; padding: 0;">
+    <colgroup>
+      <col style="width: 25mm;">
+      <col style="width: 165.9mm;">
+      <col style="width: 25mm;">
+    </colgroup>
+    <tr>
+      <td></td>
+      <td style="border-bottom: 1.5pt solid #CAAE92; padding: 6mm 0 2pt 0;">
+        <table class="membrete-tabla" role="presentation" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+          <colgroup>
+            <col style="width: 22mm;">
+            <col style="width: auto;">
+            <col style="width: 22mm;">
+          </colgroup>
+          <tr>
+            <td class="membrete-logo-izq">
+              <% if (typeof logo_base64 !== 'undefined' && logo_base64) { %>
+                <img src="<%= logo_base64 %>" alt="Logo Institucional">
+              <% } %>
+            </td>
+            <td class="membrete-texto-central">
+              <div class="membrete-razon-social">
+                <%= (typeof entidad !== 'undefined' && entidad && entidad.razon_social) ? entidad.razon_social : 'COOPERATIVA MINERA MARABUNTA R.L.' %>
+              </div>
+              <div class="membrete-personeria">
+                <%= (typeof entidad !== 'undefined' && entidad && entidad.personeria_juridica) ? entidad.personeria_juridica : 'P.J. 483/2025, R.E.C. 01.01.2760' %>
+              </div>
+              <div class="membrete-afiliacion">
+                <%= (typeof entidad !== 'undefined' && entidad && entidad.afiliacion) ? entidad.afiliacion : 'AFILIADA A LA FEDERACIÓN REGIONAL DE COOPERATIVAS MINERAS DEL SUD R.L. UYUNI' %>
+              </div>
+            </td>
+            <td class="membrete-logo-der">
+              <% if (typeof logo_ferecomin_base64 !== 'undefined' && logo_ferecomin_base64) { %>
+                <img src="<%= logo_ferecomin_base64 %>" alt="Logo FERECOMIN">
+              <% } else if (typeof logo_base64 !== 'undefined' && logo_base64) { %>
+                <img src="<%= logo_base64 %>" alt="Logo FERECOMIN">
+              <% } %>
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td></td>
+    </tr>
+  </table>
+</div>

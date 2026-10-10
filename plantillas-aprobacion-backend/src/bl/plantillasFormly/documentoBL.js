@@ -1098,6 +1098,9 @@ module.exports = {
 
   anularDocumentos: (pModelos, pDocumento, pRuta, idUsuario, tr) => {
     const paraAnular = module.exports.buscarAnuladores(pDocumento.plantilla_valor);
+    if (!paraAnular || paraAnular.length === 0) {
+      return Promise.resolve();
+    }
     return Util.generarAnulador({cite:pDocumento.nombre})
     .then(bufferAnulador => module.exports.ejecutarAnulacion(paraAnular, pRuta, pModelos, idUsuario, pDocumento,bufferAnulador, tr));
   },
@@ -1205,40 +1208,46 @@ module.exports = {
   obtenerCrearHash: (pDocumento, auditUsuario) => {
     const nombreDocumento = Util.formatoNombreDoc(pDocumento.nombre);
     const existe = Util.existePdf(nombreDocumento);
-    const rutaDocumentos = Util.rutaDocumentos();
-    if(!existe || existe === false) {
-      const datos = {
-        doc: {
-          nombre: nombreDocumento,
-          plantilla: pDocumento.plantilla,
-        },
-        form_actual: Util.dataToView(JSON.parse(pDocumento.plantilla), JSON.parse(pDocumento.plantilla_valor)),
-        model_actual: JSON.parse(pDocumento.plantilla_valor),
-        audit_usuario: auditUsuario,
-        host: 'hla',
-        grupo: pDocumento.grupo,
-        codigo: pDocumento.codigo,
-      };
+    const datos = {
+      doc: {
+        nombre: nombreDocumento,
+        plantilla: pDocumento.plantilla,
+      },
+      form_actual: Util.dataToView(JSON.parse(pDocumento.plantilla), JSON.parse(pDocumento.plantilla_valor)),
+      model_actual: JSON.parse(pDocumento.plantilla_valor),
+      audit_usuario: auditUsuario,
+      host: 'hla',
+      grupo: pDocumento.grupo,
+      codigo: pDocumento.codigo,
+    };
+    if (datos.model_actual && datos.model_actual['cite-0'] && datos.model_actual['cite-0'].fecha) {
       datos.model_actual['cite-0'].fecha = Util.formatearFecha(datos.model_actual['cite-0'].fecha);
-
-      return Util.generarDocumento(datos, true)
-      .then(() => Util.obtenerHash(nombreDocumento));
     }
-    const hash = Util.obtenerHash(nombreDocumento);
-    return hash;
+
+    return Util.generarDocumento(datos, true)
+      .then(() => Util.obtenerHash(nombreDocumento))
+      .catch(err => {
+        logger.warn('[obtenerCrearHash] Error generando PDF/hash:', err.message || err);
+        if (existe) {
+          return Util.obtenerHash(nombreDocumento);
+        }
+        return null;
+      });
   },
 
-  actualizarFirmaHash: (pModelos, pHash, pDoc, idUsuario, tr) =>
-    pModelos.firma.update({
-      hash: pHash,
-      _usuario_modificacion: idUsuario,
-    },
-    {
+  actualizarFirmaHash: (pModelos, pHash, pDoc, idUsuario, tr) => {
+    const opts = {
       where: {
         fid_documento: pDoc.id_documento,
-      },
-      transaction: tr.transaction,
-    })
+      }
+    };
+    if (tr && tr.transaction) {
+      opts.transaction = tr.transaction;
+    }
+    return pModelos.firma.update({
+      hash: pHash,
+      _usuario_modificacion: idUsuario,
+    }, opts)
     .then(() => {
       console.log('Firma hash actualizado...');
       return;
@@ -1246,7 +1255,8 @@ module.exports = {
     .catch(error => {
       logger.error("Error en la actualizacion del hash", error);
       return;
-    }),
+    });
+  },
 
   aprobarVia: (modelos, documento, datos, transaccion) =>
     new Promise((resolve, reject) => {
@@ -1422,16 +1432,16 @@ module.exports = {
         // else {
         //   // // datosActualizar.plantilla_valor = documento.plantilla_valor;
         // }
-        return module.exports.crearSolicitudAlmacen(modelos, datosActualizar, documento.id_documento);
+        return module.exports.crearSolicitudAlmacen(modelos, datosActualizar, documento.id_documento).catch(e => logger.warn('[crearSolicitudAlmacen] Omitiendo por error:', e.message || e));
       })
       .then(() => {
         console.log('[documentoBL] Ingreso de activos');
-        return module.exports.crearIngresoActivos(modelos, datosActualizar, documento.id_documento);
+        return module.exports.crearIngresoActivos(modelos, datosActualizar, documento.id_documento).catch(e => logger.warn('[crearIngresoActivos] Omitiendo por error:', e.message || e));
       })
-      .then(() => module.exports.crearIngresoAlmacen(modelos, datosActualizar, documento.id_documento))
-      .then(() => module.exports.notificarEntregaAlmacen(modelos, datosActualizar, documento.id_documento))
-      .then(() => module.exports.asignarActivo(modelos, datosActualizar, documento.id_documento))
-      .then(() => module.exports.bajaActivo(modelos, datosActualizar, documento.id_documento))
+      .then(() => module.exports.crearIngresoAlmacen(modelos, datosActualizar, documento.id_documento).catch(e => logger.warn('[crearIngresoAlmacen] Omitiendo por error:', e.message || e)))
+      .then(() => module.exports.notificarEntregaAlmacen(modelos, datosActualizar, documento.id_documento).catch(e => logger.warn('[notificarEntregaAlmacen] Omitiendo por error:', e.message || e)))
+      .then(() => module.exports.asignarActivo(modelos, datosActualizar, documento.id_documento).catch(e => logger.warn('[asignarActivo] Omitiendo por error:', e.message || e)))
+      .then(() => module.exports.bajaActivo(modelos, datosActualizar, documento.id_documento).catch(e => logger.warn('[bajaActivo] Omitiendo por error:', e.message || e)))
       .then(() => module.exports.actualizarDocumento(documento, datosActualizar, modelos.historial_flujo, tr))
       .then(actualizacionResp => module.exports.generarCodigo(modelos, actualizacionResp, datos.usuarioModificacion, tr))
       .then(codigoResp => {
@@ -1469,9 +1479,18 @@ module.exports = {
         return module.exports.cerrarDocumento(modelos, documento, datos.usuarioModificacion, tr)
         .then(() => notificar.enviar(modelos, documento, 'aprobado', {}));
       })
-      .then(() => module.exports.anularDocumentos(modelos, documento, dirDocumento, datos.usuarioModificacio, tr))
-      .then(() => module.exports.obtenerCrearHash(documento, datos.auditUsuario))
-      .then(hashResp => module.exports.actualizarFirmaHash(modelos, hashResp, documento, datos.usuarioModificacion, tr))
+      .then(() => module.exports.anularDocumentos(modelos, documento, dirDocumento, datos.usuarioModificacion, tr).catch(e => logger.warn('[anularDocumentos] Omitiendo por error:', e.message || e)))
+      .then(() => {
+        setImmediate(() => {
+          module.exports.obtenerCrearHash(documento, datos.auditUsuario)
+            .then(hashResp => {
+              if (hashResp) {
+                return module.exports.actualizarFirmaHash(modelos, hashResp, documento, datos.usuarioModificacion, null);
+              }
+            })
+            .catch(e => logger.warn('[obtenerCrearHash] Omitiendo por error:', e.message || e));
+        });
+      })
       .then(() => resolve())
       .catch(error => {
         logger.error("Error en la aprobación para ", error);

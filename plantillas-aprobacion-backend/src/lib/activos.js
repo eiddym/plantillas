@@ -26,7 +26,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const url = encodeURI(`${config.activos.url_consulta_por_usuario}/${ci}?responsable_ci=${ci_responsable}`);
       console.log('[libActivos] url = ', url);
-      return axios({ method: 'get', url, headers: { 'Authorization': config.activos.token } })
+      return axios({ method: 'get', url, headers: { 'Authorization': config.activos.token }, timeout: 3000 })
         .then(resp => {
           if ((resp.status === 200 || resp.status === 202) && resp.data.finalizado) {
             return resolve(resp.data.data || []);
@@ -48,7 +48,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const url = encodeURI(config.activos.url_asignacion);
       console.log('[libActivos] url = '.blue, url);
-      return axios({ method: 'post', url, data, headers: { 'Authorization': config.activos.token } })
+      return axios({ method: 'post', url, data, headers: { 'Authorization': config.activos.token }, timeout: 3000 })
         .then(resp => {
           console.log('[libActivos] revisando respuesta'.blue, resp);
           if ((resp.status === 200 || resp.status === 202) && resp.data.finalizado) {
@@ -71,7 +71,7 @@ module.exports = {
     console.log('[libActivos] devolver _________...'.yellow);
     return new Promise((resolve, reject) => {
       const url = encodeURI(config.activos.url_devolucion);
-      return axios({ method: 'post', url, data, headers: { 'Authorization': config.activos.token } })
+      return axios({ method: 'post', url, data, headers: { 'Authorization': config.activos.token }, timeout: 3000 })
       .then(resp => {
         console.log('[libActivos] revisando la resp', resp)
         if ((resp.status === 200 || resp.status === 202) && resp.data.finalizado) {
@@ -96,7 +96,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const url = encodeURI(config.activos.url_ingreso);
       console.log('[libActivos] url = ', url);
-      return axios({ method: 'post', url, data, headers: { 'Authorization': config.activos.token } })
+      return axios({ method: 'post', url, data, headers: { 'Authorization': config.activos.token }, timeout: 3000 })
         .then(resp => {
           console.log('[libActivos] revisando la resp', resp)
           if ((resp.status === 200 || resp.status === 202) && resp.data.finalizado) {

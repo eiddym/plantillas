@@ -1,62 +1,85 @@
 <style>
-  .pdf-footer {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #444;
-    box-sizing: border-box;
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  * { box-sizing: border-box; }
+
+  .pdf-footer-container {
+    width: 215.9mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
+    font-size: 8pt !important;
+    color: #333 !important;
+  }
+  .pdf-footer-wrapper-tabla {
+    width: 215.9mm !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .pdf-footer-line {
-    width: 100%;
-    height: 1.6px;
-    background-color: #c4a484;
-    margin-bottom: 4px;
-    display: block;
-    clear: both;
+    width: 100% !important;
+    height: 1.5pt !important;
+    background-color: #CAAE92 !important;
+    margin: 0 0 3pt 0 !important;
+    display: block !important;
   }
-  .pdf-footer-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-  .pdf-footer-table td {
-    padding: 0;
-    vertical-align: bottom;
+  .pdf-footer-tabla {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
   }
   .pdf-footer-datos {
-    text-align: center;
-    line-height: 1.35;
-    font-size: 7pt;
-    color: #444;
+    text-align: center !important;
+    font-size: 7.5pt !important;
+    line-height: 1.25 !important;
   }
   .pdf-footer-pagina {
-    width: 45px;
-    text-align: right;
-    font-size: 9pt;
-    font-weight: bold;
-    color: #333;
-    white-space: nowrap;
+    width: 70px !important;
+    text-align: right !important;
+    vertical-align: bottom !important;
+    font-size: 8pt !important;
+    white-space: nowrap !important;
   }
 </style>
 
-<%
-  var footerEntidad = (typeof entidad !== 'undefined' && entidad) ? entidad : {};
-%>
-<div class="pdf-footer">
-  <div class="pdf-footer-line"></div>
-  <table class="pdf-footer-table" role="presentation">
+<div class="pdf-footer-container">
+  <table class="pdf-footer-wrapper-tabla" role="presentation" style="width: 215.9mm; border-collapse: collapse; table-layout: fixed; margin: 0; padding: 0;">
+    <colgroup>
+      <col style="width: 25mm;">
+      <col style="width: 165.9mm;">
+      <col style="width: 25mm;">
+    </colgroup>
     <tr>
-      <td class="pdf-footer-datos">
-        ZONA PROGRESO, CALLE RAVELO S/N, ENTRE BOLIVAR Y ABAROA, UYUNI - BOLIVIA<br>
-        M.C./NIT: 484874028 | TELEFONO: 71617875 | CORREO: contacto@marabuntarl.com<br>
-        marabuntarl.com
+      <td></td>
+      <td>
+        <div class="pdf-footer-line"></div>
+        <table class="pdf-footer-tabla" role="presentation" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+          <colgroup>
+            <col style="width: 70px;">
+            <col style="width: auto;">
+            <col style="width: 70px;">
+          </colgroup>
+          <tr>
+            <td style="width: 70px;"></td>
+            <td class="pdf-footer-datos">
+              ZONA PROGRESO, CALLE RAVELO S/N, ENTRE BOLIVAR Y ABAROA, UYUNI - BOLIVIA<br>
+              M.C./NIT: 484874028 | TELEFONO: 71617875 | CORREO: contacto@marabuntarl.com<br>
+              marabuntarl.com
+            </td>
+            <td class="pdf-footer-pagina">
+              <span class="pageNumber"></span>/<span class="totalPages"></span>
+            </td>
+          </tr>
+        </table>
       </td>
-      <td class="pdf-footer-pagina">
-        <span class="pageNumber"></span>/<span class="totalPages"></span>
-      </td>
+      <td></td>
     </tr>
   </table>
 </div>
-
-
