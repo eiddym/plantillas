@@ -343,6 +343,26 @@
       if(typeof html !== 'undefined' && html) marcaAgua = false;
       var codigoSeguridad = typeof codigo ==='undefined'? '': codigo;
         var entidad = typeof entidad === 'undefined' ? {} : entidad;
+
+      // Extraer Clasificación y Tipo de documento desde form_actual/model_actual
+      // para mostrarlos en el bloque de cabecera del PDF
+      var _cabClasificacion = '';
+      var _cabTipoDoc = '';
+      if (typeof form_actual !== 'undefined' && Array.isArray(form_actual)) {
+        for (var _ci = 0; _ci < form_actual.length; _ci++) {
+          var _cItem = form_actual[_ci];
+          if (!_cabClasificacion && _cItem.type === 'select' &&
+              _cItem.templateOptions && _cItem.templateOptions.label &&
+              _cItem.templateOptions.label.toLowerCase().indexOf('clasificaci') !== -1) {
+            _cabClasificacion = (typeof model_actual !== 'undefined' && model_actual && model_actual[_cItem.key])
+              ? model_actual[_cItem.key] : '';
+          }
+          if (!_cabTipoDoc && _cItem.type === 'texto' && _cItem.templateOptions &&
+              (_cItem.templateOptions.tipo === 'h1' || _cItem.templateOptions.tipo === 'h2')) {
+            _cabTipoDoc = _cItem.templateOptions.label || '';
+          }
+        }
+      }
     %>
     <div class="<%= (typeof marcaAgua !== 'undefined' && marcaAgua == true)? 'fondo-texto':'none' %>"></div>
     <div class="mi-contenido">
@@ -354,7 +374,9 @@
             <td class="pdf-meta-izq" style="width: 68%; vertical-align: top; text-align: left; font-size: 10pt; line-height: 1.35; color: #222;">
               <%= typeof pdf_cite !== 'undefined' && pdf_cite ? pdf_cite : (typeof doc !== 'undefined' && doc && doc.nombre ? doc.nombre.replace(/\.pdf$/i, '') : '') %><br>
               Expediente : <%= typeof pdf_expediente !== 'undefined' && pdf_expediente !== null ? pdf_expediente : (typeof exp !== 'undefined' ? exp : '') %><br>
-              Código de verificación : <%= typeof pdf_codigo !== 'undefined' && pdf_codigo ? pdf_codigo : (typeof codigoSeguridad !== 'undefined' ? codigoSeguridad : '') %>
+              Código de verificación : <%= typeof pdf_codigo !== 'undefined' && pdf_codigo ? pdf_codigo : (typeof codigoSeguridad !== 'undefined' ? codigoSeguridad : '') %><% if (_cabClasificacion) { %><br>
+              Clasificación : <%= _cabClasificacion %><% } %><% if (_cabTipoDoc) { %><br>
+              Tipo de documento : <%= _cabTipoDoc %><% } %>
             </td>
             <td class="pdf-meta-der" style="width: 32%; vertical-align: top; text-align: right;" align="right">
               <div class="pdf-fecha-qr" style="display: inline-block; text-align: center;">
@@ -719,6 +741,11 @@
             <%break;
           case 'select':
             var itemsM=pItem.templateOptions.options
+            // Clasificación ya se muestra en el bloque de cabecera del PDF, omitir en body
+            if (pItem.templateOptions.label &&
+                pItem.templateOptions.label.toLowerCase().indexOf('clasificaci') !== -1) {
+              break;
+            }
             if(pItem.templateOptions.multiple){ %>
               <br><span class="etiqueta"><%= pItem.templateOptions.label%></span><br>
               <% var vector = datos[pItem.key];
