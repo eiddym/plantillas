@@ -163,20 +163,22 @@
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
-        margin: 0 0 8pt 0;
+        margin: 0 0 10pt 0;
+      }
+      .bloque-campos tr {
+        vertical-align: baseline;
       }
       .datosGenerales {
-        width: 16mm;
-        min-width: 16mm;
-        max-width: 16mm;
+        width: 18mm;
+        min-width: 18mm;
         font-family: 'Open Sans', Arial, Helvetica, sans-serif;
         font-weight: 700;
         font-size: 11pt;
         line-height: 15pt;
-        color: #111;
-        vertical-align: top;
+        color: #000;
+        vertical-align: baseline !important;
         text-align: left;
-        padding: 0 0 2pt 0;
+        padding: 0 0 4pt 0;
         white-space: nowrap;
       }
       .datosGeneralesValor {
@@ -185,9 +187,9 @@
         font-size: 11pt;
         line-height: 15pt;
         color: #222;
-        vertical-align: top;
+        vertical-align: baseline !important;
         text-align: left;
-        padding: 0 0 2pt 2mm;
+        padding: 0 0 4pt 2mm;
       }
       .border-test {
         border: 1px solid black;
@@ -596,25 +598,15 @@
                   if(pItem.templateOptions.show.via && via.length > 0) { %>
                         <tr>
                           <td class="datosGenerales">VÍA:</td>
-                          <td class="datosGeneralesValor">
-                            <% for(var j = 0; j < via.length; j++){
-                              var itemVia = via[j]; %>
-                              <%= itemVia.nombres %> <%= itemVia.apellidos %>
-                              <br /><%=itemVia.cargo%>
-                            <%} %>
-                          </td>
+                          <td class="datosGeneralesValor"><% for(var j = 0; j < via.length; j++){
+                              var itemVia = via[j]; %><%= itemVia.nombres %> <%= itemVia.apellidos %><br /><%=itemVia.cargo%><% } %></td>
                         </tr>
                       <%}
                   if(pItem.templateOptions.show.de) { %>
                     <tr>
                       <td class="datosGenerales">DE:</td>
-                      <td class="datosGeneralesValor">
-                        <% for(var j = 0; j < de.length; j++){
-                          var itemDe = de[j]; %>
-                          <%= itemDe.nombres %> <%= itemDe.apellidos %>
-                          <br /><%=itemDe.cargo%>
-                          <%}%>
-                      </td>
+                      <td class="datosGeneralesValor"><% for(var j = 0; j < de.length; j++){
+                          var itemDe = de[j]; %><%= itemDe.nombres %> <%= itemDe.apellidos %><br /><%=itemDe.cargo%><% } %></td>
                     </tr>
                   <% } if(pItem.templateOptions.show.ref) { %>
                     <tr>
@@ -643,45 +635,24 @@
                 <% if(pItem.templateOptions.show.para && paraEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">PARA:</td>
-                    <td class="datosGeneralesValor">
-                      <% for(var z = 0; z < paraEncabezado.length; z++){
-                        var itemPara = paraEncabezado[z]; %>
-                        <%= itemPara.nombres %> <%= itemPara.apellidos %><br />
-                        <% if(itemPara.mostrar_cargo || itemPara.cargo) { %>
-                          <%= itemPara.cargo %><br />
-                        <% } %>
-                      <% } %>
-                    </td>
+                    <td class="datosGeneralesValor"><% for(var z = 0; z < paraEncabezado.length; z++){
+                        var itemPara = paraEncabezado[z]; %><%= itemPara.nombres %> <%= itemPara.apellidos %><br /><% if(itemPara.mostrar_cargo || itemPara.cargo) { %><%= itemPara.cargo %><br /><% } %><% } %></td>
                   </tr>
                 <% } %>
 
                 <% if(pItem.templateOptions.show.via && viaEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">VÍA:</td>
-                    <td class="datosGeneralesValor">
-                      <% for(var j = 0; j < viaEncabezado.length; j++){
-                        var itemViaEncabezado = viaEncabezado[j]; %>
-                        <%= itemViaEncabezado.nombres %> <%= itemViaEncabezado.apellidos %><br />
-                        <% if(itemViaEncabezado.mostrar_cargo || itemViaEncabezado.cargo) { %>
-                          <%= itemViaEncabezado.cargo %><br />
-                        <% } %>
-                      <% } %>
-                    </td>
+                    <td class="datosGeneralesValor"><% for(var j = 0; j < viaEncabezado.length; j++){
+                        var itemViaEncabezado = viaEncabezado[j]; %><%= itemViaEncabezado.nombres %> <%= itemViaEncabezado.apellidos %><br /><% if(itemViaEncabezado.mostrar_cargo || itemViaEncabezado.cargo) { %><%= itemViaEncabezado.cargo %><br /><% } %><% } %></td>
                   </tr>
                 <% } %>
 
                 <% if(pItem.templateOptions.show.de && deEncabezado.length > 0) { %>
                   <tr>
                     <td class="datosGenerales">DE:</td>
-                    <td class="datosGeneralesValor">
-                      <% for(var j = 0; j < deEncabezado.length; j++){
-                        var itemDeEncabezado = deEncabezado[j]; %>
-                        <%= itemDeEncabezado.nombres %> <%= itemDeEncabezado.apellidos %><br />
-                        <% if(itemDeEncabezado.mostrar_cargo || itemDeEncabezado.cargo) { %>
-                          <%= itemDeEncabezado.cargo %><br />
-                        <% } %>
-                      <% } %>
-                    </td>
+                    <td class="datosGeneralesValor"><% for(var j = 0; j < deEncabezado.length; j++){
+                        var itemDeEncabezado = deEncabezado[j]; %><%= itemDeEncabezado.nombres %> <%= itemDeEncabezado.apellidos %><br /><% if(itemDeEncabezado.mostrar_cargo || itemDeEncabezado.cargo) { %><%= itemDeEncabezado.cargo %><br /><% } %><% } %></td>
                   </tr>
                 <% } %>
 
