@@ -6,16 +6,18 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController(DashboardService, Storage, Documento, $state, $rootScope) {
+  function MainController(DashboardService, Storage, Documento, $state, $rootScope, $scope) {
     var vm = this;
 
     vm.cargando = true;
     vm.usuario = Storage.getUser() || {};
     vm.saludo = obtenerSaludo();
 
-    $rootScope.$on('user:updated', function() {
+    var unbindUserUpdated = $rootScope.$on('user:updated', function() {
       vm.usuario = Storage.getUser() || {};
     });
+
+    $scope.$on('$destroy', unbindUserUpdated);
 
     vm.secciones = [];
     vm.vistaPrevia = vistaPrevia;
@@ -32,18 +34,32 @@
 
     var ICON_COLOR_MAP = {
       'documentos': { icon: 'description', color: 'blue', countKey: 'documentos', desc: 'Mis documentos redactados' },
+      'mis documentos': { icon: 'description', color: 'blue', countKey: 'documentos', desc: 'Mis documentos redactados' },
       'aprobacion': { icon: 'access_time', color: 'orange', countKey: 'pendientes', desc: 'Trámites en bandeja de derivación' },
+      'documentos pendientes': { icon: 'access_time', color: 'orange', countKey: 'pendientes', desc: 'Trámites en bandeja de derivación' },
       'firmar': { icon: 'edit', color: 'purple', countKey: 'firmas', desc: 'Pendientes de firma digital' },
       'aprobar_documento': { icon: 'fingerprint', color: 'indigo', countKey: 'firmas', desc: 'Aprobación con Ciudadanía' },
-      'impresion': { icon: 'print', color: 'blue', countKey: 'documentos', desc: 'Impresión oficial de documentos' },
-      'archivo': { icon: 'archive', color: 'slate', countKey: 'archivos', desc: 'Archivo digital emitido' },
+      'aprobar con cd': { icon: 'fingerprint', color: 'indigo', countKey: 'firmas', desc: 'Aprobación con Ciudadanía' },
+      'impresion': { icon: 'print', color: 'blue', countKey: 'impresion', desc: 'Impresión oficial de documentos' },
+      'imprimir documentos': { icon: 'print', color: 'blue', countKey: 'impresion', desc: 'Impresión oficial de documentos' },
+      'archivo': { icon: 'archive', color: 'amber', countKey: 'archivo', desc: 'Archivo digital emitido' },
+      'en_curso': { icon: 'sync', color: 'teal', countKey: 'en_curso', desc: 'Documentos en curso' },
+      'en curso': { icon: 'sync', color: 'teal', countKey: 'en_curso', desc: 'Documentos en curso' },
+      'monitoreo': { icon: 'pie_chart', color: 'indigo', countKey: 'monitoreo', desc: 'Monitoreo de flujos' },
       'catalogos': { icon: 'folder', color: 'teal', countKey: 'catalogos', desc: 'Tablas de datos y catálogos' },
-      'compartidos': { icon: 'share', color: 'teal', countKey: 'compartidos', desc: 'Catálogos compartidos' },
+      'mis catalogos': { icon: 'folder', color: 'teal', countKey: 'catalogos', desc: 'Tablas de datos y catálogos' },
+      'compartidos': { icon: 'share', color: 'green', countKey: 'compartidos', desc: 'Catálogos compartidos' },
       'usuario': { icon: 'group', color: 'green', countKey: 'usuarios', desc: 'Gestión de usuarios' },
+      'usuarios': { icon: 'group', color: 'green', countKey: 'usuarios', desc: 'Gestión de usuarios' },
       'rol': { icon: 'security', color: 'purple', countKey: 'roles', desc: 'Perfiles de permisos y roles' },
+      'roles': { icon: 'security', color: 'purple', countKey: 'roles', desc: 'Perfiles de permisos y roles' },
       'menu': { icon: 'menu', color: 'orange', countKey: 'menus', desc: 'Administración de menús' },
-      'unidad': { icon: 'business', color: 'blue', countKey: 'unidades', desc: 'Estructura organizacional' },
+      'menús': { icon: 'menu', color: 'orange', countKey: 'menus', desc: 'Administración de menús' },
+      'menus': { icon: 'menu', color: 'orange', countKey: 'menus', desc: 'Administración de menús' },
+      'unidad': { icon: 'business', color: 'indigo', countKey: 'unidades', desc: 'Estructura organizacional' },
+      'unidades': { icon: 'business', color: 'indigo', countKey: 'unidades', desc: 'Estructura organizacional' },
       'plantillas': { icon: 'layers', color: 'teal', countKey: 'plantillas', desc: 'Formularios y plantillas' },
+      'plantilla': { icon: 'layers', color: 'teal', countKey: 'plantillas', desc: 'Formularios y plantillas' },
       'contactos': { icon: 'person', color: 'indigo', countKey: 'contactos', desc: 'Directorio de personal' }
     };
 
@@ -73,17 +89,19 @@
         if (padre.submenu && padre.submenu.length) {
           var secItems = [];
           angular.forEach(padre.submenu, function(sub) {
-            var meta = ICON_COLOR_MAP[sub.url] || { 
+            var rawUrl = (sub.url || sub.ruta || '').toLowerCase().trim().replace(/^\//, '');
+            var rawLabel = (sub.label || sub.nombre || '').toLowerCase().trim();
+            var meta = ICON_COLOR_MAP[rawLabel] || ICON_COLOR_MAP[rawUrl] || {
               icon: sub.icono || 'extension', 
               color: 'blue', 
               countKey: null, 
-              desc: sub.label 
+              desc: sub.label || sub.nombre 
             };
-            var val = (meta.countKey && contadores[meta.countKey] !== undefined) ? contadores[meta.countKey] : 0;
+            var val = (meta.countKey && angular.isDefined(contadores[meta.countKey])) ? contadores[meta.countKey] : 0;
 
             secItems.push({
-              label: sub.label,
-              url: sub.url,
+              label: sub.label || sub.nombre,
+              url: sub.url || sub.ruta,
               icon: meta.icon,
               color: meta.color,
               valor: val,

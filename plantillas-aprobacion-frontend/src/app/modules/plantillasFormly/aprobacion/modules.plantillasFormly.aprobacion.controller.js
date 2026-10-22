@@ -70,7 +70,7 @@
             if(respuesta.datos.resultado[0]._usuario_creacion==cuenta.id)
                 $location.path('documento/' + pIdentificador);
             else
-                Documento.showPdfId(pIdentificador);
+                vistaPrevia(pEvento, pIdentificador);
         });
     }
 
@@ -134,6 +134,7 @@
         vmd.data.pdf_buffer=data.pdf.pdf_buffer;
         vmd.data.flag_html=true;
         vmd.data.show_pdf=false; // Visor limpio estilo móvil (sin barras ni botones innecesarios)
+        vmd.data.es_jefe = Boolean(cuenta && cuenta.es_jefe);
 
         //funciones
         vmd.cerrar = cerrar;

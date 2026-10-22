@@ -169,8 +169,6 @@ module.exports = app => {
     .then(doc => {
       if(doc){
         xdocs = doc;
-        if( doc[0].accion=='RECHAZADO' )
-        return usuario.findByPk(xdoc._usuario_creacion);
         return usuario.findByPk(xdoc.via_actual);
       }else {
         tipoError = 'ADVERTENCIA';

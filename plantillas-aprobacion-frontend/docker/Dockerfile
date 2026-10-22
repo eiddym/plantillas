@@ -29,10 +29,12 @@ RUN npm config set fetch-retries 5 && \
     /usr/local/bin/bower install --allow-root
 
 # Copiar el resto del código fuente del frontend
+ARG BUILD_ID=1
+ENV BUILD_ID=${BUILD_ID}
 COPY . .
 
-# Preparar constantes y ejecutar compilación + sed
-RUN ./node_modules/.bin/gulp build && \
+RUN ./node_modules/.bin/gulp clean && \
+    ./node_modules/.bin/gulp build && \
     sed -i -e 's/src=maps\//src=/g' dist/index.html && \
     sed -i -e 's/.js.map/.js/g' dist/index.html && \
     sed -i -E "s#(src=)([^ >]+\.js)([ >])#\1\2?v=$(date +%s)\3#g" dist/index.html && \

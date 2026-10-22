@@ -6,7 +6,7 @@
     .controller('ArchivoController', ArchivoController);
 
   /** @ngInject */
-  function ArchivoController(DataService, restUrl, Storage, Documento, Message, $mdDialog) {
+  function ArchivoController(DataService, restUrl, Storage, Documento, Message) {
     var vm = this;
     var cuenta = Storage.getUser() || {};
     var usuarioId = cuenta.id_usuario || cuenta.id || 1;

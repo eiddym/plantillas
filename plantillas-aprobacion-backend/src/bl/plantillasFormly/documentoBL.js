@@ -117,19 +117,26 @@ module.exports = {
 
   eliminarDocumento: (pIdUsuario, pIdDocumento, pModelo, pModeloHistorial) => {
     const condicion={};
-    if(pIdUsuario!=null || pIdUsuario!=undefined) condicion._usuario_creacion=pIdUsuario
-    if(pIdDocumento!=null || pIdDocumento!=undefined) condicion.id_documento=pIdDocumento
+    if(pIdDocumento!=null && pIdDocumento!=undefined) condicion.id_documento=pIdDocumento;
     return new Promise((resolve, reject) => pModelo.findOne({where:condicion})
     .then(pResultado => {
 
       if(pResultado != null){
         if(pResultado.estado=='NUEVO' || pResultado.estado=='RECHAZADO'){
-          return module.exports.actualizarDocumento(pResultado,
-          {
-            estado:'ELIMINADO',
-            _usuario_modificacion: pIdUsuario,
-            documento_padre: -pResultado.documento_padre,
-          }, pModeloHistorial)
+          if (!pResultado.nombre || pResultado.nombre.indexOf('/') === -1) {
+            return module.exports.actualizarDocumento(pResultado,
+            {
+              estado:'ELIMINADO',
+              _usuario_modificacion: pIdUsuario,
+              documento_padre: -pResultado.documento_padre,
+            }, pModeloHistorial);
+          } else {
+            return module.exports.actualizarDocumento(pResultado,
+            {
+              via_actual: null,
+              _usuario_modificacion: pIdUsuario,
+            }, pModeloHistorial);
+          }
         }
         else throw new Error("La modificacion no esta disponible en este momento.");
       }

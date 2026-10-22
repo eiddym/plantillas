@@ -62,14 +62,14 @@
               {{data.dc.observaciones}}
               <div><br></div>
           </div>
-          <md-input-container>
+          <md-input-container ng-if="data.es_jefe">
               <label>Usuario</label>
-              <md-select name="user" ng-model="data._usuario_seleccionado" required>
+              <md-select name="user" ng-model="data._usuario_seleccionado" ng-required="data.es_jefe">
                   <md-option ng-repeat="us in data.usuarios" ng-value="us.id_usuario"> {{us.nombres+' '+us.apellidos}}<br> -{{us.cargo}}- </md-option>
               </md-select>
           </md-input-container>
           <md-input-container style="width:100%">
-              <label>Proveído</label>
+              <label>{{ data.es_jefe ? 'Proveído' : 'Proveído / Motivo de rechazo' }}</label>
               <textarea name="obs" ng-model="data.observaciones" md-maxlength="250" maxlength="250" rows="2" required></textarea>
           </md-input-container>
       </div>
@@ -89,8 +89,11 @@
   <md-dialog-actions>
       <span flex></span>
       <div ng-if="data.es_derivar">
-          <md-button class="ap md-raised bt-bg-warning" ng-click="derivar()" ng-disabled="obsForm.user.$invalid || obsForm.obs.$invalid">
+          <md-button class="ap md-raised bt-bg-warning" ng-click="derivar()" ng-disabled="(data.es_jefe && obsForm.user.$invalid) || obsForm.obs.$invalid" ng-if="data.es_jefe">
               <md-icon>check</md-icon> Derivar
+          </md-button>
+          <md-button class="ap md-raised bt-bg-danger" ng-click="observar()" ng-disabled="obsForm.obs.$invalid" ng-if="!data.es_jefe">
+              <md-icon>cancel</md-icon> Rechazar
           </md-button>
           <md-button class="ap md-raised bt-bg-success" ng-click="openSelect($event)">
               <md-icon>error</md-icon> Crear documento

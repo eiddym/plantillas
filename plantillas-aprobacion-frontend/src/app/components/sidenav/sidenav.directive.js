@@ -46,6 +46,15 @@
             var vm = this;
             var color = ['info', 'success', 'danger', 'warning', 'primary'];
 
+            function checkIsHome() {
+                var path = ($location.path() || '').trim();
+                var stateName = ($rootScope.$state && $rootScope.$state.current) ? $rootScope.$state.current.name : '';
+                return !path || path === '/' || path === '/inicio' || path === '' || path === '/home' || stateName === 'home' || stateName === 'inicio';
+            }
+
+            vm.isHomeState = checkIsHome;
+            vm.isHome = checkIsHome;
+
             vm.user = Storage.existUser() ? Storage.getUser() : {};
             vm.menu = [];
 

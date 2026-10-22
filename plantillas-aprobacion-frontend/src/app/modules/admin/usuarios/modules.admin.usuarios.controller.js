@@ -7,7 +7,7 @@
 
 
     /** @ngInject */
-    function UsuariosController(restUrl, Modal, DataService, Util, Message, Storage, $log) {
+    function UsuariosController(restUrl, Modal, DataService, Util, Message, Storage) {
         var vm = this;
 
         vm.title = 'Usuarios';

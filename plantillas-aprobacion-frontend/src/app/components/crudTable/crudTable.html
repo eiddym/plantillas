@@ -156,11 +156,11 @@
                                 <md-tooltip>Eliminar</md-tooltip>
                                 <md-icon>delete</md-icon>
                             </md-button>
-                            <md-button class="md-icon-button boton-eliminar" aria-label="Eliminar" ng-click="vm.delete($event, item)" ng-if="vm.permissions.delete && item.id_documento && (item.estado=='NUEVO' || item.estado=='RECHAZADO')">
+                            <md-button class="md-icon-button boton-eliminar" aria-label="Eliminar" ng-click="vm.delete($event, item)" ng-if="vm.permissions.delete && item.id_documento && item.estado=='NUEVO' && (!item.nombre || item.nombre.indexOf('/') === -1)">
                                 <md-tooltip>Eliminar</md-tooltip>
                                 <md-icon>delete</md-icon>
                             </md-button>
-                            <md-button class="md-icon-button " aria-label=""  ng-if="vm.permissions.delete && item.id_documento && (item.estado!='NUEVO' && item.estado!='RECHAZADO')">
+                            <md-button class="md-icon-button " aria-label="" ng-if="vm.permissions.delete && item.id_documento && (item.estado!='NUEVO' || (item.nombre && item.nombre.indexOf('/') !== -1))">
                                 <md-icon></md-icon>
                             </md-button>
 

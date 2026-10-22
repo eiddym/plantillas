@@ -6,7 +6,7 @@
     .module('app')
     .constant('moment', moment)
     .constant('appName', 'app')
-    .constant('PageNoLogin', ['login'])
+    .constant('PageNoLogin', ['login', 'verificar'])
     .constant('authUrl', '/ws/autenticar') // Auth
     .constant('restUrl', '/ws/api/v1/' ) // Rest Api Backend
     .constant('backUrl', '/ws/') // Backend
